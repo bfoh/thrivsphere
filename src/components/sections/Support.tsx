@@ -27,12 +27,12 @@ export function Support() {
           <img
             src="/images/people/support-woman.png"
             alt="A warm, reassuring ThrivSphere wellbeing practitioner"
-            style={{ height: "100%", width: "auto", objectFit: "contain", objectPosition: "bottom", filter: "drop-shadow(-16px 22px 26px rgba(31,58,95,0.2))" }}
+            style={{ height: "100%", width: "auto", objectFit: "contain", objectPosition: "top", filter: "drop-shadow(-16px 22px 26px rgba(31,58,95,0.2))" }}
           />
         </div>
       }
     >
-      <div style={{ maxWidth: 720, width: "100%", alignSelf: "flex-start", marginRight: "auto", position: "relative", zIndex: 1 }}>
+      <div style={{ maxWidth: 620, width: "100%", alignSelf: "flex-start", marginRight: "auto", position: "relative", zIndex: 1 }}>
       <FancyHeadline
         lines={[
           [{ t: "start your", size: 16, italic: true, color: GOLD }],
