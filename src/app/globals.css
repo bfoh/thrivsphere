@@ -872,8 +872,13 @@ body {
   .nav-burger {
     display: inline-flex !important;
   }
+  /* sections flow to their content on mobile (no forced full-viewport gap) */
+  .snap {
+    min-height: auto !important;
+  }
   .section-inner {
-    padding: 110px 24px 120px !important;
+    padding: 104px 24px 56px !important;
+    justify-content: flex-start !important;
   }
   .hero-grid,
   .two-col,
@@ -969,7 +974,7 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
   .section-inner {
-    padding: 112px 18px 120px !important;
+    padding: 100px 18px 52px !important;
   }
   .page-hero-inner {
     padding: 56px 20px 44px !important;
