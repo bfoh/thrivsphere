@@ -65,7 +65,7 @@ export function Hero({ onNavigate }: { onNavigate: (id: string) => void }) {
 
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 9, marginTop: 44, maxWidth: 900 }} className="hero-chips">
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 9, marginTop: 44, maxWidth: 900 }} className="hero-chips hide-mobile">
         {audience.slice(0, 8).map((a) => (
           <span className="chip chip-dot" key={a}>
             {a}

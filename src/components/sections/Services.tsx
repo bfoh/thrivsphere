@@ -46,7 +46,7 @@ export function Services() {
       </div>
 
       <div style={{ marginTop: 30, display: "flex", flexWrap: "wrap", gap: 24, alignItems: "flex-start" }}>
-        <div style={{ flex: "1 1 340px" }}>
+        <div style={{ flex: "1 1 340px" }} className="hide-mobile">
           <p style={{ margin: "0 0 10px", color: "#fff", fontWeight: 700, fontSize: 14, letterSpacing: "0.05em", textTransform: "uppercase" }}>
             Wellbeing education topics
           </p>

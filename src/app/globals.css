@@ -684,17 +684,21 @@ body {
   }
 }
 
-/* cutout anchored to the TOP of the section, hanging down the right edge */
+/* cutout fills the right side from the top of the section, bleeding at bottom */
 .bleed-right {
   position: absolute;
-  right: 2vw;
-  top: 96px;
-  height: 70vh;
-  max-height: 640px;
+  right: 0;
+  top: 104px;
+  bottom: 0;
+  width: min(46vw, 620px);
   z-index: 1;
-  display: flex;
-  align-items: flex-start;
   pointer-events: none;
+}
+.bleed-right img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: 60% 4% !important;
 }
 @media (max-width: 1050px) {
   .bleed-right {
@@ -826,6 +830,13 @@ body {
   }
   .crisis-short {
     display: inline;
+  }
+}
+
+/* hide decorative chip rows on mobile for a cleaner look */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
   }
 }
 

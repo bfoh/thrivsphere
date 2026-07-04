@@ -53,18 +53,20 @@ export function About() {
         </div>
       </div>
 
-      <p style={{ margin: "34px 0 12px", fontWeight: 800, color: "var(--navy)", fontSize: 14, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-        The values that guide us
-      </p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 9 }}>
-        {values.map((v) => (
-          <span className="chip" key={v}>
-            <span className="chip-check">
-              <Icon name="check" size={12} stroke="#fff" />
+      <div className="hide-mobile">
+        <p style={{ margin: "34px 0 12px", fontWeight: 800, color: "var(--navy)", fontSize: 14, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          The values that guide us
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 9 }}>
+          {values.map((v) => (
+            <span className="chip" key={v}>
+              <span className="chip-check">
+                <Icon name="check" size={12} stroke="#fff" />
+              </span>
+              {v}
             </span>
-            {v}
-          </span>
-        ))}
+          ))}
+        </div>
       </div>
     </Section>
   );
