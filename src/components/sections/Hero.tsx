@@ -44,6 +44,20 @@ export function Hero({ onNavigate }: { onNavigate: (id: string) => void }) {
             <span style={{ color: "var(--teal-deep)" }}>Inspiring Hope</span>
             <span style={{ color: "var(--gold)" }}>.</span>
           </h1>
+
+          {/* mobile-only hero cutout — gradient panel, figure bleeds up from bottom */}
+          <div className="hero-mobile-visual">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/people/hero-woman.png"
+              alt="A smiling woman supported by ThrivSphere Wellbeing"
+            />
+            <span className="hero-mobile-badge">
+              <Icon name="shield" size={15} stroke="var(--teal-deep)" />
+              100% confidential
+            </span>
+          </div>
+
           <p style={{ margin: "22px 0 0", fontSize: 17.5, lineHeight: 1.6, maxWidth: 540, color: "var(--ink)" }}>
             A safe, confidential and compassionate online space where women experiencing emotional
             abuse, anxiety, isolation or life transitions can access wellbeing support, coaching,
