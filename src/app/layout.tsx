@@ -16,10 +16,7 @@ export const metadata: Metadata = {
   title: "ThrivSphere Wellbeing CIC — Empowering Wellbeing. Building Resilience. Inspiring Hope.",
   description:
     "ThrivSphere Wellbeing CIC is a UK Community Interest Company providing accessible, confidential online wellbeing support, coaching, mindfulness and community for women — helping you heal, grow and thrive.",
-  icons: {
-    icon: "/images/favicon.svg",
-    apple: "/images/favicon.svg",
-  },
+  // favicon/apple-icon auto-detected from app/icon.png, app/apple-icon.png, app/favicon.ico (the ThrivSphere logo)
 };
 
 export default function RootLayout({
