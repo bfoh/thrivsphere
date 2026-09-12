@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { requirePortalClient } from "@/lib/portal-guard";
 import { and, desc, eq } from "drizzle-orm";
-import { getCurrentActor } from "@/lib/session";
-import { getOnboardingState } from "@/lib/onboarding";
 import { requireClientAccess } from "@/lib/guard";
 import { getDb } from "@/db";
 import { documents } from "@/db/schema";
@@ -11,11 +9,7 @@ import { Icon } from "@/components/icons";
 export const metadata: Metadata = { title: "Your documents", robots: { index: false, follow: false } };
 
 export default async function PortalDocumentsPage() {
-  const actor = await getCurrentActor();
-  if (!actor) redirect("/sign-in");
-
-  const state = await getOnboardingState(actor.userId);
-  if (state.step !== "complete" || !state.clientId) redirect("/portal/register");
+  const state = await requirePortalClient();
 
   await requireClientAccess(state.clientId, { entity: "documents", action: "view" });
 

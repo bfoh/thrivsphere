@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentActor } from "@/lib/session";
+import { isStaff } from "@/lib/authz";
+import Link from "next/link";
 import { getOnboardingState } from "@/lib/onboarding";
 import { AgeGateForm, IntakeForm, ConsentForm } from "@/components/portal/RegisterForms";
 
@@ -28,6 +30,12 @@ export default async function RegisterPage() {
 
   const state = await getOnboardingState(actor.userId);
   if (state.step === "complete") redirect("/portal");
+
+  // A staff member may legitimately also be a client, so registering is not
+  // blocked — but they arrive here far more often by accident than intent, and
+  // should not feel obliged to complete a form written for people seeking
+  // support just to escape it.
+  const staffWithoutRecord = isStaff(actor) && !state.clientId;
 
   const currentIndex = STEPS.findIndex((s) => s.key === state.step);
 
@@ -83,6 +91,29 @@ export default async function RegisterPage() {
           );
         })}
       </ol>
+
+      {staffWithoutRecord && (
+        <div
+          style={{
+            marginBottom: 24,
+            padding: "14px 18px",
+            borderRadius: 12,
+            background: "rgba(79,168,168,0.1)",
+            border: "1px solid rgba(79,168,168,0.3)",
+            fontSize: 14,
+            lineHeight: 1.6,
+            color: "var(--ink)",
+          }}
+        >
+          You&apos;re signed in as a member of staff. This form is for people
+          registering as clients — you only need it if you also want a client
+          account of your own.{" "}
+          <Link href="/admin" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
+            Go to the admin dashboard
+          </Link>
+          .
+        </div>
+      )}
 
       <h1 style={{ margin: "0 0 8px", fontSize: "clamp(23px,4.6vw,30px)", fontWeight: 800, color: "var(--navy)" }}>
         {state.step === "age" && "First, a little about you"}

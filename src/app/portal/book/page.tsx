@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getCurrentActor } from "@/lib/session";
-import { getOnboardingState } from "@/lib/onboarding";
+import { requirePortalClient } from "@/lib/portal-guard";
 import { getBookableSlots, getDefaultPractitioner } from "@/lib/queries/availability";
 import { SlotPicker } from "@/components/portal/SlotPicker";
 import { NotCrisisNotice } from "@/components/NotCrisisNotice";
@@ -12,12 +10,8 @@ const DURATION = 50;
 const LDN = "Europe/London";
 
 export default async function BookPage() {
-  const actor = await getCurrentActor();
-  if (!actor) redirect("/sign-in");
-
   // Registration, including the 18+ gate and consent, must be finished first.
-  const state = await getOnboardingState(actor.userId);
-  if (state.step !== "complete") redirect("/portal/register");
+  await requirePortalClient();
 
   const practitioner = await getDefaultPractitioner();
   const slots = practitioner

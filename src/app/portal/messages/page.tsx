@@ -1,18 +1,12 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getCurrentActor } from "@/lib/session";
-import { getOnboardingState } from "@/lib/onboarding";
+import { requirePortalClient } from "@/lib/portal-guard";
 import { getConversation, markMessagesRead } from "@/app/actions/messages";
 import { MessageThread } from "@/components/MessageThread";
 
 export const metadata: Metadata = { title: "Messages", robots: { index: false, follow: false } };
 
 export default async function MessagesPage() {
-  const actor = await getCurrentActor();
-  if (!actor) redirect("/sign-in");
-
-  const state = await getOnboardingState(actor.userId);
-  if (state.step !== "complete" || !state.clientId) redirect("/portal/register");
+  const state = await requirePortalClient();
 
   const messages = await getConversation(state.clientId);
   await markMessagesRead(state.clientId);

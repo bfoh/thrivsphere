@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { requirePortalClient } from "@/lib/portal-guard";
 import { asc, eq } from "drizzle-orm";
-import { getCurrentActor } from "@/lib/session";
-import { getOnboardingState } from "@/lib/onboarding";
 import { getDb } from "@/db";
 import { pricePlans } from "@/db/schema";
 import { PlanButton } from "@/components/portal/PlanButton";
@@ -14,11 +12,7 @@ const money = (pence: number, currency: string) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency, minimumFractionDigits: 0 }).format(pence / 100);
 
 export default async function PurchasePage() {
-  const actor = await getCurrentActor();
-  if (!actor) redirect("/sign-in");
-
-  const state = await getOnboardingState(actor.userId);
-  if (state.step !== "complete") redirect("/portal/register");
+  await requirePortalClient();
 
   const plans = await getDb()
     .select()

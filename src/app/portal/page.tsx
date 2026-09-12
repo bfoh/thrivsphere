@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { requirePortalClient } from "@/lib/portal-guard";
 import { desc, eq } from "drizzle-orm";
-import { getCurrentActor } from "@/lib/session";
-import { getOnboardingState } from "@/lib/onboarding";
 import { requireClientAccess } from "@/lib/guard";
 import { getDb } from "@/db";
 import { appointments, clients, packages } from "@/db/schema";
@@ -17,11 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalPage() {
-  const actor = await getCurrentActor();
-  if (!actor) redirect("/sign-in");
-
-  const state = await getOnboardingState(actor.userId);
-  if (state.step !== "complete" || !state.clientId) redirect("/portal/register");
+  const state = await requirePortalClient();
 
   // Guarded even though this is the client's own record: the read is audited
   // like any other access to confidential data.
