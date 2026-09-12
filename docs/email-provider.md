@@ -32,15 +32,23 @@ printf '%s' "<key>" | vercel env add BREVO_API_KEY preview
 printf '%s' "<key>" | vercel env add BREVO_API_KEY development
 ```
 
-## Before it will deliver
+## Sender address
 
-Brevo requires the sending domain to be authenticated before it will deliver
-reliably. In the Brevo dashboard, add `thrivsphere.org` under **Senders,
-Domains & Dedicated IPs** and publish the DKIM and Brevo code DNS records it
-gives you, plus an SPF record.
+`thrivsphere.org` is authenticated in Brevo (DKIM and SPF published, verified
+12 September 2026). Mail is sent from `no-reply@thrivsphere.org`.
 
-Without this, mail is likely to be rejected or land in spam — which for an
-appointment reminder means a client simply does not turn up.
+There is no "no-reply" mailbox in Brevo, and there does not need to be. Once a
+domain is authenticated, Brevo accepts **any** address at that domain as a
+sender — the per-address "Senders" list is only for people sending from a
+domain they do not control, such as a Gmail address.
+
+So the sending address is chosen here, in `EMAIL_FROM_ADDRESS`, not in Brevo.
+Changing it to `bookings@thrivsphere.org` or anything else at the same domain
+needs no Brevo change at all.
+
+`no-reply@` does not receive mail. Replies are directed to `hello@thrivsphere.org`
+by the `replyTo` field, so a client who hits reply still reaches a real inbox —
+worth checking that mailbox exists and is monitored.
 
 ## Behaviour when unconfigured
 
