@@ -5,6 +5,14 @@ import { getClientRecord } from "@/lib/queries/clients";
 import { RiskBadge } from "@/components/admin/RiskBadge";
 import { Section, Field, Empty } from "@/components/admin/RecordUI";
 import { NoteForm } from "@/components/admin/NoteForm";
+import {
+  AmendNoteForm,
+  ClearFlagButton,
+  CloseConcernForm,
+  EscalateForm,
+  RaiseConcernForm,
+  ReferralForm,
+} from "@/components/admin/SafeguardingForms";
 import { Icon } from "@/components/icons";
 
 export const metadata: Metadata = {
@@ -82,6 +90,7 @@ export default async function ClientRecordPage({
                   <strong style={{ color: "var(--navy)" }}>{f.category.replace(/_/g, " ")}</strong> — {f.summary}
                 </span>
                 <span style={{ fontSize: 12, color: "var(--navy-soft)" }}>raised {d(f.raisedAt)}</span>
+                <ClearFlagButton flagId={f.id} clientId={client.id} />
               </li>
             ))}
           </ul>
@@ -180,6 +189,21 @@ export default async function ClientRecordPage({
                     Amended {dt(n.supersededAt)} — the original text above is retained.
                   </p>
                 )}
+                {n.amendments.length > 0 && (
+                  <div style={{ marginTop: 10, paddingLeft: 14, borderLeft: "3px solid rgba(212,175,55,0.5)" }}>
+                    {n.amendments.map((am) => (
+                      <div key={am.id} style={{ marginBottom: 8 }}>
+                        <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.55, color: "var(--ink)", whiteSpace: "pre-wrap" }}>
+                          {am.body}
+                        </p>
+                        <p style={{ margin: "3px 0 0", fontSize: 11.5, color: "var(--navy-soft)" }}>
+                          Amendment · {am.reason} · {dt(am.createdAt)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <AmendNoteForm noteId={n.id} clientId={client.id} />
               </article>
             ))}
           </div>
@@ -188,6 +212,9 @@ export default async function ClientRecordPage({
 
       {/* safeguarding */}
       <Section title="Safeguarding concerns" subtitle={`${concerns.length} recorded`}>
+        <div style={{ marginBottom: 16 }}>
+          <RaiseConcernForm clientId={client.id} />
+        </div>
         {concerns.length === 0 ? (
           <Empty>No safeguarding concerns recorded.</Empty>
         ) : (
@@ -209,6 +236,12 @@ export default async function ClientRecordPage({
                   <Field label="Client informed" value={c.clientInformed ? "Yes" : "No"} small />
                   <Field label="Outcome" value={c.outcome} small />
                 </div>
+                {c.status !== "closed" && (
+                  <>
+                    {!c.escalatedAt && <EscalateForm concernId={c.id} clientId={client.id} />}
+                    <CloseConcernForm concernId={c.id} clientId={client.id} />
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -217,6 +250,7 @@ export default async function ClientRecordPage({
 
       {/* referrals */}
       <Section title="Referrals & signposting" subtitle={`${referrals.length} recorded`}>
+        <ReferralForm clientId={client.id} />
         {referrals.length === 0 ? (
           <Empty>No referrals recorded.</Empty>
         ) : (

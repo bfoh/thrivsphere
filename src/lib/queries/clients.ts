@@ -13,6 +13,7 @@ import {
   riskFlags,
   safeguardingConcerns,
   sessionNotes,
+  sessionNoteAmendments,
   users,
 } from "@/db/schema";
 import { requireCapability, requireClientAccess } from "@/lib/guard";
@@ -169,12 +170,36 @@ export async function getClientRecord(clientId: string) {
     db.select().from(documents).where(eq(documents.clientId, clientId)),
   ]);
 
+  // Amendments are attached to their notes so the record reads as the original
+  // text followed by its corrections, rather than two disconnected lists.
+  const noteIds = notes.map((n) => n.id);
+  const amendments = noteIds.length
+    ? await db
+        .select({
+          id: sessionNoteAmendments.id,
+          noteId: sessionNoteAmendments.noteId,
+          body: sessionNoteAmendments.body,
+          reason: sessionNoteAmendments.reason,
+          createdAt: sessionNoteAmendments.createdAt,
+        })
+        .from(sessionNoteAmendments)
+        .where(inArray(sessionNoteAmendments.noteId, noteIds))
+        .orderBy(sessionNoteAmendments.createdAt)
+    : [];
+
+  const byNote = new Map<string, typeof amendments>();
+  for (const a of amendments) {
+    const list = byNote.get(a.noteId) ?? [];
+    list.push(a);
+    byNote.set(a.noteId, list);
+  }
+
   return {
     client,
     intake: intake[0] ?? null,
     riskFlags: flags,
     concerns,
-    notes,
+    notes: notes.map((n) => ({ ...n, amendments: byNote.get(n.id) ?? [] })),
     appointments: appts,
     packages: pkgs,
     consents: consentRows,
