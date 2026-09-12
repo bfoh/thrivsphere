@@ -63,3 +63,29 @@ worth checking that mailbox exists and is monitored.
 
 Brevo is not offered there. It is configured manually with the key above, which
 is why these variables are set by hand rather than provisioned automatically.
+
+
+## Who sends what
+
+Two separate systems send email, and they are branded separately.
+
+**This application, via Brevo** — `src/lib/email-templates.ts`:
+booking confirmation, 24-hour and 1-hour reminders, new secure message,
+payment receipt, and the internal enquiry notification.
+
+**Clerk** — account emails it sends itself: verification code, password reset,
+sign-in links, password changed, new device sign-in, account locked.
+
+Clerk's templates cannot be set from application code. They are applied with:
+
+```bash
+npx dotenv -e .env.local -- npx tsx scripts/brand-clerk-emails.ts
+```
+
+**Re-run that after creating a production Clerk instance.** Templates belong to
+an instance, so a new one starts with Clerk's defaults and every account email
+reverts to generic Clerk branding.
+
+Clerk validates required variables per template — `password_changed` must
+contain `{{primary_email_address}}`, for example — and rejects the update with
+a 422 naming the missing variable if one is dropped.

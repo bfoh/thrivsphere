@@ -206,52 +206,60 @@ export function bookingConfirmation(startsAt: Date): Email {
   };
 }
 
-/**
- * Reminders are deliberately plain.
- *
- * A confirmation or a receipt is read once, usually soon after the person
- * chose to act. A reminder arrives unannounced, possibly while someone else is
- * looking at the screen. Services working with domestic abuse send neutral
- * reminders for exactly this reason: discretion is the safeguarding measure,
- * not an aesthetic preference.
- *
- * So these carry no logo, no colours, no service description and no crisis
- * block — anything that identifies a wellbeing service at a glance. They are
- * text-only, which is also why they contain no tracked images.
- *
- * Crisis signposting is one tap away in the portal and on every page of the
- * site, and is on the branded messages. It is left out here on purpose.
- */
-function plainReminder(subject: string, lines: string[]): Email {
+export function reminder24h(startsAt: Date): Email {
+  const w = when(startsAt);
   return {
-    subject,
-    // No `html` at all — a plain-text email cannot carry a logo, a colour, or
-    // a remote image that reports when it was opened.
-    text: [
-      ...lines,
-      "",
-      `Your account: ${siteUrl()}/portal`,
-      "",
-      "To stop these reminders, change your settings in your account.",
-    ].join("\n"),
-    html: "",
+    subject: "Your appointment tomorrow",
+    html: shell({
+      preheader: "A reminder of your upcoming appointment.",
+      heading: "Your appointment is tomorrow",
+      body: `
+        <p style="margin:0 0 14px;">This is a reminder of your appointment:</p>
+        <p style="margin:0 0 18px;font-size:17px;font-weight:bold;color:${NAVY};">${w}</p>
+        <p style="margin:0;">If you need to rearrange, please let us know as soon as you can —
+        at least 24 hours' notice means there is no charge.</p>`,
+      cta: { label: "View my appointment", href: `${siteUrl()}/portal` },
+      footerNote: "You can turn these reminders off at any time in your account settings.",
+    }),
+    text: textShell(
+      [
+        `This is a reminder of your appointment on ${w}.`,
+        "",
+        "If you need to rearrange, please let us know as soon as you can —",
+        "at least 24 hours' notice means there is no charge.",
+        "",
+        `Your account: ${siteUrl()}/portal`,
+      ],
+      { footer: "You can turn these reminders off at any time in your account settings." }
+    ),
   };
 }
 
-export function reminder24h(startsAt: Date): Email {
-  return plainReminder("Your appointment tomorrow", [
-    `A reminder of your appointment on ${when(startsAt)}.`,
-    "",
-    "If you need to rearrange, please let us know as early as you can.",
-  ]);
-}
-
 export function reminder1h(startsAt: Date): Email {
-  return plainReminder("Your appointment is soon", [
-    `Your appointment starts at ${when(startsAt)}.`,
-    "",
-    "Sign in a few minutes beforehand.",
-  ]);
+  const w = when(startsAt);
+  return {
+    subject: "Your appointment is soon",
+    html: shell({
+      preheader: "Your appointment starts shortly.",
+      heading: "Your appointment is soon",
+      body: `
+        <p style="margin:0 0 14px;">Your appointment starts at:</p>
+        <p style="margin:0 0 18px;font-size:17px;font-weight:bold;color:${NAVY};">${w}</p>
+        <p style="margin:0;">Sign in a few minutes beforehand — your joining link is waiting
+        in your account.</p>`,
+      cta: { label: "Join from my account", href: `${siteUrl()}/portal` },
+      footerNote: "You can turn these reminders off at any time in your account settings.",
+    }),
+    text: textShell(
+      [
+        `Your appointment starts at ${w}.`,
+        "",
+        "Sign in a few minutes beforehand — your joining link is waiting in your account:",
+        `${siteUrl()}/portal`,
+      ],
+      { footer: "You can turn these reminders off at any time in your account settings." }
+    ),
+  };
 }
 
 /**

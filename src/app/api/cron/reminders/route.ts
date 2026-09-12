@@ -98,16 +98,11 @@ export async function GET(request: Request) {
           ? reminder24h(row.startsAt)
           : reminder1h(row.startsAt);
 
-    // Reminders go out plain and without the service name in the sender line;
-    // the booking confirmation is branded like the rest.
-    const discreet = item.kind !== "booking_confirmation";
-
     const result = await sendEmail({
       to: row.email,
       subject: email.subject,
       text: email.text,
-      html: email.html || undefined,
-      discreet,
+      html: email.html,
     });
 
     if (result.ok) {

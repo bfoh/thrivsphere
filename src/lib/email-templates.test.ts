@@ -20,26 +20,30 @@ before(() => {
 
 const when = new Date("2026-06-05T17:00:00Z"); // 18:00 BST, a Friday
 
-/** Branded messages: read once, soon after the person chose to act. */
 const brandedEmails = () => [
   bookingConfirmation(when),
+  reminder24h(when),
+  reminder1h(when),
   secureMessageNotice(),
   paymentReceipt("4 Sessions", 10000, 4),
 ];
 
-/** Plain messages: arrive unannounced, so they stay unidentifiable. */
-const plainEmails = () => [reminder24h(when), reminder1h(when)];
-
-const clientEmails = () => [...brandedEmails(), ...plainEmails()];
+const clientEmails = brandedEmails;
 
 describe("every client email", () => {
+  it("always has both an HTML and a plain-text version", () => {
+    for (const e of clientEmails()) {
+      assert.ok(e.html.length > 0, `${e.subject}: missing HTML`);
+    }
+  });
+
   it("always has a plain-text version", () => {
     for (const e of clientEmails()) {
       assert.ok(e.text.length > 0, `${e.subject}: missing text`);
     }
   });
 
-  it("branded messages carry crisis signposting in both versions", () => {
+  it("carries crisis signposting in both versions", () => {
     for (const e of brandedEmails()) {
       assert.match(e.html, /999/, `${e.subject}: HTML missing 999`);
       assert.match(e.html, /116&nbsp;123|116 123/, `${e.subject}: HTML missing Samaritans`);
@@ -67,7 +71,7 @@ describe("every client email", () => {
     }
   });
 
-  it("sets a preheader on branded messages so the inbox preview does not leak the body", () => {
+  it("sets a preheader so the inbox preview does not leak the body", () => {
     for (const e of brandedEmails()) {
       assert.match(e.html, /display:none;max-height:0/, `${e.subject}: no preheader`);
     }
@@ -88,62 +92,16 @@ describe("appointment emails", () => {
   it("show the time in UK local time", () => {
     // 17:00 UTC in June is 18:00 BST.
     for (const e of [bookingConfirmation(when), reminder24h(when), reminder1h(when)]) {
-      assert.match(e.text, /18:00/, `${e.subject}: wrong timezone`);
+      assert.match(e.html, /18:00/, `${e.subject}: wrong timezone in HTML`);
+      assert.match(e.text, /18:00/, `${e.subject}: wrong timezone in text`);
       assert.match(e.text, /Friday/);
     }
   });
 
-  it("tells the client how to stop reminders", () => {
-    assert.match(reminder24h(when).text, /stop these reminders/i);
-    assert.match(reminder1h(when).text, /stop these reminders/i);
-  });
-});
-
-/**
- * Reminders arrive unannounced, possibly while someone else can see the
- * screen. These assertions exist so a future redesign cannot quietly make them
- * identifiable again.
- */
-describe("reminders are discreet", () => {
-  it("send no HTML at all, so they carry no logo or tracked image", () => {
-    for (const e of plainEmails()) {
-      assert.equal(e.html, "", `${e.subject}: should be text only`);
-    }
-  });
-
-  it("never name the service in the body", () => {
-    for (const e of plainEmails()) {
-      assert.ok(!/ThrivSphere Wellbeing|wellbeing service/i.test(e.text), `${e.subject}: names the service`);
-    }
-  });
-
-  it("do not describe what the service is", () => {
-    for (const e of plainEmails()) {
-      assert.ok(
-        !/wellbeing|counsel|therapy|mental health|support service/i.test(e.text),
-        `${e.subject}: describes the service`
-      );
-    }
-  });
-
-  it("omit the crisis block, which is the most identifying part", () => {
-    // Deliberate. Crisis signposting is one tap away in the portal, on every
-    // page of the site, and on the branded messages.
-    for (const e of plainEmails()) {
-      assert.ok(!/Samaritans|116 123/.test(e.text), `${e.subject}: includes crisis numbers`);
-    }
-  });
-
-  it("still say when the appointment is and how to stop them", () => {
-    for (const e of plainEmails()) {
-      assert.match(e.text, /18:00/, `${e.subject}: no time`);
-      assert.match(e.text, /stop these reminders/i, `${e.subject}: no opt-out`);
-    }
-  });
-
-  it("keep a neutral subject line", () => {
-    for (const e of plainEmails()) {
-      assert.match(e.subject, /^Your appointment/, `unexpected subject: ${e.subject}`);
+  it("tells the client how to turn reminders off", () => {
+    for (const e of [reminder24h(when), reminder1h(when)]) {
+      assert.match(e.html, /turn these reminders off/i, `${e.subject}: no opt-out in HTML`);
+      assert.match(e.text, /turn these reminders off/i, `${e.subject}: no opt-out in text`);
     }
   });
 });
