@@ -13,7 +13,7 @@
  * Run with:
  *   npx dotenv -e .env.local -- npx tsx scripts/seed.ts
  */
-import { getDb } from "../src/db";
+import { getDb } from "../src/db/client";
 import { pricePlans, services, signpostOrganisations } from "../src/db/schema";
 import { plans, services as staticServices, signposts } from "../src/data/site";
 import { sql } from "drizzle-orm";
