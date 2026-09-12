@@ -3,6 +3,7 @@ import { requireCapability } from "@/lib/guard";
 import { getDb } from "@/db";
 import { clients, enquiries, appointments, safeguardingConcerns } from "@/db/schema";
 import { count, eq } from "drizzle-orm";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -57,6 +58,11 @@ export default async function AdminPage() {
           </div>
         ))}
       </div>
+      <p style={{ margin: "26px 0 0", fontSize: 14.5 }}>
+        <Link href="/admin/clients" style={{ color: "var(--teal-deep)", fontWeight: 700, textDecoration: "none" }}>
+          View all clients →
+        </Link>
+      </p>
     </main>
   );
 }
