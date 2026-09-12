@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
 import { CookieBanner } from "@/components/CookieBanner";
 import { Analytics } from "@/components/Analytics";
 import { CursorFX } from "@/components/CursorFX";
@@ -47,10 +48,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className={montserrat.variable}>
-        {children}
-        <CursorFX />
-        <CookieBanner />
-        <Analytics />
+        {/* Inside <body> rather than wrapping <html>, which is what Next 16
+            cache components require. */}
+        <ClerkProvider>
+          {children}
+          <CursorFX />
+          <CookieBanner />
+          <Analytics />
+        </ClerkProvider>
       </body>
     </html>
   );
