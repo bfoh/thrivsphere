@@ -2,7 +2,7 @@ export const brand = {
   name: "ThrivSphere Wellbeing CIC",
   short: "ThrivSphere",
   tagline: "Empowering Wellbeing. Building Resilience. Inspiring Hope.",
-  email: "hello@thrivsphere.org.uk",
+  email: "hello@thrivsphere.org",
   location: "United Kingdom · Online Wellbeing Platform",
   /** One-line positioning. Non-clinical — see `scopeOfPractice` below. */
   positioning:

@@ -148,7 +148,7 @@ export function SiteFooter() {
         }}
       >
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-          <Icon name="mail" size={15} /> hello@thrivsphere.org.uk
+          <Icon name="mail" size={15} /> hello@thrivsphere.org
         </span>
         <span>© {new Date().getFullYear()} ThrivSphere Wellbeing CIC. All rights reserved.</span>
       </div>

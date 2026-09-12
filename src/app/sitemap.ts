@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { policyLinks, posts, resources } from "@/data/site";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thrivsphere.org.uk";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thrivsphere.org";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();

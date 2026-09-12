@@ -13,7 +13,7 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thrivsphere.org.uk";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thrivsphere.org";
 
 const description =
   "ThrivSphere Wellbeing CIC is a UK Community Interest Company providing accessible, confidential online wellbeing support, education, coaching, mindfulness and signposting to adults aged 18+ — women and men. A non-clinical service helping you heal, grow and thrive.";
