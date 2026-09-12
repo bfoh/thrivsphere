@@ -13,6 +13,9 @@ import {
   RaiseConcernForm,
   ReferralForm,
 } from "@/components/admin/SafeguardingForms";
+import { UploadDocumentForm, DeleteDocumentButton } from "@/components/admin/DocumentForms";
+import { MessageThread } from "@/components/MessageThread";
+import { getConversation } from "@/app/actions/messages";
 import { Icon } from "@/components/icons";
 
 export const metadata: Metadata = {
@@ -42,6 +45,8 @@ export default async function ClientRecordPage({
   const { id } = await params;
   const record = await getClientRecord(id);
   if (!record) notFound();
+
+  const conversation = await getConversation(id);
 
   const { client, intake, riskFlags, concerns, notes, appointments, packages, consents, referrals, documents } =
     record;
@@ -301,19 +306,40 @@ export default async function ClientRecordPage({
       </Section>
 
       {/* documents */}
-      <Section title="Documents" subtitle={`${documents.length} stored`}>
+      <Section title="Documents" subtitle={`${documents.length} stored · private, access logged`}>
+        <UploadDocumentForm clientId={client.id} />
         {documents.length === 0 ? (
           <Empty>No documents uploaded.</Empty>
         ) : (
-          <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+          <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
             {documents.map((doc) => (
-              <li key={doc.id} style={{ fontSize: 14, color: "var(--ink)" }}>
-                {doc.filename} <span style={{ color: "var(--navy-soft)" }}>({doc.category}, {d(doc.uploadedAt)})</span>
+              <li
+                key={doc.id}
+                style={{ display: "flex", justifyContent: "space-between", gap: 14, alignItems: "center", flexWrap: "wrap", fontSize: 14, color: "var(--ink)" }}
+              >
+                <span>
+                  <strong style={{ color: "var(--navy)" }}>{doc.filename}</strong>{" "}
+                  <span style={{ color: "var(--navy-soft)" }}>
+                    ({doc.category}, {d(doc.uploadedAt)}
+                    {doc.visibleToClient ? ", shared with client" : ""})
+                  </span>
+                </span>
+                <span style={{ display: "inline-flex", gap: 16, alignItems: "center" }}>
+                  <a href={`/api/documents/${doc.id}`} style={{ fontSize: 13, fontWeight: 700, color: "var(--teal-deep)", textDecoration: "none" }}>
+                    Download
+                  </a>
+                  <DeleteDocumentButton documentId={doc.id} clientId={client.id} />
+                </span>
               </li>
             ))}
           </ul>
         )}
       </Section>
+
+      <Section title="Secure messages" subtitle="Inside the portal — nothing personal is sent by email">
+        <MessageThread clientId={client.id} messages={conversation ?? []} placeholder="Write to this client…" />
+      </Section>
+
     </div>
   );
 }

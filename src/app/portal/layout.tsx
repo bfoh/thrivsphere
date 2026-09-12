@@ -31,9 +31,27 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           borderBottom: "1px solid rgba(31,58,95,0.08)",
         }}
       >
-        <Link href="/portal" aria-label="ThrivSphere portal" style={{ display: "flex" }}>
-          <Logo height={46} />
-        </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+          <Link href="/portal" aria-label="ThrivSphere portal" style={{ display: "flex" }}>
+            <Logo height={46} />
+          </Link>
+          <nav style={{ display: "flex", gap: 16 }}>
+            {[
+              { label: "Overview", href: "/portal" },
+              { label: "Book", href: "/portal/book" },
+              { label: "Messages", href: "/portal/messages" },
+              { label: "Documents", href: "/portal/documents" },
+            ].map((n) => (
+              <Link
+                key={n.href}
+                href={n.href}
+                style={{ fontSize: 14, fontWeight: 700, color: "var(--navy)", textDecoration: "none" }}
+              >
+                {n.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
         <UserButton />
       </header>
       <main style={{ background: "var(--warm-white)", minHeight: "calc(100vh - 102px)" }}>
