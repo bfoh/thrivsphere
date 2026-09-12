@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Section } from "../Section";
 import { Icon } from "../icons";
 import { FancyHeadline } from "../FancyHeadline";
@@ -30,7 +31,7 @@ export function Services() {
 
       <div className="services-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18, marginTop: 34 }}>
         {services.map((s) => (
-          <div key={s.title} className="svc-card">
+          <Link key={s.title} href="/services" className="svc-card" style={{ textDecoration: "none", color: "inherit" }}>
             <span className="svc-icon">
               <Icon name={s.icon} size={25} stroke="#fff" />
             </span>
@@ -41,7 +42,7 @@ export function Services() {
             <span className="svc-arrow">
               Learn more <Icon name="arrow" size={15} stroke="var(--teal-deep)" />
             </span>
-          </div>
+          </Link>
         ))}
       </div>
 

@@ -4,27 +4,73 @@ export const brand = {
   tagline: "Empowering Wellbeing. Building Resilience. Inspiring Hope.",
   email: "hello@thrivsphere.org.uk",
   location: "United Kingdom · Online Wellbeing Platform",
+  /** One-line positioning. Non-clinical — see `scopeOfPractice` below. */
+  positioning:
+    "Professional wellbeing support, education and signposting informed by extensive mental health experience.",
+  audienceLine: "Open to all adults aged 18+ — women and men.",
 };
 
-/** Unified nav item: either scrolls to a home section, or links to a route. */
-export type NavItem = { label: string; section?: string; href?: string };
+/** Primary nav. Every item is a real route — the client's 7-page structure. */
+export type NavItem = { label: string; href: string };
 
 export const nav: NavItem[] = [
-  { label: "About", section: "about" },
-  { label: "Services", section: "services" },
-  { label: "Programme", section: "programme" },
+  { label: "About", href: "/about" },
+  { label: "Services", href: "/services" },
   { label: "Pricing", href: "/pricing" },
   { label: "Resources", href: "/resources" },
-  { label: "Blog", href: "/blog" },
+  { label: "Contact", href: "/contact" },
 ];
 
+/**
+ * Scope of practice — what ThrivSphere is and is not.
+ * ThrivSphere is a non-clinical service: it does not assess, diagnose or treat.
+ * Surfaced on About, Services and Book, and inside the Stage 2 intake flow.
+ */
+export const scopeOfPractice = {
+  isTitle: "What ThrivSphere is",
+  is: [
+    "A non-clinical wellbeing, education and support service",
+    "Emotional wellbeing support, coaching and mindfulness",
+    "Education on resilience, healthy relationships and self-care",
+    "A confidential space to talk things through without judgement",
+    "Signposting to the right specialist service when you need one",
+  ],
+  isNotTitle: "What ThrivSphere is not",
+  isNot: [
+    "An emergency, crisis or out-of-hours service",
+    "A clinical or medical service — we do not assess, diagnose or treat",
+    "A substitute for your GP, NHS mental health services or medication",
+    "A counselling, psychotherapy or psychiatric service",
+    "A provider of legal advice or fitness-for-work assessments",
+  ],
+  note: "If your needs fall outside what we offer, we will say so and help you find the right support.",
+};
+
+/** Every public policy — rendered in the sidebar on each policy page. */
 export const policyLinks = [
+  { label: "Scope of Practice", href: "/scope-of-practice" },
+  { label: "Terms & Conditions", href: "/terms" },
+  { label: "Consent Policy", href: "/consent" },
   { label: "Privacy Policy (UK GDPR)", href: "/privacy" },
+  { label: "Confidentiality Statement", href: "/confidentiality" },
   { label: "Cookie Policy", href: "/cookies" },
   { label: "Safeguarding Policy", href: "/safeguarding" },
-  { label: "Confidentiality Statement", href: "/confidentiality" },
+  { label: "Domestic Abuse & Safe Disclosure", href: "/domestic-abuse" },
+  { label: "Suicide, Self-Harm & Crisis", href: "/crisis" },
+  { label: "Payments & Cancellations", href: "/payments" },
+  { label: "Complaints & Feedback", href: "/complaints" },
+  { label: "Equality, Diversity & Inclusion", href: "/edi" },
   { label: "Accessibility Statement", href: "/accessibility" },
+];
+
+/** Curated subset for the site footer, which has limited room. */
+export const footerPolicyLinks = [
+  { label: "Scope of Practice", href: "/scope-of-practice" },
+  { label: "Safeguarding Policy", href: "/safeguarding" },
+  { label: "Privacy Policy (UK GDPR)", href: "/privacy" },
+  { label: "Confidentiality Statement", href: "/confidentiality" },
   { label: "Terms & Conditions", href: "/terms" },
+  { label: "All policies", href: "/scope-of-practice" },
 ];
 
 export const values = [
@@ -40,19 +86,19 @@ export const values = [
   "Community",
 ];
 
+/**
+ * What people come to us with. Deliberately non-clinical language —
+ * these are presenting concerns, not conditions or diagnoses.
+ */
 export const audience = [
-  "Emotional abuse",
-  "Coercive control",
-  "Unhealthy relationships",
-  "Separation or divorce",
-  "Anxiety",
-  "Depression",
-  "Stress & burnout",
-  "Low confidence",
-  "Social isolation",
-  "Life transitions",
-  "Mental health challenges",
-  "Recovery & healing",
+  "Relationship & marital difficulties",
+  "Emotional distress",
+  "Stress & anxiety",
+  "Low mood & wellbeing difficulties",
+  "Domestic abuse or unhealthy relationships",
+  "Life changes & personal challenges",
+  "Confidence & resilience",
+  "General wellbeing & signposting",
 ];
 
 export type Service = {
@@ -74,8 +120,8 @@ export const services: Service[] = [
   },
   {
     icon: "users",
-    title: "Women's Wellbeing Circle",
-    desc: "Facilitated online peer support groups — a safe space for discussion, encouragement and shared learning.",
+    title: "Wellbeing Circles",
+    desc: "Facilitated online peer support groups — a safe space for discussion, encouragement and shared learning. Mixed groups, plus separate women's and men's circles.",
   },
   {
     icon: "lotus",
@@ -102,11 +148,16 @@ export const services: Service[] = [
     title: "Resource Centre",
     desc: "A digital wellbeing library of articles, downloadable guides, videos, exercises and trusted self-help resources.",
   },
+  {
+    icon: "shield",
+    title: "Signposting & Referral",
+    desc: "Where your needs fall outside what we offer, we help you find the right support — your GP, NHS services, safeguarding teams or specialist organisations.",
+  },
 ];
 
 export const educationTopics = [
   "Emotional wellbeing",
-  "Anxiety & depression",
+  "Understanding stress & low mood",
   "Emotional resilience",
   "Healthy relationships",
   "Emotional abuse awareness",
@@ -118,8 +169,8 @@ export const educationTopics = [
 ];
 
 export const programme = {
-  name: "ThrivSphere Women's Wellbeing & Resilience Programme",
-  aim: "To support women experiencing emotional abuse, anxiety, depression, social isolation, unhealthy relationships and life transitions through accessible, remote wellbeing services.",
+  name: "ThrivSphere Wellbeing & Resilience Programme",
+  aim: "To support adults aged 18+ — women and men — experiencing emotional distress, stress and anxiety, low mood, relationship difficulties, domestic abuse or life changes, through accessible, remote wellbeing support, education and signposting.",
   objectives: [
     "Improve emotional wellbeing",
     "Strengthen resilience",
@@ -130,7 +181,7 @@ export const programme = {
     "Support recovery & long-term wellbeing",
   ],
   activities: [
-    "Monthly Wellbeing Circle",
+    "Monthly Wellbeing Circles",
     "One-to-one emotional wellbeing support",
     "Wellbeing coaching",
     "Mindfulness sessions",
@@ -154,65 +205,103 @@ export const founder = {
   name: "Patience Barning T",
   titles: ["Registered Mental Health Nurse (RMN)", "SCPHN · Occupational Health Nurse"],
   bio: [
-    "ThrivSphere Wellbeing CIC was founded by Patience Barning T, a Registered Mental Health Nurse and Specialist Community Public Health / Occupational Health Nurse with a deep commitment to women's emotional, mental and social wellbeing.",
-    "Drawing on years of clinical and community experience, Patience created ThrivSphere as a safe, confidential and compassionate online space where women can access wellbeing education, one-to-one support, coaching, mindfulness and peer connection — regardless of where they are in the world.",
-    "Her vision is simple and powerful: that every woman navigating emotional abuse, anxiety, isolation or life transition can find a place to heal, grow and thrive.",
+    "ThrivSphere Wellbeing CIC was founded by Patience Barning T, a Registered Mental Health Nurse and Specialist Community Public Health / Occupational Health Nurse with a deep commitment to emotional, mental and social wellbeing.",
+    "Drawing on years of professional and community experience, Patience created ThrivSphere as a safe, confidential and compassionate online space where adults can access wellbeing education, one-to-one support, coaching, mindfulness and peer connection — regardless of where they are.",
+    "ThrivSphere is a non-clinical service. It offers professional wellbeing support, education and signposting informed by extensive mental health experience — it does not provide clinical assessment, diagnosis or treatment.",
+    "The vision is simple and powerful: that every adult navigating emotional distress, difficult relationships, isolation or life change can find a place to heal, grow and thrive.",
   ],
 };
 
 export const impact = [
   { stat: "100%", label: "Confidential & compassionate" },
   { stat: "Online", label: "Accessible anywhere in the UK" },
-  { stat: "Women-first", label: "Growing to support all in time" },
+  { stat: "18+", label: "Open to women and men" },
   { stat: "CIC", label: "Community Interest Company" },
 ];
 
 export type Plan = {
+  /** Stable key — becomes the `price_plans.slug` column in Stage 2. */
+  slug: string;
   name: string;
   price: string;
   unit: string;
+  /** Amount in pence — the value Stripe Checkout is created with. */
+  amountPence: number;
+  /** Sessions credited to the client's package on payment. */
+  sessions: number;
   blurb: string;
   features: string[];
   featured?: boolean;
   cta: string;
 };
 
+/**
+ * Launch pricing. In Stage 2 these move into the `price_plans` table and become
+ * editable from the admin dashboard — this array is the seed for that table.
+ */
 export const plans: Plan[] = [
   {
-    name: "Wellbeing Circle",
-    price: "£12",
-    unit: "per month",
-    blurb: "Facilitated monthly peer support and community connection.",
+    slug: "initial-consultation",
+    name: "Initial Consultation",
+    price: "£20",
+    unit: "one-off, 30 minutes",
+    amountPence: 2000,
+    sessions: 1,
+    blurb: "Your first conversation — understand your needs and see if we're the right fit.",
     features: [
-      "Monthly online Wellbeing Circle",
-      "Community discussion space",
-      "Access to recorded webinars",
-      "Downloadable wellbeing guides",
+      "A confidential 30-minute conversation",
+      "Understand what you're looking for",
+      "Agree your goals together",
+      "Signposting if we're not the right fit",
+      "No obligation to continue",
     ],
-    cta: "Join the Circle",
+    cta: "Book your consultation",
   },
   {
-    name: "One-to-One Support",
-    price: "£45",
+    slug: "individual-session",
+    name: "Individual Session",
+    price: "£30",
     unit: "per 50-min session",
-    blurb: "Confidential individual emotional wellbeing support & coaching.",
+    amountPence: 3000,
+    sessions: 1,
+    blurb: "Confidential one-to-one wellbeing support and coaching, as and when you need it.",
     features: [
       "1:1 emotional wellbeing session",
-      "Personalised wellbeing plan",
       "Practical tools & resources",
-      "Secure online video sessions",
+      "Secure online video session",
       "Flexible evening availability",
+      "Book one at a time — no commitment",
     ],
-    featured: true,
     cta: "Book a session",
   },
   {
-    name: "Resilience Programme",
-    price: "£120",
-    unit: "6-week programme",
+    slug: "package-4",
+    name: "4 Sessions",
+    price: "£100",
+    unit: "save £20",
+    amountPence: 10000,
+    sessions: 4,
+    blurb: "A short block of support to work through something specific.",
+    features: [
+      "4 one-to-one sessions",
+      "Personalised wellbeing plan",
+      "Book at your own pace",
+      "Workbook & progress tracking",
+      "Saves £20 against single sessions",
+    ],
+    featured: true,
+    cta: "Get 4 sessions",
+  },
+  {
+    slug: "package-6",
+    name: "6 Sessions",
+    price: "£150",
+    unit: "save £30",
+    amountPence: 15000,
+    sessions: 6,
     blurb: "Our flagship structured journey to lasting resilience.",
     features: [
-      "6 guided weekly sessions",
+      "6 guided sessions",
       "Mindfulness & coaching blend",
       "Wellbeing Circle membership",
       "Workbook & progress tracking",
@@ -271,7 +360,7 @@ export const resources: Resource[] = [
       "- Undermining your confidence or sense of reality",
       "## This is not your fault",
       "Coercive control is a form of abuse and, in the UK, it is a criminal offence. What you're experiencing is real, and support is available — confidentially and without judgement.",
-      "If you are in immediate danger call 999. For confidential advice, the National Domestic Abuse Helpline is free, 24/7, on 0808 2000 247. ThrivSphere can also walk alongside you and signpost specialist services.",
+      "Coercive control affects people of every gender. If you are in immediate danger call 999. For confidential advice, the National Domestic Abuse Helpline is free, 24/7, on 0808 2000 247; men can also contact the Men's Advice Line on 0808 8010 327. ThrivSphere can walk alongside you and signpost specialist services.",
     ],
   },
   {
@@ -309,7 +398,7 @@ export const resources: Resource[] = [
       "- Reclaim small choices — a meal, a song, how you spend an hour",
       "## Reconnect with your strengths",
       "Think of a time you got through something hard. The qualities that carried you then are still yours now. Write them down where you can see them.",
-      "Healing isn't linear, and progress can be quiet. Be patient with yourself. Working alongside a supportive therapist or coach can help you rebuild confidence at a pace that feels safe.",
+      "Healing isn't linear, and progress can be quiet. Be patient with yourself. Working alongside a supportive wellbeing practitioner or coach can help you rebuild confidence at a pace that feels safe.",
     ],
   },
   {
@@ -446,9 +535,134 @@ export const posts: Post[] = [
 ];
 
 export const faqs = [
-  { q: "Is ThrivSphere a crisis service?", a: "No. We are an outpatient wellbeing service and do not provide crisis, emergency or fitness-for-work assessments. In an emergency call 999, or Samaritans on 116 123." },
-  { q: "Are sessions confidential?", a: "Yes. Confidentiality is central to everything we do and is handled in line with UK GDPR and our Confidentiality Policy, with safeguarding exceptions where there is a risk of serious harm." },
-  { q: "Do I have to use my full name?", a: "No. You're welcome to share only what feels comfortable. A first name is enough to begin." },
-  { q: "Where are sessions held?", a: "All sessions are online via secure video, so you can access support from anywhere in the UK." },
-  { q: "Who can access ThrivSphere?", a: "Currently women aged 18+. Our long-term vision is to extend support to men experiencing similar challenges." },
+  { q: "Who can access ThrivSphere?", a: "Any adult aged 18 or over — women and men. We ask everyone to confirm they are 18+ when registering. We do not currently work with under-18s." },
+  { q: "Is ThrivSphere a crisis service?", a: "No. We are a non-clinical wellbeing, education and support service. We do not provide crisis, emergency, out-of-hours or fitness-for-work assessments. In an emergency call 999, or Samaritans on 116 123 (free, 24/7)." },
+  { q: "Do you provide therapy, diagnosis or treatment?", a: "No. ThrivSphere offers professional wellbeing support, education and signposting informed by extensive mental health experience. We do not carry out clinical assessment, make diagnoses, or provide medical or psychological treatment. If that's what you need, we'll help you find it." },
+  { q: "What happens if my needs fall outside what you offer?", a: "We'll tell you honestly and help you find the right support — your GP, NHS mental health services, a domestic abuse service, safeguarding services or another specialist organisation. Signposting is part of what we do, not a sign that we've turned you away." },
+  { q: "Are sessions confidential?", a: "Yes. Confidentiality is central to everything we do and is handled in line with UK GDPR and our Confidentiality Policy. There are limits: if we believe you or someone else is at risk of serious harm, we may need to share information to keep people safe. We'll always try to discuss this with you first." },
+  { q: "Do I have to use my full name?", a: "To register and pay we need enough to identify you and keep safe records, but you're welcome to share only what feels comfortable in your sessions." },
+  { q: "Where are sessions held?", a: "All sessions are online via secure video, so you can access support from anywhere in the UK. Your joining link appears in your ThrivSphere account — we never send it by email." },
+];
+
+/**
+ * Signposting directory — where we point people when their needs fall outside
+ * ThrivSphere's scope. Rendered on Resources and Contact, and used inside the
+ * Book flow. In Stage 2 this seeds the `signposting_directory` table and powers
+ * the admin referral picker so recorded referrals map to real organisations.
+ */
+export type SignpostCategory =
+  | "emergency"
+  | "mental-health"
+  | "domestic-abuse"
+  | "safeguarding"
+  | "practical";
+
+export type Signpost = {
+  name: string;
+  category: SignpostCategory;
+  phone?: string;
+  url?: string;
+  detail: string;
+  /** Shown with visual priority — use for life-threatening situations. */
+  urgent?: boolean;
+};
+
+export const signpostCategories: { key: SignpostCategory; label: string }[] = [
+  { key: "emergency", label: "Emergency & crisis" },
+  { key: "mental-health", label: "Mental health support" },
+  { key: "domestic-abuse", label: "Domestic abuse & safety" },
+  { key: "safeguarding", label: "Safeguarding" },
+  { key: "practical", label: "Practical & financial" },
+];
+
+export const signposts: Signpost[] = [
+  {
+    name: "Emergency services",
+    category: "emergency",
+    phone: "999",
+    detail: "If you or someone else is in immediate danger, or life is at risk, call 999 now.",
+    urgent: true,
+  },
+  {
+    name: "Samaritans",
+    category: "emergency",
+    phone: "116 123",
+    url: "https://www.samaritans.org",
+    detail: "Free, confidential, 24/7. For anyone struggling to cope, whatever you're going through.",
+    urgent: true,
+  },
+  {
+    name: "Shout",
+    category: "emergency",
+    phone: "Text SHOUT to 85258",
+    url: "https://giveusashout.org",
+    detail: "Free, confidential, 24/7 text support if you'd rather not speak to someone out loud.",
+    urgent: true,
+  },
+  {
+    name: "NHS 111 — mental health option",
+    category: "mental-health",
+    phone: "111 (select the mental health option)",
+    url: "https://111.nhs.uk",
+    detail: "24/7 NHS mental health advice and urgent support when it isn't a 999 emergency.",
+  },
+  {
+    name: "Your GP",
+    category: "mental-health",
+    detail:
+      "Your first route to NHS assessment, treatment and referral. ThrivSphere is not a substitute for your GP, and we'll often encourage you to speak to them.",
+  },
+  {
+    name: "NHS Talking Therapies",
+    category: "mental-health",
+    url: "https://www.nhs.uk/nhs-services/mental-health-services/nhs-talking-therapies/",
+    detail: "Free NHS talking therapy for anxiety and depression in England. You can refer yourself.",
+  },
+  {
+    name: "Mind",
+    category: "mental-health",
+    phone: "0300 102 1234",
+    url: "https://www.mind.org.uk",
+    detail: "Information, advice and local services for anyone experiencing a mental health problem.",
+  },
+  {
+    name: "National Domestic Abuse Helpline",
+    category: "domestic-abuse",
+    phone: "0808 2000 247",
+    url: "https://www.nationaldahelpline.org.uk",
+    detail: "Free, confidential, 24/7, run by Refuge. Support for anyone experiencing domestic abuse.",
+  },
+  {
+    name: "Men's Advice Line",
+    category: "domestic-abuse",
+    phone: "0808 8010 327",
+    url: "https://mensadviceline.org.uk",
+    detail: "Confidential support for men experiencing domestic abuse.",
+  },
+  {
+    name: "Galop",
+    category: "domestic-abuse",
+    phone: "0800 999 5428",
+    url: "https://galop.org.uk",
+    detail: "Support for LGBT+ people experiencing abuse, violence or hate crime.",
+  },
+  {
+    name: "Local authority adult safeguarding",
+    category: "safeguarding",
+    detail:
+      "If an adult at risk is being abused or neglected, contact the adult social care safeguarding team at their local council. In an emergency call 999.",
+  },
+  {
+    name: "Citizens Advice",
+    category: "practical",
+    url: "https://www.citizensadvice.org.uk",
+    detail: "Free, independent advice on money, housing, work, benefits and legal problems.",
+  },
+  {
+    name: "Shelter",
+    category: "practical",
+    phone: "0808 800 4444",
+    url: "https://england.shelter.org.uk",
+    detail: "Housing and homelessness advice, including emergency housing.",
+  },
 ];

@@ -37,7 +37,7 @@ export function Founder() {
                 borderRadius: 50,
               }}
             >
-              <Icon name="shield" size={15} stroke="#b8922a" /> Clinically-led care
+              <Icon name="shield" size={15} stroke="#b8922a" /> Experienced wellbeing support
             </div>
           </div>
         </div>
@@ -49,7 +49,7 @@ export function Founder() {
               [{ t: "FOUNDER", size: 52, weight: 800, color: NAVY }],
               [
                 { t: "compassionate,", size: 18, italic: true, color: TEAL },
-                { t: "CLINICALLY-LED", size: 24, weight: 800, color: NAVY },
+                { t: "EXPERIENCE-LED", size: 24, weight: 800, color: NAVY },
               ],
             ]}
           />
@@ -72,7 +72,7 @@ export function Founder() {
               color: "var(--navy)",
             }}
           >
-            &ldquo;Every woman deserves a place to heal, grow and thrive.&rdquo;
+            &ldquo;Everyone deserves a place to heal, grow and thrive.&rdquo;
           </blockquote>
         </div>
       </div>

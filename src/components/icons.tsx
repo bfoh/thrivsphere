@@ -1,3 +1,4 @@
+import Image from "next/image";
 import * as React from "react";
 
 type IconProps = { size?: number; className?: string; stroke?: string };
@@ -143,12 +144,18 @@ export function Icon({ name, size = 24, stroke = "currentColor" }: IconProps & {
   }
 }
 
-export function Logo({ height = 46 }: { height?: number }) {
+/** Intrinsic size of the logo asset, used to keep the aspect ratio exact. */
+const LOGO_W = 900;
+const LOGO_H = 920;
+
+export function Logo({ height = 46, priority = false }: { height?: number; priority?: boolean }) {
   return (
-    /* eslint-disable-next-line @next/next/no-img-element */
-    <img
+    <Image
       src="/images/thrivsphere-logo.png"
       alt="ThrivSphere Wellbeing CIC"
+      width={Math.round((height * LOGO_W) / LOGO_H)}
+      height={height}
+      priority={priority}
       style={{ height, width: "auto", display: "block" }}
     />
   );

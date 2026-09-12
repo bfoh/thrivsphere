@@ -4,6 +4,7 @@ import { PageShell } from "@/components/PageShell";
 import { ProseBody } from "@/components/ProseBody";
 import { Icon } from "@/components/icons";
 import { resources } from "@/data/site";
+import Link from "next/link";
 
 export function generateStaticParams() {
   return resources.map((r) => ({ slug: r.slug }));
@@ -17,7 +18,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const res = resources.find((r) => r.slug === slug);
   return {
-    title: res ? `${res.title} — ThrivSphere Resources` : "Resource — ThrivSphere",
+    title: res ? res.title : "Resource",
     description: res?.desc,
   };
 }
@@ -31,12 +32,12 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
     <PageShell eyebrow={res.category} title={res.title} intro={res.desc} watermark="Resource">
       <div style={{ maxWidth: 720 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 22, fontSize: 13.5, color: "var(--navy-soft)" }}>
-          <a href="/resources" style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "var(--teal-deep)", fontWeight: 700, textDecoration: "none" }}>
+          <Link href="/resources" style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "var(--teal-deep)", fontWeight: 700, textDecoration: "none" }}>
             <span style={{ display: "inline-flex", transform: "rotate(180deg)" }}>
               <Icon name="arrow" size={15} stroke="var(--teal-deep)" />
             </span>
             Resource Centre
-          </a>
+          </Link>
           <span>·</span>
           <span>{res.type}</span>
         </div>
@@ -48,9 +49,9 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
           <p style={{ margin: "0 auto 16px", maxWidth: 460, fontSize: 15, lineHeight: 1.55, color: "var(--ink)" }}>
             Work one-to-one with our team to put these tools into practice, at a pace that feels right for you.
           </p>
-          <a href="/book" className="pill pill-teal" style={{ padding: "13px 26px", fontSize: 14.5 }}>
+          <Link href="/book" className="pill pill-teal" style={{ padding: "13px 26px", fontSize: 14.5 }}>
             Book a Session <Icon name="arrow" size={16} />
-          </a>
+          </Link>
         </div>
       </div>
     </PageShell>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PolicyPage } from "@/components/PolicyPage";
 
 export const metadata: Metadata = {
-  title: "Safeguarding Policy — ThrivSphere Wellbeing CIC",
+  title: "Safeguarding Policy",
 };
 
 export default function Page() {

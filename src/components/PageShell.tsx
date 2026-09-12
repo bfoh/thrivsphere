@@ -5,6 +5,7 @@ import { PageWatermark } from "./PageWatermark";
 import { MobileMenu } from "./MobileMenu";
 import { Logo, Icon } from "./icons";
 import { nav } from "@/data/site";
+import Link from "next/link";
 
 /** Chrome for routed sub-pages: crisis bar + sticky header + footer. */
 export function PageShell({
@@ -50,26 +51,26 @@ export function PageShell({
           marginTop: 30,
         }}
       >
-        <a href="/" style={{ display: "flex", alignItems: "center" }} aria-label="ThrivSphere home">
+        <Link href="/" style={{ display: "flex", alignItems: "center" }} aria-label="ThrivSphere home">
           <Logo height={50} />
-        </a>
+        </Link>
         <nav style={{ display: "flex", alignItems: "center", gap: 24 }} className="nav-links">
-          <a href="/" className="nav-item" style={link}>
+          <Link href="/" className="nav-item" style={link}>
             Home
-          </a>
+          </Link>
           {nav.map((it) => (
-            <a
+            <Link
               key={it.label}
-              href={it.section ? `/#${it.section}` : it.href}
+              href={it.href}
               className="nav-item"
               style={link}
             >
               {it.label}
-            </a>
+            </Link>
           ))}
-          <a href="/book" className="pill pill-gold nav-cta" style={{ padding: "9px 18px", fontSize: 13 }}>
-            Book a Session <Icon name="arrow" size={16} />
-          </a>
+          <Link href="/book" className="pill pill-gold nav-cta" style={{ padding: "9px 18px", fontSize: 13 }}>
+            Book a Consultation <Icon name="arrow" size={16} />
+          </Link>
           <MobileMenu />
         </nav>
       </header>

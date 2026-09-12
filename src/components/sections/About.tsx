@@ -24,8 +24,9 @@ export function About() {
       />
       <p style={{ margin: "16px 0 0", fontSize: 17, lineHeight: 1.6, maxWidth: 760, color: "var(--ink)" }}>
         ThrivSphere Wellbeing CIC is a UK-based Community Interest Company with an international
-        vision. We exist to improve the emotional, mental and social wellbeing of women — offering a
-        confidential, compassionate and empowering environment to heal, grow and thrive.
+        vision. We exist to improve the emotional, mental and social wellbeing of adults aged 18 and
+        over — women and men — offering a confidential, compassionate and empowering environment to
+        heal, grow and thrive.
       </p>
 
       <div className="two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22, marginTop: 34 }}>
@@ -36,8 +37,9 @@ export function About() {
           </div>
           <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.6, color: "var(--ink)" }}>
             To promote emotional, mental and social wellbeing through accessible education, emotional
-            support, coaching, mindfulness, peer support and community connection — helping women build
-            resilience, support recovery, improve confidence and create positive futures.
+            support, coaching, mindfulness, peer support, community connection and signposting —
+            helping adults build resilience, support recovery, improve confidence and create
+            positive futures.
           </p>
         </div>
         <div className="mv-card">
@@ -47,7 +49,7 @@ export function About() {
           </div>
           <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.6, color: "var(--ink)" }}>
             To create a trusted, accessible and empowering online wellbeing community where
-            individuals can heal, grow and thrive through life&apos;s challenges — reaching women
+            individuals can heal, grow and thrive through life&apos;s challenges — reaching adults
             across the UK, Ghana, the African diaspora and beyond.
           </p>
         </div>

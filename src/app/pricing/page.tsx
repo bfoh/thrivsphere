@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { PageShell } from "@/components/PageShell";
 import { Icon } from "@/components/icons";
 import { plans, faqs } from "@/data/site";
+import { NotCrisisNotice } from "@/components/NotCrisisNotice";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Pricing — ThrivSphere Wellbeing CIC",
+  title: "Pricing",
   description: "Clear, affordable pricing for ThrivSphere wellbeing support, coaching and our resilience programme.",
 };
 
@@ -14,9 +16,9 @@ export default function PricingPage() {
       eyebrow="Pricing"
       watermark="Pricing"
       title="Affordable, transparent wellbeing support"
-      intro="As a Community Interest Company, we keep pricing fair and accessible. Concessions are available — if cost is a barrier, please get in touch and we'll do our best to help."
+      intro="As a Community Interest Company, we keep pricing fair and accessible. Every service is open to adults aged 18+ — women and men. Concessions are available: if cost is a barrier, please get in touch and we'll do our best to help."
     >
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22 }} className="prog-grid">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 18 }} className="prog-grid">
         {plans.map((p) => (
           <div key={p.name} className={`price-card${p.featured ? " featured" : ""}`}>
             {p.featured && (
@@ -51,20 +53,39 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <a
+            <Link
               href="/book"
               className={`pill ${p.featured ? "pill-gold" : "pill-teal"}`}
-              style={{ width: "100%", padding: "13px 20px", fontSize: 14.5 }}
+              // marginTop:auto pins every CTA to the foot of its card so the
+              // row of buttons lines up even though the cards differ in height.
+              style={{
+                width: "100%",
+                marginTop: "auto",
+                padding: "13px 16px",
+                fontSize: 13.5,
+                textAlign: "center",
+              }}
             >
               {p.cta} <Icon name="arrow" size={16} />
-            </a>
+            </Link>
           </div>
         ))}
       </div>
 
       <p style={{ marginTop: 22, fontSize: 13.5, color: "var(--navy-soft)", textAlign: "center" }}>
-        Prices shown are illustrative. Grant-funded and concessionary places may be available for those who need them.
+        Sessions are paid in advance. Concessionary and grant-funded places may be available — if
+        cost is a barrier, please{" "}
+        <Link href="/contact" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
+          talk to us
+        </Link>{" "}
+        before deciding not to come. See our{" "}
+        <Link href="/payments" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
+          Payments, Cancellations, Refunds &amp; No-Shows policy
+        </Link>
+        .
       </p>
+
+      <NotCrisisNotice style={{ marginTop: 34 }} />
 
       <h2 style={{ margin: "56px 0 20px", fontSize: 28, color: "var(--navy)", fontWeight: 800 }}>
         Frequently asked questions

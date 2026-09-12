@@ -1,28 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-const KEY = "thrivsphere-cookie-consent";
+import Link from "next/link";
+import { setConsent, useConsent } from "@/lib/consent";
 
 export function CookieBanner() {
-  const [show, setShow] = useState(false);
+  const consent = useConsent();
 
-  useEffect(() => {
-    try {
-      if (!localStorage.getItem(KEY)) setShow(true);
-    } catch {
-      setShow(true);
-    }
-  }, []);
-
-  const decide = (value: "accepted" | "essential") => {
-    try {
-      localStorage.setItem(KEY, value);
-    } catch {}
-    setShow(false);
-  };
-
-  if (!show) return null;
+  // `null` also covers the server render, so the banner never flashes for
+  // someone who has already chosen.
+  if (consent !== null) return null;
 
   return (
     <div
@@ -44,21 +30,21 @@ export function CookieBanner() {
     >
       <p style={{ margin: "0 0 10px", fontSize: 12.5, lineHeight: 1.5, color: "var(--ink)" }}>
         <span style={{ fontWeight: 800, color: "var(--navy)" }}>🍪 Cookies.</span> We use essential
-        cookies, plus optional analytics if you allow.{" "}
-        <a href="/cookies" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
+        cookies only, unless you allow optional analytics.{" "}
+        <Link href="/cookies" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
           Learn more
-        </a>
+        </Link>
       </p>
       <div style={{ display: "flex", gap: 8 }}>
         <button
-          onClick={() => decide("accepted")}
+          onClick={() => setConsent("accepted")}
           className="pill pill-gold"
           style={{ padding: "8px 14px", fontSize: 12.5, flex: 1 }}
         >
           Accept all
         </button>
         <button
-          onClick={() => decide("essential")}
+          onClick={() => setConsent("essential")}
           className="pill pill-ghost"
           style={{ padding: "8px 14px", fontSize: 12.5, flex: 1 }}
         >

@@ -1,17 +1,21 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Logo } from "./icons";
 import { PillButton } from "./PillButton";
 import { MobileMenu } from "./MobileMenu";
 import { nav } from "@/data/site";
 
-export function TopNav({
-  active,
-  onNavigate,
-}: {
-  active: string;
-  onNavigate: (id: string) => void;
-}) {
+/**
+ * Fixed header for the homepage deck.
+ *
+ * Every nav item is a real route now, so the active item comes from the
+ * pathname rather than from scroll position.
+ */
+export function TopNav() {
+  const pathname = usePathname();
+
   return (
     <header
       style={{
@@ -30,37 +34,35 @@ export function TopNav({
         padding: "0 28px",
       }}
     >
-      <button
-        onClick={() => onNavigate("home")}
-        style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center" }}
+      <Link
+        href="/"
+        style={{ display: "flex", alignItems: "center" }}
         aria-label="ThrivSphere home"
       >
         <Logo height={50} />
-      </button>
+      </Link>
 
       <nav style={{ display: "flex", alignItems: "center", gap: 24 }} className="nav-links">
-        {nav.map((it) =>
-          it.section ? (
-            <button
+        {nav.map((it) => {
+          const active = pathname === it.href || pathname.startsWith(`${it.href}/`);
+          return (
+            <Link
               key={it.label}
-              onClick={() => onNavigate(it.section!)}
+              href={it.href}
               className="nav-item"
-              style={navLinkStyle(active === it.section)}
+              aria-current={active ? "page" : undefined}
+              style={navLinkStyle(active)}
             >
               {it.label}
-            </button>
-          ) : (
-            <a key={it.label} href={it.href} className="nav-item" style={navLinkStyle(false)}>
-              {it.label}
-            </a>
-          )
-        )}
+            </Link>
+          );
+        })}
         <span className="nav-cta">
           <PillButton variant="gold" size="sm" href="/book" icon="arrow">
-            Book a Session
+            Book a Consultation
           </PillButton>
         </span>
-        <MobileMenu onSection={onNavigate} />
+        <MobileMenu />
       </nav>
     </header>
   );
