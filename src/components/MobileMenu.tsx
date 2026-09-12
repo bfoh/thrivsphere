@@ -1,29 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Icon } from "./icons";
 import { nav } from "@/data/site";
 
-type Item = { label: string; section?: string; href: string };
-
-/**
- * Mobile navigation: hamburger toggles a full-width dropdown panel.
- * On the homepage, section items scroll (via onSection); routes use links.
- * On sub-pages (no onSection), every item is a link.
- */
-export function MobileMenu({ onSection }: { onSection?: (id: string) => void }) {
+/** Mobile navigation: hamburger toggles a full-width dropdown panel. */
+export function MobileMenu() {
   const [open, setOpen] = useState(false);
-
-  const items: Item[] = [
-    { label: "Home", section: "home", href: "/" },
-    ...nav.map((n) => ({
-      label: n.label,
-      section: n.section,
-      href: n.section ? `/#${n.section}` : n.href!,
-    })),
-  ];
-
   const close = () => setOpen(false);
+
+  const items = [{ label: "Home", href: "/" }, ...nav];
 
   return (
     <>
@@ -48,27 +35,19 @@ export function MobileMenu({ onSection }: { onSection?: (id: string) => void }) 
         <>
           <div onClick={close} className="mobileMenu-scrim" />
           <nav className="mobileMenu">
-            {items.map((it) =>
-              onSection && it.section ? (
-                <button
-                  key={it.label}
-                  onClick={() => {
-                    onSection(it.section!);
-                    close();
-                  }}
-                  className="mobileMenu-link"
-                >
-                  {it.label}
-                </button>
-              ) : (
-                <a key={it.label} href={it.href} onClick={close} className="mobileMenu-link">
-                  {it.label}
-                </a>
-              )
-            )}
-            <a href="/book" onClick={close} className="pill pill-gold" style={{ marginTop: 8, padding: "13px 22px", fontSize: 15, justifyContent: "center" }}>
-              Book a Session <Icon name="arrow" size={17} />
-            </a>
+            {items.map((it) => (
+              <Link key={it.label} href={it.href} onClick={close} className="mobileMenu-link">
+                {it.label}
+              </Link>
+            ))}
+            <Link
+              href="/book"
+              onClick={close}
+              className="pill pill-gold"
+              style={{ marginTop: 8, padding: "13px 22px", fontSize: 15, justifyContent: "center" }}
+            >
+              Book a Consultation <Icon name="arrow" size={17} />
+            </Link>
           </nav>
         </>
       )}

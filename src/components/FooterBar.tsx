@@ -3,7 +3,9 @@
 import * as React from "react";
 import { PillButton } from "./PillButton";
 import { Icon } from "./icons";
-import { policyLinks } from "@/data/site";
+import { footerPolicyLinks } from "@/data/site";
+import Link from "next/link";
+import Image from "next/image";
 
 const footerLink: React.CSSProperties = {
   display: "block",
@@ -59,7 +61,7 @@ export function FooterBar({
         </span>
         <span style={{ width: 1, height: 22, background: "rgba(255,255,255,0.2)" }} className="footer-div" />
         <PillButton variant="gold" size="sm" onClick={onBook} icon="arrow">
-          Book a Session
+          Book a Consultation
         </PillButton>
       </div>
     </div>
@@ -81,15 +83,21 @@ export function SiteFooter() {
         className="footer-grid"
       >
         <div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/images/thrivsphere-logo.png"
             alt="ThrivSphere Wellbeing CIC"
+            width={86}
+            height={88}
             style={{ height: 88, width: "auto", background: "#fff", borderRadius: 14, padding: 8 }}
           />
           <p style={{ marginTop: 16, fontSize: 14, lineHeight: 1.6, maxWidth: 340, color: "#b9c8dd" }}>
             A UK Community Interest Company providing accessible, confidential online wellbeing
-            support for women — helping you heal, grow and thrive.
+            support, education and signposting to adults aged 18+ — helping you heal, grow and
+            thrive.
+          </p>
+          <p style={{ marginTop: 12, fontSize: 12.5, lineHeight: 1.55, maxWidth: 340, color: "#9db0c9" }}>
+            ThrivSphere is a non-clinical service and is not an emergency or crisis service. We do
+            not provide clinical assessment, diagnosis or treatment.
           </p>
         </div>
         <div>
@@ -97,17 +105,17 @@ export function SiteFooter() {
             Explore
           </h4>
           {[
-            { l: "About", h: "/#about" },
-            { l: "Our Services", h: "/#services" },
-            { l: "Programme", h: "/#programme" },
-            { l: "Resource Centre", h: "/resources" },
+            { l: "About", h: "/about" },
+            { l: "Our Services", h: "/services" },
             { l: "Pricing", h: "/pricing" },
+            { l: "Resource Centre", h: "/resources" },
             { l: "Blog", h: "/blog" },
-            { l: "Book a Session", h: "/book" },
+            { l: "Contact Us", h: "/contact" },
+            { l: "Book a Consultation", h: "/book" },
           ].map((x) => (
-            <a key={x.l} href={x.h} style={footerLink}>
+            <Link key={x.l} href={x.h} style={footerLink}>
               {x.l}
-            </a>
+            </Link>
           ))}
         </div>
         <div>
@@ -116,11 +124,12 @@ export function SiteFooter() {
           </h4>
           <p style={{ margin: "0 0 9px", fontSize: 14, color: "#b9c8dd" }}>Emergency: 999</p>
           <p style={{ margin: "0 0 9px", fontSize: 14, color: "#b9c8dd" }}>Samaritans: 116 123</p>
-          <p style={{ margin: "0 0 13px", fontSize: 14, color: "#b9c8dd" }}>Refuge: 0808 2000 247</p>
-          {policyLinks.map((p) => (
-            <a key={p.href} href={p.href} style={footerLink}>
+          <p style={{ margin: "0 0 9px", fontSize: 14, color: "#b9c8dd" }}>Domestic abuse: 0808 2000 247</p>
+          <p style={{ margin: "0 0 13px", fontSize: 14, color: "#b9c8dd" }}>Men&apos;s Advice Line: 0808 8010 327</p>
+          {footerPolicyLinks.map((p) => (
+            <Link key={p.label} href={p.href} style={footerLink}>
               {p.label}
-            </a>
+            </Link>
           ))}
         </div>
       </div>
@@ -139,7 +148,7 @@ export function SiteFooter() {
         }}
       >
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-          <Icon name="mail" size={15} /> hello@thrivsphere.org.uk
+          <Icon name="mail" size={15} /> hello@thrivsphere.org
         </span>
         <span>© {new Date().getFullYear()} ThrivSphere Wellbeing CIC. All rights reserved.</span>
       </div>

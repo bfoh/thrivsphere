@@ -47,10 +47,10 @@ export default function Home() {
   return (
     <>
       <CrisisBar />
-      <TopNav active={active} onNavigate={navigate} />
+      <TopNav />
 
       <div ref={deckRef} className="deck">
-        <Hero onNavigate={navigate} />
+        <Hero />
         <About />
         <Founder />
         <Services />

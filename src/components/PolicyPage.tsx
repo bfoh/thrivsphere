@@ -2,6 +2,7 @@ import { PageShell } from "./PageShell";
 import { Icon } from "./icons";
 import { policies } from "@/data/policies";
 import { policyLinks } from "@/data/site";
+import Link from "next/link";
 
 export function PolicyPage({ slug }: { slug: string }) {
   const p = policies[slug];
@@ -43,7 +44,7 @@ export function PolicyPage({ slug }: { slug: string }) {
               Policies
             </h3>
             {policyLinks.map((l) => (
-              <a
+              <Link
                 key={l.href}
                 href={l.href}
                 style={{
@@ -56,7 +57,7 @@ export function PolicyPage({ slug }: { slug: string }) {
                 }}
               >
                 {l.label}
-              </a>
+              </Link>
             ))}
           </div>
         </aside>

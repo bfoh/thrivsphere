@@ -2,22 +2,24 @@ import type { Metadata } from "next";
 import { PageShell } from "@/components/PageShell";
 import { BookingForm } from "@/components/BookingForm";
 import { Icon } from "@/components/icons";
+import { NotCrisisNotice } from "@/components/NotCrisisNotice";
+import { ScopeOfPractice } from "@/components/ScopeOfPractice";
 
 export const metadata: Metadata = {
-  title: "Book a Session — ThrivSphere Wellbeing CIC",
+  title: "Book a Consultation",
   description: "Book a confidential online wellbeing session with ThrivSphere. Reach out in confidence and we'll be in touch.",
 };
 
 const steps = [
   { icon: "chat", title: "Reach out", text: "Complete the confidential form below. Share only what feels comfortable." },
-  { icon: "users", title: "We match you", text: "Our Client Care Specialist reviews your request and finds the right support." },
-  { icon: "heart", title: "Your first session", text: "A paid clinical consultation to understand your needs and goals — online, from anywhere." },
+  { icon: "users", title: "We match you", text: "We review your request and confirm the right support — or signpost you elsewhere if we are not the right fit." },
+  { icon: "heart", title: "Your first session", text: "An initial wellbeing consultation (£20) to understand your needs and goals — online, from anywhere." },
 ];
 
 export default function BookPage() {
   return (
     <PageShell
-      eyebrow="Book a Session"
+      eyebrow="Book a Consultation"
       watermark="Book"
       title="Take the first step, in confidence"
       intro="Finding the right fit matters. Tell us a little about what you're looking for and we'll be in touch to arrange your session — usually within two working days."
@@ -37,28 +39,13 @@ export default function BookPage() {
         ))}
       </div>
 
-      <div
-        style={{
-          background: "var(--navy)",
-          borderRadius: 14,
-          padding: "16px 22px",
-          color: "#e7eefa",
-          marginBottom: 26,
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          flexWrap: "wrap",
-        }}
-      >
-        <Icon name="shield" size={20} stroke="var(--gold)" />
-        <span style={{ fontSize: 14 }}>
-          <strong style={{ color: "#fff" }}>ThrivSphere is not a crisis service.</strong> In an emergency call{" "}
-          <strong style={{ color: "#fff" }}>999</strong>, or Samaritans on{" "}
-          <strong style={{ color: "#fff" }}>116 123</strong> (free, 24/7).
-        </span>
-      </div>
+      <NotCrisisNotice style={{ marginBottom: 26 }} />
 
       <BookingForm />
+
+      <div style={{ marginTop: 44 }}>
+        <ScopeOfPractice compact />
+      </div>
     </PageShell>
   );
 }

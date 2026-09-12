@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { PageShell } from "@/components/PageShell";
 import { Icon } from "@/components/icons";
 import { resources } from "@/data/site";
+import { SignpostList } from "@/components/SignpostList";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Resource Centre — ThrivSphere Wellbeing CIC",
+  title: "Resource Centre",
   description: "A digital wellbeing library of guides, exercises, articles and self-help resources to support your journey.",
 };
 
@@ -19,7 +21,7 @@ export default function ResourcesPage() {
     >
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 20 }} className="two-col">
         {resources.map((r) => (
-          <a key={r.slug} href={`/resources/${r.slug}`} className="tile" style={{ padding: 26, display: "flex", gap: 16 }}>
+          <Link key={r.slug} href={`/resources/${r.slug}`} className="tile" style={{ padding: 26, display: "flex", gap: 16 }}>
             <span className="tile-icon">
               <Icon name={r.icon} size={24} stroke="#fff" />
             </span>
@@ -36,18 +38,27 @@ export default function ResourcesPage() {
                 </span>
               </div>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
+
+      <h2 style={{ margin: "52px 0 6px", fontSize: 26, fontWeight: 800, color: "var(--navy)" }}>
+        Where else you can turn
+      </h2>
+      <p style={{ margin: "0 0 26px", fontSize: 15.5, lineHeight: 1.6, color: "var(--ink)", maxWidth: 700 }}>
+        ThrivSphere is a non-clinical service and is not an emergency or crisis service. If what you
+        need sits outside what we offer, these organisations can help.
+      </p>
+      <SignpostList />
 
       <div style={{ marginTop: 34, textAlign: "center", background: "linear-gradient(135deg,#f2f6ee,#e6efe1)", borderRadius: 18, padding: "34px 24px" }}>
         <h3 style={{ margin: "0 0 8px", fontSize: 21, color: "var(--navy)" }}>New resources every month</h3>
         <p style={{ margin: "0 auto 18px", maxWidth: 480, fontSize: 15, lineHeight: 1.55, color: "var(--ink)" }}>
           Join our free wellbeing newsletter and be first to receive new guides, exercises and webinar invitations.
         </p>
-        <a href="/#support" className="pill pill-gold" style={{ padding: "13px 26px", fontSize: 14.5 }}>
+        <Link href="/#support" className="pill pill-gold" style={{ padding: "13px 26px", fontSize: 14.5 }}>
           Join the newsletter <Icon name="arrow" size={16} />
-        </a>
+        </Link>
       </div>
     </PageShell>
   );

@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { PageShell } from "@/components/PageShell";
 import { Icon } from "@/components/icons";
 import { posts } from "@/data/site";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Blog — ThrivSphere Wellbeing CIC",
+  title: "Blog",
   description: "Wellbeing insights, gentle guidance and stories of resilience from the ThrivSphere community.",
 };
 
@@ -21,7 +22,7 @@ export default function BlogPage() {
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         {posts.map((p, i) => (
-          <a key={p.slug} href={`/blog/${p.slug}`} className="tile" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 10 }}>
+          <Link key={p.slug} href={`/blog/${p.slug}`} className="tile" style={{ padding: 28, display: "flex", flexDirection: "column", gap: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
               <span style={{ fontSize: 11.5, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: cat[i % cat.length], background: `${cat[i % cat.length]}18`, padding: "5px 11px", borderRadius: 50 }}>
                 {p.category}
@@ -33,7 +34,7 @@ export default function BlogPage() {
             <span className="tile-arrow" style={{ marginTop: 2 }}>
               Read article <Icon name="arrow" size={15} stroke="var(--teal-deep)" />
             </span>
-          </a>
+          </Link>
         ))}
       </div>
       <p style={{ marginTop: 26, textAlign: "center", fontSize: 13.5, color: "var(--navy-soft)" }}>
