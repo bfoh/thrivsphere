@@ -10,7 +10,9 @@
 export type EmailInput = {
   to: string;
   subject: string;
+  /** Always required. HTML is an enhancement, never the only version. */
   text: string;
+  html?: string;
   fromEmail: string;
   fromName?: string;
   replyTo?: string;
@@ -21,6 +23,7 @@ export type BrevoPayload = {
   to: { email: string }[];
   subject: string;
   textContent: string;
+  htmlContent?: string;
   replyTo?: { email: string };
 };
 
@@ -41,7 +44,11 @@ export function buildBrevoPayload(input: EmailInput): BrevoPayload {
       : { email: input.fromEmail },
     to: [{ email: input.to }],
     subject: input.subject,
+    // Text first and always present: some people read mail as text by choice,
+    // some by necessity, and a screen reader handles it far better than a
+    // table layout. HTML is added alongside, never instead.
     textContent: input.text,
+    ...(input.html ? { htmlContent: input.html } : {}),
     ...(input.replyTo ? { replyTo: { email: input.replyTo } } : {}),
   };
 }

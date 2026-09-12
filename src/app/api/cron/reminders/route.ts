@@ -2,7 +2,8 @@ import crypto from "node:crypto";
 import { and, eq, gte, lte } from "drizzle-orm";
 import { getDb } from "@/db";
 import { appointments, clients, remindersSent } from "@/db/schema";
-import { dueReminders, reminderContent, type ReminderKind } from "@/lib/reminders";
+import { dueReminders, type ReminderKind } from "@/lib/reminders";
+import { bookingConfirmation, reminder1h, reminder24h } from "@/lib/email-templates";
 import { sendEmail } from "@/lib/email";
 
 /**
@@ -90,8 +91,19 @@ export async function GET(request: Request) {
     const row = rows.find((r) => r.appointmentId === item.appointmentId);
     if (!row) continue;
 
-    const { subject, text } = reminderContent(item.kind, row.startsAt);
-    const result = await sendEmail({ to: row.email, subject, text });
+    const email =
+      item.kind === "booking_confirmation"
+        ? bookingConfirmation(row.startsAt)
+        : item.kind === "reminder_24h"
+          ? reminder24h(row.startsAt)
+          : reminder1h(row.startsAt);
+
+    const result = await sendEmail({
+      to: row.email,
+      subject: email.subject,
+      text: email.text,
+      html: email.html,
+    });
 
     if (result.ok) {
       // Recorded only after a successful send, so a provider outage means the

@@ -36,9 +36,18 @@ describe("buildBrevoPayload", () => {
     assert.deepEqual(Object.keys(p.to[0]), ["email"]);
   });
 
-  it("sends plain text only, never HTML", () => {
-    const p = buildBrevoPayload(base) as Record<string, unknown>;
-    assert.equal("htmlContent" in p, false);
+  it("omits htmlContent when no HTML is supplied", () => {
+    assert.equal("htmlContent" in buildBrevoPayload(base), false);
+  });
+
+  it("always sends a plain-text part, even alongside HTML", () => {
+    // This replaces an earlier rule that forbade HTML outright. Branded email
+    // is fine; sending *only* HTML is not — some people read mail as text by
+    // choice, some by necessity, and screen readers handle text far better.
+    const p = buildBrevoPayload({ ...base, html: "<p>Hello</p>" });
+    assert.equal(p.htmlContent, "<p>Hello</p>");
+    assert.equal(p.textContent, base.text);
+    assert.ok(p.textContent.length > 0, "a text alternative is mandatory");
   });
 
   it("carries no field beyond what Brevo needs", () => {

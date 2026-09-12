@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { brand } from "@/data/site";
 import type { EnquiryState } from "@/lib/enquiry-state";
 import { sendEmail } from "@/lib/email";
+import { enquiryNotification } from "@/lib/email-templates";
 
 const SERVICES = [
   "One-to-One Emotional Wellbeing Support",
@@ -81,22 +82,21 @@ export async function submitEnquiry(
     };
   }
 
+  const notification = enquiryNotification({
+    name,
+    email,
+    service: service || undefined,
+    phone: phone || undefined,
+    preferredTimes: preferred || undefined,
+    message: message || undefined,
+  });
+
   const result = await sendEmail({
     to: process.env.ENQUIRY_TO_EMAIL ?? brand.email,
     replyTo: email,
-    subject: `${preferred || phone ? "Booking request" : "Website enquiry"} — ${name}`,
-    text: [
-      `Name: ${name}`,
-      `Email: ${email}`,
-      `Service: ${service || "Not specified"}`,
-      `Phone: ${phone || "Not given"}`,
-      `Preferred times: ${preferred || "Not given"}`,
-      "",
-      "Message:",
-      message || "(no message)",
-      "",
-      `Received: ${new Date().toISOString()}`,
-    ].join("\n"),
+    subject: notification.subject,
+    text: notification.text,
+    html: notification.html,
   });
 
   // Never pretend an enquiry was sent. If it did not go, say so and give the

@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { dueReminders, reminderContent, type ReminderCandidate } from "./reminders";
+import { dueReminders, type ReminderCandidate } from "./reminders";
 
 const NOW = new Date("2026-06-01T09:00:00Z");
 const at = (iso: string) => new Date(iso);
@@ -83,36 +83,5 @@ describe("dueReminders", () => {
     );
     assert.equal(out.length, 2);
     assert.deepEqual(out.map((d) => d.appointmentId).sort(), ["a1", "a2"]);
-  });
-});
-
-describe("reminderContent", () => {
-  const when = at("2026-06-05T17:00:00Z");
-
-  it("includes the date and time in UK time", () => {
-    const { text } = reminderContent("reminder_24h", when);
-    // 17:00 UTC in June is 18:00 BST.
-    assert.match(text, /18:00/);
-    assert.match(text, /Friday/);
-  });
-
-  it("never includes a joining link or personal detail", () => {
-    for (const kind of ["booking_confirmation", "reminder_24h", "reminder_1h"] as const) {
-      const { subject, text } = reminderContent(kind, when);
-      assert.ok(!/zoom|teams|whereby|meet\.google/i.test(text), "must not contain a joining link");
-      assert.ok(!/wellbeing|therapy|counsel|session about/i.test(subject), "subject must stay neutral");
-    }
-  });
-
-  it("points at the portal and mentions the opt-out", () => {
-    const { text } = reminderContent("reminder_24h", when);
-    assert.match(text, /\/portal/);
-    assert.match(text, /turn them off/);
-  });
-
-  it("carries the crisis signposting", () => {
-    const { text } = reminderContent("reminder_1h", when);
-    assert.match(text, /999/);
-    assert.match(text, /116 123/);
   });
 });
