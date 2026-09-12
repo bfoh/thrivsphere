@@ -3,10 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { and, eq, isNull, ne } from "drizzle-orm";
 import { getDb } from "@/db";
-import { secureMessages } from "@/db/schema";
+import { clients, secureMessages } from "@/db/schema";
 import { getCurrentActor } from "@/lib/session";
 import { recordAudit } from "@/lib/audit";
 import { canAccessClient, isStaff } from "@/lib/authz";
+import { sendEmail } from "@/lib/email";
+import { secureMessageNotice } from "@/lib/email-templates";
+import { brand } from "@/data/site";
 import type { MessageState } from "@/lib/message-state";
 
 const MAX_LENGTH = 5000;
@@ -46,11 +49,55 @@ export async function sendSecureMessage(
     return { status: "error", message: "You do not have permission to do that." };
   }
 
-  await getDb().insert(secureMessages).values({
+  const db = getDb();
+
+  await db.insert(secureMessages).values({
     clientId,
     senderId: actor.userId,
     body,
   });
+
+  // Tell the other party a message is waiting. Without this the thread is only
+  // discovered by chance, which defeats the point of having it.
+  //
+  // Deliberately fire-and-forget in effect: a message that saved must not be
+  // reported as failed because the mail provider had a bad minute.
+  try {
+    if (isStaff(actor)) {
+      const [client] = await db
+        .select({ email: clients.email, notify: clients.emailRemindersEnabled })
+        .from(clients)
+        .where(eq(clients.id, clientId))
+        .limit(1);
+
+      // Honours the same preference as reminders. Someone who asked us not to
+      // email them about appointments has not agreed to be emailed about
+      // messages either — their reasons are the same reasons.
+      if (client?.email && client.notify) {
+        const notice = secureMessageNotice();
+        const sent = await sendEmail({
+          to: client.email,
+          subject: notice.subject,
+          text: notice.text,
+          html: notice.html,
+        });
+        if (!sent.ok) console.error("[messages] client notification not sent:", sent.reason);
+      }
+    } else {
+      // A client wrote to the service. Staff are told there is something to
+      // read, never what it says.
+      const notice = secureMessageNotice();
+      const sent = await sendEmail({
+        to: process.env.ENQUIRY_TO_EMAIL ?? brand.email,
+        subject: "A client has sent you a message",
+        text: notice.text,
+        html: notice.html,
+      });
+      if (!sent.ok) console.error("[messages] staff notification not sent:", sent.reason);
+    }
+  } catch (err) {
+    console.error("[messages] notification failed", err);
+  }
 
   await recordAudit({
     actorId: actor.userId,

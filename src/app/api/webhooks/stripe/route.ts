@@ -1,9 +1,11 @@
 import { eq } from "drizzle-orm";
 import { getDb } from "@/db";
-import { orders, packages } from "@/db/schema";
+import { clients, orders, packages } from "@/db/schema";
 import { verifyStripeSignature } from "@/lib/stripe-signature";
 import { amountMatches, packageExpiry, parseCheckoutMetadata, shouldFulfil } from "@/lib/fulfilment";
 import { recordAudit } from "@/lib/audit";
+import { sendEmail } from "@/lib/email";
+import { paymentReceipt } from "@/lib/email-templates";
 
 /**
  * Stripe fulfilment webhook.
@@ -140,6 +142,43 @@ export async function POST(request: Request) {
     subjectClientId: order.clientId,
     detail: `payment settled: ${parsed.value.planName}, ${parsed.value.sessions} session(s)`,
   });
+
+  /*
+   * Receipt.
+   *
+   * Sent after the sessions are credited, and deliberately after the point of
+   * no return: if the mail fails, the client has still been given what they
+   * paid for. Returning anything but a 2xx here would make Stripe retry the
+   * whole event, and the replay guard would then refuse to fulfil it again —
+   * so a failed receipt must never fail the request.
+   *
+   * Receipts are not subject to the reminder opt-out. Someone who has paid is
+   * entitled to a record of it.
+   */
+  try {
+    const [client] = await db
+      .select({ email: clients.email })
+      .from(clients)
+      .where(eq(clients.id, order.clientId))
+      .limit(1);
+
+    if (client?.email) {
+      const receipt = paymentReceipt(
+        parsed.value.planName,
+        order.amountPence,
+        parsed.value.sessions
+      );
+      const sent = await sendEmail({
+        to: client.email,
+        subject: receipt.subject,
+        text: receipt.text,
+        html: receipt.html,
+      });
+      if (!sent.ok) console.error("[stripe] receipt not sent:", sent.reason, orderId);
+    }
+  } catch (err) {
+    console.error("[stripe] receipt failed", orderId, err);
+  }
 
   return new Response("Fulfilled", { status: 200 });
 }
