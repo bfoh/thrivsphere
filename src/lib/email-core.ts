@@ -27,10 +27,19 @@ export async function sendEmail(params: {
   text: string;
   html?: string;
   replyTo?: string;
+  /**
+   * Send without the service's name in the sender line.
+   *
+   * The inbox list shows the sender before anything is opened, so a message
+   * meant to be discreet gives itself away there first. Used for reminders.
+   */
+  discreet?: boolean;
 }): Promise<SendResult> {
   const apiKey = process.env.BREVO_API_KEY;
   const fromEmail = process.env.EMAIL_FROM_ADDRESS;
-  const fromName = process.env.EMAIL_FROM_NAME ?? brand.name;
+  const fromName = params.discreet
+    ? (process.env.EMAIL_FROM_NAME_DISCREET ?? "Appointments")
+    : (process.env.EMAIL_FROM_NAME ?? brand.name);
 
   if (!apiKey || !fromEmail) {
     return { ok: false, reason: "email provider not configured" };

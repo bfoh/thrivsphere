@@ -48,6 +48,8 @@ export function buildBrevoPayload(input: EmailInput): BrevoPayload {
     // some by necessity, and a screen reader handles it far better than a
     // table layout. HTML is added alongside, never instead.
     textContent: input.text,
+    // An empty string is treated as no HTML, so a deliberately plain
+    // message cannot accidentally ship an empty HTML part alongside it.
     ...(input.html ? { htmlContent: input.html } : {}),
     ...(input.replyTo ? { replyTo: { email: input.replyTo } } : {}),
   };

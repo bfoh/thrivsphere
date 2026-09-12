@@ -21,7 +21,11 @@ const isProtectedRoute = createRouteMatcher([
 
 export const proxy = clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
-    await auth.protect();
+    // `signInUrl` keeps people on thrivsphere.org. Without it Clerk falls back
+    // to its own hosted page on a .accounts.dev domain carrying whatever the
+    // application is called in the Clerk dashboard — which, for someone who
+    // just clicked a link in an appointment email, looks like phishing.
+    await auth.protect({ unauthenticatedUrl: new URL("/sign-in", req.url).toString() });
   }
 });
 
