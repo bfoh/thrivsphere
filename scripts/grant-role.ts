@@ -17,10 +17,13 @@ const ROLES = ["client", "practitioner", "supervisor", "admin"] as const;
 type RoleName = (typeof ROLES)[number];
 
 async function main() {
-  const [email, role] = process.argv.slice(2);
+  const [identifier, role] = process.argv.slice(2);
+  // Accept an authId directly, so an ambiguous email can still be resolved.
+  const byAuthId = identifier?.startsWith("user_");
+  const email = identifier;
 
-  if (!email || !role) {
-    console.error("Usage: grant-role.ts <email> <role>");
+  if (!identifier || !role) {
+    console.error("Usage: grant-role.ts <email|authId> <role>");
     console.error(`Roles: ${ROLES.join(" | ")}`);
     process.exit(1);
   }
@@ -30,14 +33,35 @@ async function main() {
   }
 
   const db = getDb();
-  const [existing] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  const matches = byAuthId
+    ? await db.select().from(users).where(eq(users.authId, identifier))
+    : await db.select().from(users).where(eq(users.email, email));
 
-  if (!existing) {
+  if (matches.length === 0) {
     console.error(
       `No user with email ${email}. They must sign in once first so the account exists.`
     );
     process.exit(1);
   }
+
+  /*
+   * Email is not unique — only authId is. The same person signing up again
+   * against a new identity provider instance produces a second row, and
+   * picking one arbitrarily could grant staff access to a dead account while
+   * leaving the live one as a client. Refuse and make the choice explicit.
+   */
+  if (matches.length > 1) {
+    console.error(`${matches.length} accounts share the email ${email}:\n`);
+    for (const m of matches) {
+      console.error(`  authId: ${m.authId}`);
+      console.error(`    role: ${m.role}  created: ${m.createdAt.toISOString()}\n`);
+    }
+    console.error("Re-run with the authId instead of the email:");
+    console.error(`  grant-role.ts <authId> ${role}`);
+    process.exit(1);
+  }
+
+  const existing = matches[0];
 
   const [updated] = await db
     .update(users)
