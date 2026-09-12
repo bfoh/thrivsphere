@@ -6,9 +6,10 @@ import { getCurrentActor } from "@/lib/session";
 import { getOnboardingState } from "@/lib/onboarding";
 import { requireClientAccess } from "@/lib/guard";
 import { getDb } from "@/db";
-import { appointments, packages } from "@/db/schema";
+import { appointments, clients, packages } from "@/db/schema";
 import { Icon } from "@/components/icons";
 import { NotCrisisNotice } from "@/components/NotCrisisNotice";
+import { ReminderToggle } from "@/components/portal/ReminderToggle";
 
 export const metadata: Metadata = {
   title: "Your account",
@@ -27,7 +28,7 @@ export default async function PortalPage() {
   await requireClientAccess(state.clientId, { entity: "portal_dashboard", action: "view" });
 
   const db = getDb();
-  const [upcoming, balances] = await Promise.all([
+  const [upcoming, balances, me] = await Promise.all([
     db
       .select()
       .from(appointments)
@@ -35,6 +36,11 @@ export default async function PortalPage() {
       .orderBy(desc(appointments.startsAt))
       .limit(5),
     db.select().from(packages).where(eq(packages.clientId, state.clientId)),
+    db
+      .select({ emailRemindersEnabled: clients.emailRemindersEnabled })
+      .from(clients)
+      .where(eq(clients.id, state.clientId))
+      .limit(1),
   ]);
 
   const remaining = balances
@@ -94,6 +100,10 @@ export default async function PortalPage() {
             </ul>
           )}
         </div>
+      </div>
+
+      <div style={{ marginTop: 18 }}>
+        <ReminderToggle enabled={me[0]?.emailRemindersEnabled ?? true} />
       </div>
 
       <NotCrisisNotice style={{ marginTop: 26 }} />

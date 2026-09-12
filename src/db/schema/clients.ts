@@ -59,6 +59,14 @@ export const clients = pgTable(
     phone: text("phone"),
     /** Whether it is safe to leave a voicemail or send a text. Domestic abuse matters. */
     safeToContactByPhone: boolean("safe_to_contact_by_phone").notNull().default(false),
+    /**
+     * Appointment reminders by email.
+     *
+     * An email from a wellbeing service is a disclosure in itself to anyone
+     * else reading that inbox, however neutrally it is worded. The client
+     * controls this from their own portal.
+     */
+    emailRemindersEnabled: boolean("email_reminders_enabled").notNull().default(true),
     contactNotes: text("contact_notes"),
 
     /** Kept for safeguarding escalation, not for marketing. */

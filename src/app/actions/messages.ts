@@ -112,3 +112,31 @@ export async function getConversation(clientId: string) {
     fromStaff: isStaff(actor) ? m.senderId === actor.userId : m.senderId !== actor.userId,
   }));
 }
+
+/**
+ * Turn appointment reminder emails on or off.
+ *
+ * The client's own decision, made in their own account. For someone whose
+ * inbox may be monitored, an email from a wellbeing service is a disclosure
+ * however carefully it is worded.
+ */
+export async function setEmailReminders(enabled: boolean): Promise<void> {
+  const actor = await getCurrentActor();
+  if (!actor?.clientId) return;
+
+  const { clients } = await import("@/db/schema");
+  await getDb()
+    .update(clients)
+    .set({ emailRemindersEnabled: enabled, updatedAt: new Date() })
+    .where(eq(clients.id, actor.clientId));
+
+  await recordAudit({
+    actorId: actor.userId,
+    action: "update",
+    entity: "clients",
+    subjectClientId: actor.clientId,
+    detail: `email reminders ${enabled ? "enabled" : "disabled"} by the client`,
+  });
+
+  revalidatePath("/portal");
+}
