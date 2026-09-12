@@ -3,7 +3,8 @@ import { CrisisBar } from "./CrisisBar";
 import { SiteFooter } from "./FooterBar";
 import { PageWatermark } from "./PageWatermark";
 import { MobileMenu } from "./MobileMenu";
-import { Logo, Icon } from "./icons";
+import { Logo } from "./icons";
+import { AccountNavLink } from "./AccountNavLink";
 import { nav } from "@/data/site";
 import Link from "next/link";
 
@@ -68,9 +69,7 @@ export function PageShell({
               {it.label}
             </Link>
           ))}
-          <Link href="/book" className="pill pill-gold nav-cta" style={{ padding: "9px 18px", fontSize: 13 }}>
-            Book a Consultation <Icon name="arrow" size={16} />
-          </Link>
+          <AccountNavLink className="nav-cta" />
           <MobileMenu />
         </nav>
       </header>

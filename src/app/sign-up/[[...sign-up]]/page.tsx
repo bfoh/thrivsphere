@@ -13,7 +13,9 @@ export default function Page() {
       title="Create your ThrivSphere account"
       intro="You'll confirm you're 18 or over and read our consent and confidentiality policies before your first session."
     >
-      <SignUp />
+      {/* Straight into registration — the 18+ gate and consent come
+          before anything else, and /portal routes them there. */}
+      <SignUp forceRedirectUrl="/portal" signInUrl="/sign-in" />
     </AuthShell>
   );
 }

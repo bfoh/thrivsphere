@@ -13,7 +13,7 @@ export default function Page() {
       title="Sign in to ThrivSphere"
       intro="Your sessions, appointments and messages live here. Nothing personal is ever sent by ordinary email."
     >
-      <SignIn />
+      <SignIn forceRedirectUrl="/portal" signUpUrl="/sign-up" />
     </AuthShell>
   );
 }

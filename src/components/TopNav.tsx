@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./icons";
-import { PillButton } from "./PillButton";
 import { MobileMenu } from "./MobileMenu";
+import { AccountNavLink } from "./AccountNavLink";
 import { nav } from "@/data/site";
 
 /**
@@ -57,11 +57,7 @@ export function TopNav() {
             </Link>
           );
         })}
-        <span className="nav-cta">
-          <PillButton variant="gold" size="sm" href="/book" icon="arrow">
-            Book a Consultation
-          </PillButton>
-        </span>
+        <AccountNavLink className="nav-cta" />
         <MobileMenu />
       </nav>
     </header>
