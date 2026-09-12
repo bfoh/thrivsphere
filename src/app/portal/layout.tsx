@@ -39,6 +39,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             {[
               { label: "Overview", href: "/portal" },
               { label: "Book", href: "/portal/book" },
+              { label: "Buy sessions", href: "/portal/purchase" },
               { label: "Messages", href: "/portal/messages" },
               { label: "Documents", href: "/portal/documents" },
             ].map((n) => (
