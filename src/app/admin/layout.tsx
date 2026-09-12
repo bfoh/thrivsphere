@@ -13,6 +13,8 @@ import { Logo } from "@/components/icons";
 const NAV = [
   { label: "Dashboard", href: "/admin" },
   { label: "Clients", href: "/admin/clients" },
+  { label: "Appointments", href: "/admin/appointments" },
+  { label: "Availability", href: "/admin/availability" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
