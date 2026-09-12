@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { brand } from "@/data/site";
 import type { EnquiryState } from "@/lib/enquiry-state";
+import { sendEmail } from "@/lib/email";
 
 const SERVICES = [
   "One-to-One Emotional Wellbeing Support",
@@ -80,51 +81,31 @@ export async function submitEnquiry(
     };
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.ENQUIRY_TO_EMAIL ?? brand.email;
-  const from = process.env.ENQUIRY_FROM_EMAIL;
+  const result = await sendEmail({
+    to: process.env.ENQUIRY_TO_EMAIL ?? brand.email,
+    replyTo: email,
+    subject: `${preferred || phone ? "Booking request" : "Website enquiry"} — ${name}`,
+    text: [
+      `Name: ${name}`,
+      `Email: ${email}`,
+      `Service: ${service || "Not specified"}`,
+      `Phone: ${phone || "Not given"}`,
+      `Preferred times: ${preferred || "Not given"}`,
+      "",
+      "Message:",
+      message || "(no message)",
+      "",
+      `Received: ${new Date().toISOString()}`,
+    ].join("\n"),
+  });
 
-  // Never pretend an enquiry was sent. If the mail provider is not configured,
-  // say so and give the person a route that works.
-  if (!apiKey || !from) {
-    console.error("[enquiry] RESEND_API_KEY or ENQUIRY_FROM_EMAIL is not set — enquiry not sent.");
+  // Never pretend an enquiry was sent. If it did not go, say so and give the
+  // person a route that works rather than losing their message silently.
+  if (!result.ok) {
+    console.error("[enquiry] not sent:", result.reason);
     return {
       status: "error",
       message: `We couldn't send your message just now. Please email us directly at ${brand.email} and we'll reply as soon as we can.`,
-    };
-  }
-
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [to],
-      reply_to: email,
-      subject: `${preferred || phone ? "Booking request" : "Website enquiry"} — ${name}`,
-      text: [
-        `Name: ${name}`,
-        `Email: ${email}`,
-        `Service: ${service || "Not specified"}`,
-        `Phone: ${phone || "Not given"}`,
-        `Preferred times: ${preferred || "Not given"}`,
-        "",
-        "Message:",
-        message || "(no message)",
-        "",
-        `Received: ${new Date().toISOString()}`,
-      ].join("\n"),
-    }),
-  });
-
-  if (!res.ok) {
-    console.error("[enquiry] Resend responded", res.status, await res.text().catch(() => ""));
-    return {
-      status: "error",
-      message: `We couldn't send your message just now. Please email us directly at ${brand.email}.`,
     };
   }
 
