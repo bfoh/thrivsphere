@@ -81,7 +81,27 @@ export default function RootLayout({
         <ClerkProvider
           telemetry={false}
           localization={clerkLocalization}
-          appearance={{ variables: { colorPrimary: "#3d8a8a", borderRadius: "0.625rem" } }}
+          appearance={{
+            variables: { colorPrimary: "#3d8a8a", borderRadius: "0.625rem" },
+            /*
+             * Social sign-in is hidden until it is actually configured.
+             *
+             * The production instance was cloned from development, which had
+             * Google enabled on Clerk's shared credentials. Those do not work
+             * in production: clicking the button sends the person to a Google
+             * error page reading "Missing required parameter: client_id",
+             * with no way back. A broken button on a sign-in page is worse
+             * than no button.
+             *
+             * This hides it in our own UI regardless of the dashboard, so the
+             * two cannot drift. Set NEXT_PUBLIC_ENABLE_SOCIAL_SIGNIN=true once
+             * real Google credentials are in place.
+             */
+            elements:
+              process.env.NEXT_PUBLIC_ENABLE_SOCIAL_SIGNIN === "true"
+                ? undefined
+                : { socialButtons: { display: "none" }, dividerRow: { display: "none" } },
+          }}
         >
           {children}
           <CursorFX />
