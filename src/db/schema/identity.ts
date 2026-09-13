@@ -10,15 +10,16 @@ import {
 /**
  * Access levels.
  *
- * Only `client` and `admin` are used at launch. The rest exist now so that
- * adding practitioners and differentiated staff access later (brief §8) is a
- * data change rather than a migration of every access check.
+ * `founder` owns the service. Only a founder manages admins, and the last
+ * founder cannot be demoted or blocked — without that, any admin could lock
+ * the organisation out of its own system.
  */
 export const userRole = pgEnum("user_role", [
   "client",
   "practitioner",
   "supervisor",
   "admin",
+  "founder",
 ]);
 
 export const userStatus = pgEnum("user_status", ["active", "suspended", "deleted"]);
@@ -49,6 +50,7 @@ export const users = pgTable(
 
 export const auditAction = pgEnum("audit_action", [
   "view",
+  "logout",
   "create",
   "update",
   "delete",

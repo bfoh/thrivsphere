@@ -112,6 +112,7 @@ export function SiteFooter() {
             { l: "Blog", h: "/blog" },
             { l: "Contact Us", h: "/contact" },
             { l: "Book a Consultation", h: "/book" },
+            { l: "Sign in to your account", h: "/sign-in" },
           ].map((x) => (
             <Link key={x.l} href={x.h} style={footerLink}>
               {x.l}

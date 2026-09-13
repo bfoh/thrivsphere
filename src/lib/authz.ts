@@ -7,7 +7,7 @@
  * fetches or logs. `src/lib/guard.ts` does that part.
  */
 
-export type Role = "client" | "practitioner" | "supervisor" | "admin";
+export type Role = "client" | "practitioner" | "supervisor" | "admin" | "founder";
 
 /** Who is asking. Built by the session layer from the identity provider. */
 export type Actor = {
@@ -46,7 +46,17 @@ export type Capability =
   | "enquiry:manage"
   | "catalogue:manage"
   | "report:read"
-  | "audit:read";
+  | "audit:read"
+  // Founder-only: running the organisation rather than delivering the service.
+  | "staff:read"
+  | "staff:manage"
+  | "role:assign"
+  | "revenue:read"
+  | "analytics:read"
+  | "hr:read"
+  | "hr:manage"
+  | "accounting:read"
+  | "accounting:manage";
 
 const CLIENT_CAPS: Capability[] = [
   "client:read:own",
@@ -89,11 +99,33 @@ const ADMIN_CAPS: Capability[] = [
   "audit:read",
 ];
 
+/**
+ * The founder owns the service: everything an admin can do, plus the things
+ * that decide who else gets in and how the organisation is run.
+ *
+ * Separating this from `admin` is what makes it possible to give someone full
+ * operational access — every client record, every payment — without also
+ * handing them the ability to remove the founder or change their own role.
+ */
+const FOUNDER_CAPS: Capability[] = [
+  ...ADMIN_CAPS,
+  "staff:read",
+  "staff:manage",
+  "role:assign",
+  "revenue:read",
+  "analytics:read",
+  "hr:read",
+  "hr:manage",
+  "accounting:read",
+  "accounting:manage",
+];
+
 const CAPABILITIES: Record<Role, Capability[]> = {
   client: CLIENT_CAPS,
   practitioner: PRACTITIONER_CAPS,
   supervisor: SUPERVISOR_CAPS,
   admin: ADMIN_CAPS,
+  founder: FOUNDER_CAPS,
 };
 
 /**
@@ -123,13 +155,15 @@ export function canAccessClient(actor: Actor | null, clientId: string): boolean 
   return can(actor, "client:read:any");
 }
 
+/** Roles that belong in the back office rather than the client portal. */
+export const STAFF_ROLES: Role[] = ["practitioner", "supervisor", "admin", "founder"];
+
 export function isStaff(actor: Actor | null): boolean {
-  return (
-    !!actor &&
-    actor.status === "active" &&
-    (actor.role === "practitioner" || actor.role === "supervisor" || actor.role === "admin")
-  );
+  return !!actor && actor.status === "active" && STAFF_ROLES.includes(actor.role);
 }
+
+/** Roles only a founder may grant or modify. */
+export const PRIVILEGED_ROLES: Role[] = ["admin", "founder"];
 
 /** Thrown by the guard; mapped to 403 at the route boundary. */
 export class ForbiddenError extends Error {

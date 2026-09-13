@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       // Reserved for the Stage 2 client portal and admin area — client records
       // must never be crawled.
-      disallow: ["/admin", "/portal", "/api"],
+      disallow: ["/admin", "/portal", "/api", "/sign-in", "/sign-up"],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };

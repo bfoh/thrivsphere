@@ -87,6 +87,14 @@ export default function PricingPage() {
 
       <NotCrisisNotice style={{ marginTop: 34 }} />
 
+      <p style={{ margin: "22px 0 0", fontSize: 14.5, color: "var(--navy-soft)", textAlign: "center" }}>
+        Already a client?{" "}
+        <Link href="/sign-in" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
+          Sign in
+        </Link>{" "}
+        to buy sessions from your account.
+      </p>
+
       <h2 style={{ margin: "56px 0 20px", fontSize: 28, color: "var(--navy)", fontWeight: 800 }}>
         Frequently asked questions
       </h2>

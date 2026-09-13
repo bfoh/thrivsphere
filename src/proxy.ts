@@ -19,8 +19,17 @@ const isProtectedRoute = createRouteMatcher([
   "/api/portal(.*)",
 ]);
 
+/**
+ * Pages under a protected prefix that must stay public.
+ *
+ * /admin/login is the staff sign-in form. Protecting it would require someone
+ * to be signed in before they could sign in — and the redirect would send them
+ * to the client entrance instead, which is the opposite of the point.
+ */
+const isPublicWithinProtected = createRouteMatcher(["/admin/login"]);
+
 export const proxy = clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
+  if (isProtectedRoute(req) && !isPublicWithinProtected(req)) {
     // `signInUrl` keeps people on thrivsphere.org. Without it Clerk falls back
     // to its own hosted page on a .accounts.dev domain carrying whatever the
     // application is called in the Clerk dashboard — which, for someone who

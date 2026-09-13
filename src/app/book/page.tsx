@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
 import { BookingForm } from "@/components/BookingForm";
 import { Icon } from "@/components/icons";
@@ -40,6 +41,14 @@ export default function BookPage() {
       </div>
 
       <NotCrisisNotice style={{ marginBottom: 26 }} />
+
+      <p style={{ margin: "0 0 20px", fontSize: 14.5, color: "var(--navy-soft)" }}>
+        Already have an account?{" "}
+        <Link href="/sign-in" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
+          Sign in
+        </Link>{" "}
+        to book from your account.
+      </p>
 
       <BookingForm />
 
