@@ -2,6 +2,13 @@
 
 Endpoint: `POST https://thrivsphere.org/api/webhooks/clerk`
 
+**Registered on the production instance (`ins_3JFN1yqK9s2LrSclSjhqYsihgMq`) on
+13 September 2026** and verified end to end: a real sign-in and sign-out
+produced a matching `login`/`logout` pair in the activity log, and forged
+requests — tampered body, replay outside the tolerance window, wrong secret, no
+headers — were all refused with 400 and logged as `permission_denied`. Re-run
+`scripts/probe-webhook.ts` to check the door again after any change.
+
 It does two things:
 
 - writes **sign-in and sign-out** entries to the activity log, so the log has a
@@ -46,6 +53,13 @@ hand from `/admin/staff`.
    correctly configured endpoint answers `200`; a wrong or missing secret
    answers `400` and writes a `permission_denied` row to the activity log,
    which is the intended behaviour and a useful confirmation in itself.
+
+## Rotating the secret
+
+Clerk → Webhooks → the endpoint → **Signing Secret** → roll it. Then
+`vercel env rm CLERK_WEBHOOK_SECRET production`, add the new value, update
+`.env.local`, and redeploy. There is a short window during the swap where
+deliveries are refused; Svix retries them, so nothing is lost.
 
 Repeat this for the development instance if session logging is wanted there
 too. Webhook endpoints belong to an instance, so the production secret is not
