@@ -84,6 +84,19 @@ export function buildBlobPath(clientId: string, filename: string, unique: string
   return `clients/${safeId}/${safeUnique}${ext ? `.${ext}` : ""}`;
 }
 
+/**
+ * Storage path for an expense receipt.
+ *
+ * Kept out of the `clients/` prefix so a receipt can never be served by the
+ * client-document route, which authorises by client record. A supplier invoice
+ * is the organisation's paperwork, not anyone's care record.
+ */
+export function buildReceiptPath(filename: string, unique: string): string {
+  const ext = extensionOf(filename);
+  const safeUnique = unique.replace(/[^a-zA-Z0-9-]/g, "");
+  return `expenses/${safeUnique}${ext ? `.${ext}` : ""}`;
+}
+
 /** Filename safe to show in a UI or a Content-Disposition header. */
 export function sanitiseFilename(filename: string): string {
   return (

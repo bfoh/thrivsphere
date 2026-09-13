@@ -1,5 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { ADMIN_NAV, navFor } from "./admin-nav";
 import { can, type Actor, type Role } from "./authz";
 
@@ -67,5 +69,16 @@ describe("ADMIN_NAV", () => {
   it("separates running the organisation from delivering the service", () => {
     const org = ADMIN_NAV.filter((i) => i.group === "organisation").map((i) => i.label);
     assert.deepEqual(org, ["Staff", "Activity", "Revenue", "HR", "Accounting"]);
+  });
+
+  it("every destination is a page that exists", () => {
+    // Staff, Activity, Revenue, HR and Accounting were menu entries before
+    // they were pages. A link to a 404 is worse than no link: it reads as the
+    // service being broken rather than the feature not being there yet.
+    for (const item of ADMIN_NAV) {
+      const route = item.href === "/admin" ? "" : item.href.replace("/admin/", "");
+      const file = join(process.cwd(), "src/app/admin/(dashboard)", route, "page.tsx");
+      assert.ok(existsSync(file), `no page for ${item.href} (looked for ${file})`);
+    }
   });
 });

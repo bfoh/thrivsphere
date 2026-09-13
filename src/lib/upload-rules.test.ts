@@ -1,6 +1,12 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { buildBlobPath, checkUpload, sanitiseFilename, MAX_UPLOAD_BYTES } from "./upload-rules";
+import {
+  buildBlobPath,
+  buildReceiptPath,
+  checkUpload,
+  sanitiseFilename,
+  MAX_UPLOAD_BYTES,
+} from "./upload-rules";
 
 const pdf = { name: "report.pdf", type: "application/pdf", size: 1000 };
 
@@ -88,5 +94,18 @@ describe("sanitiseFilename", () => {
 
   it("truncates a very long name", () => {
     assert.ok(sanitiseFilename("a".repeat(500)).length <= 200);
+  });
+});
+
+describe("buildReceiptPath", () => {
+  it("namespaces receipts away from client documents", () => {
+    const path = buildReceiptPath("invoice.pdf", "abc-123");
+    assert.equal(path, "expenses/abc-123.pdf");
+    assert.ok(!path.startsWith("clients/"));
+  });
+
+  it("does not let a filename escape the prefix", () => {
+    assert.equal(buildReceiptPath("../../etc/passwd", "a/../b"), "expenses/ab");
+    assert.ok(!buildReceiptPath("x.pdf", "../escape").includes(".."));
   });
 });
