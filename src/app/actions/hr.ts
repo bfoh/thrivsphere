@@ -35,9 +35,8 @@ export async function saveStaffProfile(
 ): Promise<HrFormState> {
   const userId = str(formData, "userId");
 
-  let actor;
   try {
-    actor = await requireCapability("hr:manage", {
+    await requireCapability("hr:manage", {
       entity: "staff_profiles",
       entityId: userId,
       action: "update",

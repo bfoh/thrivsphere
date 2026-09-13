@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { desc, eq, ne } from "drizzle-orm";
+import { desc, ne } from "drizzle-orm";
 import { getDb } from "@/db";
 import { absences, staffProfiles, trainingRecords, users } from "@/db/schema";
 import { requireCapability } from "@/lib/guard";
