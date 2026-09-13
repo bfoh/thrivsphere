@@ -50,9 +50,12 @@ export async function getCurrentActor(): Promise<Actor | null> {
 /**
  * Create the local user row the first time someone signs in.
  *
- * Always `client`. Staff access is never granted automatically — an account is
- * promoted deliberately via `scripts/grant-role.ts`, so there is no path where
- * signing up gets you near a client record.
+ * Always `client`. Staff access is never granted automatically — a founder
+ * grants it deliberately from /admin/staff, which writes an audit row, so
+ * there is no path where signing up gets you near a client record.
+ *
+ * Invited colleagues do not arrive this way: the Clerk webhook creates their
+ * row with the role the invitation carried, before they reach a page.
  */
 async function provisionUser(authId: string) {
   const clerkUser = await currentUser();

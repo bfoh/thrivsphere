@@ -6,11 +6,12 @@ import { auditLog } from "@/db/schema";
 
 export type AuditAction =
   | "view"
+  | "login"
+  | "logout"
   | "create"
   | "update"
   | "delete"
   | "export"
-  | "login"
   | "permission_denied";
 
 export type AuditEntry = {
