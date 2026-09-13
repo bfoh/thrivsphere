@@ -81,3 +81,40 @@ test("falls back to the first address when no primary is marked", () => {
   });
   assert.equal(action.kind === "user_created" && action.email, "only@example.com");
 });
+
+test("user.updated carries the new email and name", () => {
+  const action = interpretClerkEvent({
+    type: "user.updated",
+    data: {
+      id: "user_7",
+      first_name: "Ada",
+      last_name: "Nwosu",
+      primary_email_address_id: "idn_9",
+      email_addresses: [{ id: "idn_9", email_address: "Ada.New@thrivsphere.org" }],
+    },
+  });
+  assert.deepEqual(action, {
+    kind: "user_updated",
+    authId: "user_7",
+    email: "ada.new@thrivsphere.org",
+    displayName: "Ada Nwosu",
+  });
+});
+
+test("user.updated never carries a role, whatever the metadata says", () => {
+  const action = interpretClerkEvent({
+    type: "user.updated",
+    data: {
+      id: "user_8",
+      email_addresses: [{ id: "idn_1", email_address: "someone@example.com" }],
+      public_metadata: { thrivsphereRole: "founder" },
+    },
+  });
+  assert.equal(action.kind, "user_updated");
+  assert.ok(!("role" in action), "a role must not travel on an update");
+});
+
+test("user.updated with no email is ignored rather than blanking the address on file", () => {
+  const action = interpretClerkEvent({ type: "user.updated", data: { id: "user_9" } });
+  assert.equal(action.kind, "ignored");
+});

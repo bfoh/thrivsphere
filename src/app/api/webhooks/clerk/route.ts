@@ -116,6 +116,31 @@ export async function POST(request: Request) {
     return new Response("Unknown account", { status: 200 });
   }
 
+  if (action.kind === "user_updated") {
+    /*
+     * Only what the person actually changed about themselves. Their role and
+     * status are ours, not Clerk's, and are left alone — a blocked colleague
+     * editing their own name must not quietly come back as active.
+     */
+    const changed = user.email !== action.email;
+    await db
+      .update(users)
+      .set({ email: action.email, displayName: action.displayName, updatedAt: new Date() })
+      .where(eq(users.id, user.id));
+
+    if (changed) {
+      await recordAudit({
+        actorId: user.id,
+        action: "update",
+        entity: "users",
+        entityId: user.id,
+        detail: `email changed from ${user.email} to ${action.email}`,
+      });
+    }
+
+    return new Response("Updated", { status: 200 });
+  }
+
   if (action.kind === "login") {
     await db.update(users).set({ lastSeenAt: new Date() }).where(eq(users.id, user.id));
     await recordAudit({

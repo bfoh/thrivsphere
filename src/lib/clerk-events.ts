@@ -24,6 +24,7 @@ export type ClerkAction =
   | { kind: "login"; authId: string; sessionId: string | null }
   | { kind: "logout"; authId: string; sessionId: string | null }
   | { kind: "user_created"; authId: string; email: string; displayName: string | null; role: Role }
+  | { kind: "user_updated"; authId: string; email: string; displayName: string | null }
   | { kind: "user_deleted"; authId: string }
   | { kind: "ignored"; reason: string };
 
@@ -66,6 +67,23 @@ export function interpretClerkEvent(event: unknown): ClerkAction {
         displayName: displayName(data),
         role: roleFrom(data),
       };
+    }
+
+    /*
+     * The person changed their own details in Clerk.
+     *
+     * Email and name are copied across; the role deliberately is not, even
+     * though it sits in the same metadata. Roles belong to our `users` table
+     * precisely so that a privilege level cannot be changed from a third-party
+     * dashboard without an audit row — honouring it here would reopen exactly
+     * that hole. A role change goes through /admin/staff or it does not happen.
+     */
+    case "user.updated": {
+      const authId = asString(data.id);
+      if (!authId) return { kind: "ignored", reason: "user.updated without an id" };
+      const email = primaryEmail(data);
+      if (!email) return { kind: "ignored", reason: "user.updated without an email" };
+      return { kind: "user_updated", authId, email, displayName: displayName(data) };
     }
 
     case "user.deleted": {

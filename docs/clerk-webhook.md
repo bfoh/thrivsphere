@@ -7,7 +7,14 @@ It does two things:
 - writes **sign-in and sign-out** entries to the activity log, so the log has a
   beginning and an end rather than only showing what was opened;
 - applies the **role attached to a staff invitation** when the account is
-  created, so a new colleague never exists with permissions nobody chose.
+  created, so a new colleague never exists with permissions nobody chose;
+- keeps **name and email in step** when someone changes their own details in
+  Clerk, so invitations, receipts and reminders are not sent to a stale
+  address.
+
+`user.updated` deliberately does *not* apply a role, even though the role sits
+in the same metadata. Roles live in our `users` table precisely so a privilege
+level cannot be changed from a third-party dashboard without an audit row.
 
 Until it is registered, both are simply absent. Nothing else breaks: the
 endpoint refuses every unsigned request, and staff invitations still arrive —
@@ -25,6 +32,7 @@ hand from `/admin/staff`.
    - `session.removed`
    - `session.revoked`
    - `user.created`
+   - `user.updated`
    - `user.deleted`
 4. Create it, then copy the **Signing Secret** (`whsec_…`).
 5. Add it to Vercel and locally:
