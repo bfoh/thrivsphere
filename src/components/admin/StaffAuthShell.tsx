@@ -1,39 +1,21 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { SignIn } from "@clerk/nextjs";
 import { Logo } from "@/components/icons";
-import { getCurrentActor } from "@/lib/session";
-import { isStaff } from "@/lib/authz";
-
-export const metadata: Metadata = {
-  title: "Staff sign in",
-  robots: { index: false, follow: false },
-};
 
 /**
- * Staff entrance.
+ * The frame around the staff sign-in and join pages.
  *
- * Worth being clear about what this is: a separate **door**, not a separate
- * **lock**. It authenticates against the same provider as the client sign-in,
- * and knowing this URL grants nobody anything.
- *
- * What makes it more than cosmetic is the routing. A client who arrives here —
- * by a shared link, an old bookmark, or curiosity — is sent to their own portal
- * rather than shown an error or left staring at the back office they cannot
- * open. Staff go where they meant to go.
- *
- * No crisis bar here, unlike every client-facing page: this one is for people
+ * No crisis bar here, unlike every client-facing page: these are for people
  * delivering the service, not seeking it.
  */
-export default async function AdminLoginPage() {
-  const actor = await getCurrentActor();
-
-  if (actor) {
-    if (isStaff(actor)) redirect("/admin");
-    redirect("/portal");
-  }
-
+export function StaffAuthShell({
+  title,
+  intro,
+  children,
+}: {
+  title: string;
+  intro: string;
+  children: React.ReactNode;
+}) {
   return (
     <main
       style={{
@@ -59,14 +41,13 @@ export default async function AdminLoginPage() {
           letterSpacing: "-0.015em",
         }}
       >
-        Staff sign in
+        {title}
       </h1>
       <p style={{ margin: "0 0 30px", fontSize: 14.5, color: "#a9bcd4", textAlign: "center", maxWidth: 420, lineHeight: 1.6 }}>
-        For ThriveSphere staff. Everything you open in the back office is recorded
-        against your name.
+        {intro}
       </p>
 
-      <SignIn forceRedirectUrl="/admin" signUpUrl="/admin/login" />
+      {children}
 
       <p style={{ margin: "28px 0 0", fontSize: 13.5, color: "#a9bcd4", textAlign: "center", maxWidth: 420, lineHeight: 1.6 }}>
         Looking for your own appointments and messages?{" "}

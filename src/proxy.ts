@@ -22,11 +22,13 @@ const isProtectedRoute = createRouteMatcher([
 /**
  * Pages under a protected prefix that must stay public.
  *
- * /admin/login is the staff sign-in form. Protecting it would require someone
- * to be signed in before they could sign in — and the redirect would send them
- * to the client entrance instead, which is the opposite of the point.
+ * /admin/login is the staff sign-in form and /admin/join is where a staff
+ * invitation opens. Protecting them would require someone to be signed in
+ * before they could sign in — and the redirect would send them to the client
+ * entrance instead, which is the opposite of the point. Both include the paths
+ * beneath them, where Clerk shows the later steps.
  */
-const isPublicWithinProtected = createRouteMatcher(["/admin/login"]);
+const isPublicWithinProtected = createRouteMatcher(["/admin/login(.*)", "/admin/join(.*)"]);
 
 export const proxy = clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req) && !isPublicWithinProtected(req)) {

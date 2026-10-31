@@ -65,7 +65,7 @@ export function interpretClerkEvent(event: unknown): ClerkAction {
         authId,
         email: primaryEmail(data) ?? "",
         displayName: displayName(data),
-        role: roleFrom(data),
+        role: invitedRole(data.public_metadata),
       };
     }
 
@@ -122,9 +122,13 @@ function displayName(data: Json): string | null {
   return asString(data.username);
 }
 
-/** The role a founder attached to the invitation, if we recognise it. */
-function roleFrom(data: Json): Role {
-  const metadata = asObject(data.public_metadata);
-  const claimed = asString(metadata.thrivsphereRole);
+/**
+ * The role a founder attached to the invitation, if we recognise it.
+ *
+ * Read from the user's public metadata, which Clerk copies from the
+ * invitation and which only our server can write.
+ */
+export function invitedRole(publicMetadata: unknown): Role {
+  const claimed = asString(asObject(publicMetadata).thrivsphereRole);
   return claimed && (ROLES as string[]).includes(claimed) ? (claimed as Role) : "client";
 }

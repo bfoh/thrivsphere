@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { clients, users } from "@/db/schema";
 import type { Actor, Role } from "./authz";
+import { invitedRole } from "./clerk-events";
 
 /**
  * Resolve the signed-in person into an `Actor`.
@@ -50,12 +51,15 @@ export async function getCurrentActor(): Promise<Actor | null> {
 /**
  * Create the local user row the first time someone signs in.
  *
- * Always `client`. Staff access is never granted automatically — a founder
- * grants it deliberately from /admin/staff, which writes an audit row, so
+ * `client`, unless the account came from a staff invitation. Staff access is
+ * never granted automatically — a founder grants it deliberately from
+ * /admin/staff, by role change or invitation, and both write an audit row, so
  * there is no path where signing up gets you near a client record.
  *
- * Invited colleagues do not arrive this way: the Clerk webhook creates their
- * row with the role the invitation carried, before they reach a page.
+ * The Clerk webhook also creates invited colleagues' rows with the role their
+ * invitation carried, and records it. It can arrive after the new colleague's
+ * first page, so the role is read from the same invitation here too; without
+ * that they would start out as a client and land in the client portal.
  */
 async function provisionUser(authId: string) {
   const clerkUser = await currentUser();
@@ -71,7 +75,7 @@ async function provisionUser(authId: string) {
 
   const [created] = await getDb()
     .insert(users)
-    .values({ authId, email, displayName, role: "client", status: "active" })
+    .values({ authId, email, displayName, role: invitedRole(clerkUser.publicMetadata), status: "active" })
     .onConflictDoUpdate({
       target: users.authId,
       set: { email, lastSeenAt: new Date() },

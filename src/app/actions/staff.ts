@@ -84,7 +84,7 @@ export async function inviteStaffMember(
     email,
     role,
     invitedBy: actor.userId,
-    redirectUrl: `${site}/admin/login`,
+    redirectUrl: `${site}/admin/join`,
   });
 
   if (!result.ok) return { status: "error", message: `Invitation not sent: ${result.reason}` };
