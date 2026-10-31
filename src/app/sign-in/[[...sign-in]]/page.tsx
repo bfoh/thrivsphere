@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <AuthShell
-      title="Sign in to ThrivSphere"
+      title="Sign in to ThriveSphere"
       intro="Your sessions, appointments and messages live here. Nothing personal is ever sent by ordinary email."
     >
       <SignIn forceRedirectUrl="/portal" signUpUrl="/sign-up" />

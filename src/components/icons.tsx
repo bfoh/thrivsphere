@@ -144,19 +144,45 @@ export function Icon({ name, size = 24, stroke = "currentColor" }: IconProps & {
   }
 }
 
-/** Intrinsic size of the logo asset, used to keep the aspect ratio exact. */
-const LOGO_W = 900;
-const LOGO_H = 920;
+/** The two colours of the original wordmark. */
+const WORDMARK_PURPLE = "#5a2d82";
+const WORDMARK_TEAL = "#2f8a7e";
 
+/**
+ * The logo: the original emblem beside the name set as text.
+ *
+ * The full logo artwork has the old name and "CIC" drawn into it, which is not
+ * the business's legal identity, so the wordmark is rendered here instead. When
+ * a corrected master file arrives it can replace this one component.
+ */
 export function Logo({ height = 46, priority = false }: { height?: number; priority?: boolean }) {
   return (
-    <Image
-      src="/images/thrivsphere-logo.png"
-      alt="ThrivSphere Wellbeing CIC"
-      width={Math.round((height * LOGO_W) / LOGO_H)}
-      height={height}
-      priority={priority}
-      style={{ height, width: "auto", display: "block" }}
-    />
+    <span style={{ display: "inline-flex", alignItems: "center", gap: Math.round(height * 0.2) }}>
+      <Image
+        src="/images/emblem.png"
+        alt=""
+        width={height}
+        height={height}
+        priority={priority}
+        style={{ height, width: height, display: "block" }}
+      />
+      <span style={{ display: "flex", flexDirection: "column", lineHeight: 1, whiteSpace: "nowrap" }}>
+        <span style={{ fontSize: Math.round(height * 0.42), fontWeight: 800, letterSpacing: "-0.01em" }}>
+          <span style={{ color: WORDMARK_PURPLE }}>Thrive</span>
+          <span style={{ color: WORDMARK_TEAL }}>Sphere</span>
+        </span>
+        <span
+          style={{
+            marginTop: Math.round(height * 0.06),
+            fontSize: Math.max(8, Math.round(height * 0.19)),
+            fontWeight: 700,
+            letterSpacing: "0.24em",
+            color: "#b8860b",
+          }}
+        >
+          WELLBEING
+        </span>
+      </span>
+    </span>
   );
 }

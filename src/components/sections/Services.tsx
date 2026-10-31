@@ -84,7 +84,7 @@ export function Services() {
         >
           <strong style={{ color: "#fff" }}>Signposting &amp; safety.</strong> Where extra help is
           needed, we refer to trusted domestic abuse, crisis, housing and mental health services.
-          ThrivSphere does not provide legal advice, crisis or emergency services.
+          ThriveSphere does not provide legal advice, crisis or emergency services.
         </div>
       </div>
     </Section>

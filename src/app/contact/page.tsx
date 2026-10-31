@@ -9,7 +9,7 @@ import { brand } from "@/data/site";
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
-    "Get in touch with ThrivSphere Wellbeing CIC in confidence, or find emergency and specialist support if you need help right now.",
+    "Get in touch with ThriveSphere Wellbeing in confidence, or find emergency and specialist support if you need help right now.",
 };
 
 export default function ContactPage() {
@@ -68,7 +68,7 @@ export default function ContactPage() {
         Where else you can turn
       </h2>
       <p style={{ margin: "0 0 26px", fontSize: 15.5, lineHeight: 1.6, color: "var(--ink)", maxWidth: 700 }}>
-        If what you need sits outside what ThrivSphere offers, these organisations can help. We will
+        If what you need sits outside what ThriveSphere offers, these organisations can help. We will
         always help you find the right support — signposting is part of what we do.
       </p>
       <SignpostList />

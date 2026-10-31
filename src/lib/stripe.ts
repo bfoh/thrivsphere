@@ -9,7 +9,7 @@ import "server-only";
  * dependency out of the payment path and leaves the behaviour readable.
  *
  * Card details never reach this application — Checkout is hosted by Stripe, so
- * PCI scope stays outside ThrivSphere entirely.
+ * PCI scope stays outside ThriveSphere entirely.
  */
 const API = "https://api.stripe.com/v1";
 

@@ -1,13 +1,34 @@
 export const brand = {
-  name: "ThrivSphere Wellbeing CIC",
-  short: "ThrivSphere",
-  tagline: "Empowering Wellbeing. Building Resilience. Inspiring Hope.",
+  name: "ThriveSphere Wellbeing",
+  short: "ThriveSphere",
+  tagline: "Supporting Your Wellbeing. Strengthening Your Resilience.",
   email: "hello@thrivsphere.org",
-  location: "United Kingdom · Online Wellbeing Platform",
+  location: "United Kingdom · Online wellbeing support",
   /** One-line positioning. Non-clinical — see `scopeOfPractice` below. */
   positioning:
-    "Professional wellbeing support, education and signposting informed by extensive mental health experience.",
-  audienceLine: "Open to all adults aged 18+ — women and men.",
+    "Online non-clinical mental wellbeing support, psychoeducation, coping skills education, emotional resilience and personal wellbeing development.",
+  audienceLine: "For adults aged 18 years and above.",
+  /** Shown wherever booking is mentioned. Individual schedules are never published. */
+  availabilityLine:
+    "Flexible online appointments, including evenings and weekends, subject to availability.",
+};
+
+/**
+ * The legal entity behind the trading name.
+ *
+ * ThriveSphere Wellbeing is not a separately registered company, so the
+ * website must name the company that is — the trading disclosure rules expect
+ * its name, number and registered office on the site. The address was checked
+ * against Companies House on 31 October 2026.
+ */
+export const legal = {
+  companyName: "3G AND PAT HEALTHCARE LIMITED",
+  companyNumber: "11615975",
+  jurisdiction: "England and Wales",
+  registeredOffice: "9 Shapland, Tadpole Garden Village, Swindon, Wiltshire, SN25 2SD",
+  /** The owner's own wording for the footer. */
+  statement:
+    "ThriveSphere Wellbeing is a trading name of 3G AND PAT HEALTHCARE LIMITED. Registered in England and Wales. Company Registration Number: 11615975.",
 };
 
 /** Primary nav. Every item is a real route — the client's 7-page structure. */
@@ -22,12 +43,12 @@ export const nav: NavItem[] = [
 ];
 
 /**
- * Scope of practice — what ThrivSphere is and is not.
- * ThrivSphere is a non-clinical service: it does not assess, diagnose or treat.
+ * Scope of practice — what ThriveSphere is and is not.
+ * ThriveSphere is a non-clinical service: it does not assess, diagnose or treat.
  * Surfaced on About, Services and Book, and inside the Stage 2 intake flow.
  */
 export const scopeOfPractice = {
-  isTitle: "What ThrivSphere is",
+  isTitle: "What ThriveSphere is",
   is: [
     "A non-clinical wellbeing, education and support service",
     "Emotional wellbeing support, coaching and mindfulness",
@@ -35,7 +56,7 @@ export const scopeOfPractice = {
     "A confidential space to talk things through without judgement",
     "Signposting to the right specialist service when you need one",
   ],
-  isNotTitle: "What ThrivSphere is not",
+  isNotTitle: "What ThriveSphere is not",
   isNot: [
     "An emergency, crisis or out-of-hours service",
     "A clinical or medical service — we do not assess, diagnose or treat",
@@ -57,7 +78,7 @@ export const policyLinks = [
   { label: "Safeguarding Policy", href: "/safeguarding" },
   { label: "Domestic Abuse & Safe Disclosure", href: "/domestic-abuse" },
   { label: "Suicide, Self-Harm & Crisis", href: "/crisis" },
-  { label: "Payments & Cancellations", href: "/payments" },
+  { label: "Cancellation and Refunds", href: "/payments" },
   { label: "Complaints & Feedback", href: "/complaints" },
   { label: "Equality, Diversity & Inclusion", href: "/edi" },
   { label: "Accessibility Statement", href: "/accessibility" },
@@ -169,7 +190,7 @@ export const educationTopics = [
 ];
 
 export const programme = {
-  name: "ThrivSphere Wellbeing & Resilience Programme",
+  name: "ThriveSphere Wellbeing & Resilience Programme",
   aim: "To support adults aged 18+ — women and men — experiencing emotional distress, stress and anxiety, low mood, relationship difficulties, domestic abuse or life changes, through accessible, remote wellbeing support, education and signposting.",
   objectives: [
     "Improve emotional wellbeing",
@@ -205,9 +226,9 @@ export const founder = {
   name: "Patience Barning T",
   titles: ["Registered Mental Health Nurse (RMN)", "SCPHN · Occupational Health Nurse"],
   bio: [
-    "ThrivSphere Wellbeing CIC was founded by Patience Barning T, a Registered Mental Health Nurse and Specialist Community Public Health / Occupational Health Nurse with a deep commitment to emotional, mental and social wellbeing.",
-    "Drawing on years of professional and community experience, Patience created ThrivSphere as a safe, confidential and compassionate online space where adults can access wellbeing education, one-to-one support, coaching, mindfulness and peer connection — regardless of where they are.",
-    "ThrivSphere is a non-clinical service. It offers professional wellbeing support, education and signposting informed by extensive mental health experience — it does not provide clinical assessment, diagnosis or treatment.",
+    "ThriveSphere Wellbeing was founded by Patience Barning T, a Registered Mental Health Nurse and Specialist Community Public Health / Occupational Health Nurse with a deep commitment to emotional, mental and social wellbeing.",
+    "Drawing on years of professional and community experience, Patience created ThriveSphere as a safe, confidential and compassionate online space where adults can access wellbeing education, one-to-one support, coaching, mindfulness and peer connection — regardless of where they are.",
+    "ThriveSphere is a non-clinical service. It offers professional wellbeing support, education and signposting informed by extensive mental health experience — it does not provide clinical assessment, diagnosis or treatment.",
     "The vision is simple and powerful: that every adult navigating emotional distress, difficult relationships, isolation or life change can find a place to heal, grow and thrive.",
   ],
 };
@@ -360,7 +381,7 @@ export const resources: Resource[] = [
       "- Undermining your confidence or sense of reality",
       "## This is not your fault",
       "Coercive control is a form of abuse and, in the UK, it is a criminal offence. What you're experiencing is real, and support is available — confidentially and without judgement.",
-      "Coercive control affects people of every gender. If you are in immediate danger call 999. For confidential advice, the National Domestic Abuse Helpline is free, 24/7, on 0808 2000 247; men can also contact the Men's Advice Line on 0808 8010 327. ThrivSphere can walk alongside you and signpost specialist services.",
+      "Coercive control affects people of every gender. If you are in immediate danger call 999. For confidential advice, the National Domestic Abuse Helpline is free, 24/7, on 0808 2000 247; men can also contact the Men's Advice Line on 0808 8010 327. ThriveSphere can walk alongside you and signpost specialist services.",
     ],
   },
   {
@@ -535,18 +556,18 @@ export const posts: Post[] = [
 ];
 
 export const faqs = [
-  { q: "Who can access ThrivSphere?", a: "Any adult aged 18 or over — women and men. We ask everyone to confirm they are 18+ when registering. We do not currently work with under-18s." },
-  { q: "Is ThrivSphere a crisis service?", a: "No. We are a non-clinical wellbeing, education and support service. We do not provide crisis, emergency, out-of-hours or fitness-for-work assessments. In an emergency call 999, or Samaritans on 116 123 (free, 24/7)." },
-  { q: "Do you provide therapy, diagnosis or treatment?", a: "No. ThrivSphere offers professional wellbeing support, education and signposting informed by extensive mental health experience. We do not carry out clinical assessment, make diagnoses, or provide medical or psychological treatment. If that's what you need, we'll help you find it." },
+  { q: "Who can access ThriveSphere?", a: "Any adult aged 18 or over — women and men. We ask everyone to confirm they are 18+ when registering. We do not currently work with under-18s." },
+  { q: "Is ThriveSphere a crisis service?", a: "No. We are a non-clinical wellbeing, education and support service. We do not provide crisis, emergency, out-of-hours or fitness-for-work assessments. In an emergency call 999, or Samaritans on 116 123 (free, 24/7)." },
+  { q: "Do you provide therapy, diagnosis or treatment?", a: "No. ThriveSphere offers professional wellbeing support, education and signposting informed by extensive mental health experience. We do not carry out clinical assessment, make diagnoses, or provide medical or psychological treatment. If that's what you need, we'll help you find it." },
   { q: "What happens if my needs fall outside what you offer?", a: "We'll tell you honestly and help you find the right support — your GP, NHS mental health services, a domestic abuse service, safeguarding services or another specialist organisation. Signposting is part of what we do, not a sign that we've turned you away." },
   { q: "Are sessions confidential?", a: "Yes. Confidentiality is central to everything we do and is handled in line with UK GDPR and our Confidentiality Policy. There are limits: if we believe you or someone else is at risk of serious harm, we may need to share information to keep people safe. We'll always try to discuss this with you first." },
   { q: "Do I have to use my full name?", a: "To register and pay we need enough to identify you and keep safe records, but you're welcome to share only what feels comfortable in your sessions." },
-  { q: "Where are sessions held?", a: "All sessions are online via secure video, so you can access support from anywhere in the UK. Your joining link appears in your ThrivSphere account — we never send it by email." },
+  { q: "Where are sessions held?", a: "All sessions are online via secure video, so you can access support from anywhere in the UK. Your joining link appears in your ThriveSphere account — we never send it by email." },
 ];
 
 /**
  * Signposting directory — where we point people when their needs fall outside
- * ThrivSphere's scope. Rendered on Resources and Contact, and used inside the
+ * ThriveSphere's scope. Rendered on Resources and Contact, and used inside the
  * Book flow. In Stage 2 this seeds the `signposting_directory` table and powers
  * the admin referral picker so recorded referrals map to real organisations.
  */
@@ -610,7 +631,7 @@ export const signposts: Signpost[] = [
     name: "Your GP",
     category: "mental-health",
     detail:
-      "Your first route to NHS assessment, treatment and referral. ThrivSphere is not a substitute for your GP, and we'll often encourage you to speak to them.",
+      "Your first route to NHS assessment, treatment and referral. ThriveSphere is not a substitute for your GP, and we'll often encourage you to speak to them.",
   },
   {
     name: "NHS Talking Therapies",

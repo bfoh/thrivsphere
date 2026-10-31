@@ -22,34 +22,50 @@ export type Policy = {
   sections: PolicySection[];
 };
 
+import { legal } from "./site";
+
 const updated = "Last reviewed: July 2026";
 const V = "1.0.0";
 const FROM = "2026-07-01";
+
+/**
+ * The November 2026 revision: the legal identity, the services and prices in
+ * the owner's pre-launch checklist, and self-service cancellation. Every
+ * policy that changed carries this version so consent records show which
+ * wording someone actually agreed to.
+ */
+const revised = "Last reviewed: November 2026";
+const V2 = "1.1.0";
+const FROM2 = "2026-11-01";
+
+/** "ThriveSphere Wellbeing is a trading name of …", with the registered office. */
+const whoWeAre = `${legal.statement} Registered office: ${legal.registeredOffice}.`;
 
 export const policies: Record<string, Policy> = {
   privacy: {
     slug: "privacy",
     requiresConsent: true,
-    version: V,
-    effectiveFrom: FROM,
+    version: V2,
+    effectiveFrom: FROM2,
     audience: "public",
     title: "Privacy Policy",
     eyebrow: "Privacy · UK GDPR",
     intro:
-      "This policy explains how ThrivSphere Wellbeing CIC collects, uses and protects your personal information in line with UK GDPR and the Data Protection Act 2018.",
+      "This policy explains how ThriveSphere Wellbeing collects, uses and protects your personal information in line with UK GDPR and the Data Protection Act 2018.",
     sections: [
-      { heading: "Who we are", body: [`ThrivSphere Wellbeing CIC is a UK-registered Community Interest Company and the data controller for the information you provide. You can contact us at hello@thrivsphere.org. ${updated}.`] },
+      { heading: "Who we are", body: [`${whoWeAre} ${legal.companyName} is the data controller for the information you provide. You can contact us at hello@thrivsphere.org. ${revised}.`] },
       {
         heading: "What we collect",
         body: ["We only collect information you choose to share with us, which may include:"],
-        bullets: ["Your name (a first name is enough) and contact details", "Information you provide in enquiry, booking or newsletter forms", "Session-related notes kept securely and confidentially", "Website analytics data (only with your consent)"],
+        bullets: ["Your name and contact details", "Information you provide in our enquiry form — please keep this brief and avoid detailed health information", "The registration details, consents and session records kept in your secure ThriveSphere account", "Payment confirmations (card details are handled by our payment provider and never reach us)", "Messages you send us by email or WhatsApp", "Website analytics data (only with your consent)"],
       },
       {
         heading: "How we use your information",
-        bullets: ["To respond to your enquiry and arrange your sessions", "To provide wellbeing support, coaching and resources", "To send newsletters you have subscribed to (you can unsubscribe anytime)", "To meet our safeguarding and legal responsibilities"],
+        bullets: ["To respond to your enquiry and arrange your sessions", "To provide wellbeing support and education", "To send appointment confirmations, reminders and payment confirmations (you can turn appointment emails off in your account)", "To meet our safeguarding and legal responsibilities"],
       },
       { heading: "Lawful basis", body: ["We process your data on the basis of your consent, our legitimate interest in providing wellbeing services, and to meet legal obligations. Special category (health) data is processed only with your explicit consent or where necessary for the provision of care."] },
       { heading: "How we protect it", body: ["Your data is stored securely, access is restricted to those who need it, and we use reputable, GDPR-compliant service providers. We never sell your data."] },
+      { heading: "WhatsApp", body: ["If you contact us on WhatsApp, your messages are also handled by WhatsApp (Meta). WhatsApp is for general enquiries and arranging appointments — please do not share personal health information there. Anything personal is best shared inside your secure ThriveSphere account."] },
       { heading: "Your rights", body: ["You have the right to access, correct, delete or restrict your data, to withdraw consent, and to complain to the Information Commissioner's Office (ICO). To exercise any right, email hello@thrivsphere.org."] },
       { heading: "Retention", body: ["We keep personal data only as long as necessary for the purposes above and in line with our Records Retention Policy, after which it is securely deleted."] },
     ],
@@ -61,7 +77,7 @@ export const policies: Record<string, Policy> = {
     audience: "public",
     title: "Cookie Policy",
     eyebrow: "Cookies",
-    intro: "This policy explains how ThrivSphere uses cookies and similar technologies on this website.",
+    intro: "This policy explains how ThriveSphere uses cookies and similar technologies on this website.",
     sections: [
       { heading: "What are cookies?", body: ["Cookies are small text files stored on your device that help websites function and understand how they are used."] },
       {
@@ -81,7 +97,7 @@ export const policies: Record<string, Policy> = {
     eyebrow: "Safeguarding",
     intro: "The safety and wellbeing of the people we support is our highest priority. This statement summarises our commitment to safeguarding adults at risk.",
     sections: [
-      { heading: "Our commitment", body: ["ThrivSphere Wellbeing CIC is committed to creating a safe, respectful environment and to protecting adults at risk of harm, abuse or neglect."] },
+      { heading: "Our commitment", body: ["ThriveSphere Wellbeing is committed to creating a safe, respectful environment and to protecting adults at risk of harm, abuse or neglect."] },
       {
         heading: "Our responsibilities",
         bullets: ["Treating everyone with dignity, respect and compassion", "Recognising and responding appropriately to safeguarding concerns", "Sharing information with relevant agencies where there is a risk of serious harm", "Ensuring staff and facilitators understand their safeguarding duties"],
@@ -101,7 +117,7 @@ export const policies: Record<string, Policy> = {
     eyebrow: "Confidentiality",
     intro: "Confidentiality sits at the heart of everything we do. This statement explains how we protect what you share with us.",
     sections: [
-      { heading: "Your privacy is respected", body: ["What you share in your sessions and communications with ThrivSphere is treated as confidential and handled with care, in line with professional standards and UK GDPR."] },
+      { heading: "Your privacy is respected", body: ["What you share in your sessions and communications with ThriveSphere is treated as confidential and handled with care, in line with professional standards and UK GDPR."] },
       {
         heading: "When confidentiality may be limited",
         body: ["There are rare circumstances where we may need to share information without your consent:"],
@@ -117,7 +133,7 @@ export const policies: Record<string, Policy> = {
     audience: "public",
     title: "Accessibility Statement",
     eyebrow: "Accessibility",
-    intro: "We want ThrivSphere to be usable and welcoming for everyone. Accessibility is one of our core values.",
+    intro: "We want ThriveSphere to be usable and welcoming for everyone. Accessibility is one of our core values.",
     sections: [
       { heading: "Our aim", body: ["We are committed to meeting the Web Content Accessibility Guidelines (WCAG) 2.1 AA standard and to continuously improving the accessibility of our website and services."] },
       {
@@ -135,39 +151,39 @@ export const policies: Record<string, Policy> = {
     audience: "public",
     title: "Consent Policy",
     eyebrow: "Consent",
-    intro: "Nothing happens without your agreement. This policy explains what you are consenting to when you register with ThrivSphere, and how you can change your mind.",
+    intro: "Nothing happens without your agreement. This policy explains what you are consenting to when you register with ThriveSphere, and how you can change your mind.",
     sections: [
-      { heading: "Informed consent", body: ["Before your first session we ask you to confirm that you understand what ThrivSphere offers, what it does not offer, and how your information will be handled. We will never assume consent — you give it actively, and we record the version of each policy you agreed to."] },
+      { heading: "Informed consent", body: ["Before your first session we ask you to confirm that you understand what ThriveSphere offers, what it does not offer, and how your information will be handled. We will never assume consent — you give it actively, and we record the version of each policy you agreed to."] },
       {
         heading: "What we ask you to confirm",
-        bullets: ["That you are aged 18 or over", "That you understand ThrivSphere is a non-clinical wellbeing service and not a crisis, medical or therapy service", "That you understand the limits of confidentiality where there is a risk of serious harm", "That you agree to our Privacy Policy and how we handle your data", "That you accept our Terms & Conditions and Client Agreement"],
+        bullets: ["That you are aged 18 or over", "That you understand ThriveSphere is a non-clinical wellbeing service and not a crisis, medical or therapy service", "That you understand the limits of confidentiality where there is a risk of serious harm", "That you agree to our Privacy Policy and how we handle your data", "That you accept our Terms & Conditions and Client Agreement"],
       },
       { heading: "Withdrawing consent", body: ["You can withdraw your consent at any time, for any reason, without having to explain yourself. Email hello@thrivsphere.org and we will stop processing your data for that purpose. Withdrawing consent does not affect anything lawfully done beforehand, and we may still need to keep certain records where the law or our safeguarding duties require it."] },
       { heading: "Capacity", body: ["We assume you have the capacity to consent unless there is clear reason to think otherwise. If we have concerns about capacity, we will pause, discuss it with you, and follow our Safeguarding Policy."] },
-      { heading: "If you change your mind", body: [`You may stop using our services at any point. Please see our Payments, Cancellations, Refunds & No-Shows policy for how this affects any sessions you have already paid for. ${updated}.`] },
+      { heading: "If you change your mind", body: [`You may stop using our services at any point. Please see our Cancellation and Refund Policy for how this affects any sessions you have already paid for. ${updated}.`] },
     ],
   },
   "scope-of-practice": {
     slug: "scope-of-practice",
-    version: V,
-    effectiveFrom: FROM,
+    version: V2,
+    effectiveFrom: FROM2,
     audience: "public",
     title: "Scope of Practice",
     eyebrow: "Scope of Practice",
-    intro: "Being clear about what we do — and what we do not do — is part of keeping you safe. ThrivSphere is a non-clinical wellbeing, education and support service.",
+    intro: "Being clear about what we do — and what we do not do — is part of keeping you safe. ThriveSphere is a non-clinical wellbeing, education and support service.",
     sections: [
       {
         heading: "What we provide",
-        bullets: ["Emotional wellbeing support and wellbeing coaching", "Wellbeing education on resilience, relationships, boundaries and self-care", "Mindfulness and relaxation sessions", "Facilitated peer support groups", "Signposting and referral to appropriate specialist services"],
+        bullets: ["A Wellbeing Needs Review — a structured, non-clinical conversation about your wellbeing and goals", "Emotional wellbeing support", "Psychoeducation and coping skills", "Resilience and personal development", "Workplace wellbeing", "Signposting and referral to appropriate specialist services"],
       },
       {
         heading: "What we do not provide",
-        body: ["ThrivSphere does not, under any circumstances, offer:"],
-        bullets: ["Clinical assessment, diagnosis or medical treatment", "Counselling, psychotherapy or psychiatric care", "Prescribing, medication advice or medication reviews", "Crisis, emergency or out-of-hours care", "Legal advice, court reports or fitness-for-work assessments", "Services to anyone under the age of 18"],
+        body: ["ThriveSphere does not, under any circumstances, offer:"],
+        bullets: ["Clinical assessment, diagnosis or medical treatment", "Counselling, psychotherapy or psychiatric care", "Prescribing, medication advice or medication reviews", "Crisis, emergency or out-of-hours care", "Legal advice or court reports", "Formal occupational health medical assessments or fitness-for-work reports", "Services to anyone under the age of 18"],
       },
-      { heading: "Informed by professional experience", body: ["ThrivSphere is founded and delivered by experienced professionals with backgrounds in mental health and wellbeing. Our support is professional wellbeing support, education and signposting informed by extensive mental health experience. That experience informs how we work — it does not turn what we offer into a clinical service."] },
+      { heading: "Informed by professional experience", body: ["ThriveSphere is founded and delivered by experienced professionals with backgrounds in mental health and wellbeing. Our support is professional wellbeing support, education and signposting informed by extensive mental health experience. That experience informs how we work — it does not turn what we offer into a clinical service."] },
       { heading: "When we will signpost you elsewhere", body: ["If what you need falls outside this scope, we will tell you honestly and help you find the right support. This is not a rejection — matching people to the right service is part of our job. See our Referral & Signposting Policy."] },
-      { heading: "Working within our limits", body: [`Our team will not work beyond their training, competence or role. If your needs change during our work together, we will review whether ThrivSphere remains the right service for you. ${updated}.`] },
+      { heading: "Working within our limits", body: [`Our team will not work beyond their training, competence or role. If your needs change during our work together, we will review whether ThriveSphere remains the right service for you. ${revised}.`] },
     ],
   },
   "domestic-abuse": {
@@ -189,7 +205,7 @@ export const policies: Record<string, Policy> = {
         heading: "Where we will point you",
         bullets: ["Immediate danger — call 999. If you cannot speak, dial 999 then press 55 on a mobile", "National Domestic Abuse Helpline — 0808 2000 247, free and 24/7", "Men's Advice Line — 0808 8010 327", "Galop, for LGBT+ people — 0800 999 5428"],
       },
-      { heading: "Our limits", body: [`ThrivSphere is not a refuge, a specialist domestic abuse service or an emergency service. We provide wellbeing support alongside specialist services, and we will always help you connect with them. ${updated}.`] },
+      { heading: "Our limits", body: [`ThriveSphere is not a refuge, a specialist domestic abuse service or an emergency service. We provide wellbeing support alongside specialist services, and we will always help you connect with them. ${updated}.`] },
     ],
   },
   crisis: {
@@ -199,7 +215,7 @@ export const policies: Record<string, Policy> = {
     audience: "public",
     title: "Suicide, Self-Harm & Crisis Escalation",
     eyebrow: "Crisis & Risk",
-    intro: "ThrivSphere is not a crisis service. This policy explains what we will do if you tell us you are thinking of ending your life or hurting yourself, so that there are no surprises.",
+    intro: "ThriveSphere is not a crisis service. This policy explains what we will do if you tell us you are thinking of ending your life or hurting yourself, so that there are no surprises.",
     sections: [
       { heading: "If you are in crisis right now", body: ["If you or someone else is in immediate danger, call 999. For free, confidential support 24/7, call Samaritans on 116 123, or text SHOUT to 85258. For urgent NHS mental health advice, call 111 and select the mental health option."] },
       { heading: "You can tell us", body: ["Talking about suicide or self-harm does not make it more likely to happen, and it will not get you thrown out of our service. We would much rather you told us."] },
@@ -213,8 +229,8 @@ export const policies: Record<string, Policy> = {
   },
   complaints: {
     slug: "complaints",
-    version: V,
-    effectiveFrom: FROM,
+    version: V2,
+    effectiveFrom: FROM2,
     audience: "public",
     title: "Complaints & Feedback",
     eyebrow: "Complaints",
@@ -225,70 +241,70 @@ export const policies: Record<string, Policy> = {
         heading: "What happens next",
         bullets: ["We acknowledge your complaint within 5 working days", "We look into it properly and fairly", "We respond in full within 20 working days, or explain why we need longer", "We tell you what we are changing as a result"],
       },
-      { heading: "If you are not satisfied", body: ["If our response does not resolve things, you can ask for it to be reviewed by a director of the CIC. For data protection concerns you can also complain to the Information Commissioner's Office at ico.org.uk."] },
-      { heading: "Feedback that isn't a complaint", body: [`We also want to hear what worked. Feedback shapes how the service grows, and we review it regularly. ${updated}.`] },
+      { heading: "If you are not satisfied", body: [`If our response does not resolve things, you can ask for it to be reviewed by a director of ${legal.companyName}. For data protection concerns you can also complain to the Information Commissioner's Office at ico.org.uk.`] },
+      { heading: "Feedback that isn't a complaint", body: [`We also want to hear what worked. Feedback shapes how the service grows, and we review it regularly. ${revised}.`] },
     ],
   },
   edi: {
     slug: "edi",
-    version: V,
-    effectiveFrom: FROM,
+    version: V2,
+    effectiveFrom: FROM2,
     audience: "public",
     title: "Equality, Diversity & Inclusion",
     eyebrow: "Equality & Inclusion",
-    intro: "ThrivSphere is for every adult who needs it. Inclusion is one of our core values, not an afterthought.",
+    intro: "ThriveSphere is for every adult who needs it. Inclusion is one of our core values, not an afterthought.",
     sections: [
       { heading: "Our commitment", body: ["We welcome adults aged 18 and over of any gender, ethnicity, faith, sexual orientation, disability, relationship status, immigration status or background. We will not discriminate, and we will challenge discrimination when we see it."] },
       {
         heading: "What this means in practice",
-        bullets: ["Services open to women and men, with specific groups where these are genuinely helpful", "Language and forms that do not assume gender, family shape or background", "Accessible sessions and materials — see our Accessibility Statement", "Awareness of cultural context, including for the African diaspora communities we serve", "Willingness to be told when we get it wrong"],
+        bullets: ["Services open to all adults aged 18 and over", "Language and forms that do not assume gender, family shape or background", "Accessible sessions and materials — see our Accessibility Statement", "Awareness of cultural context, including for the African diaspora communities we serve", "Willingness to be told when we get it wrong"],
       },
-      { heading: "Gender-specific provision", body: ["Some groups and programmes are offered separately for women and for men, because shared experience can make people feel safer to speak. Our core one-to-one service is open to all adults regardless of gender."] },
-      { heading: "Tell us what you need", body: [`If there is something that would make our service work better for you, please tell us at hello@thrivsphere.org. ${updated}.`] },
+      { heading: "Tell us what you need", body: [`If there is something that would make our service work better for you, please tell us at hello@thrivsphere.org. ${revised}.`] },
     ],
   },
   payments: {
     slug: "payments",
-    version: V,
-    effectiveFrom: FROM,
+    version: V2,
+    effectiveFrom: FROM2,
     audience: "public",
-    title: "Payments, Cancellations, Refunds & No-Shows",
-    eyebrow: "Payments & Cancellations",
+    title: "Cancellation and Refund Policy",
+    eyebrow: "Cancellations & Refunds",
     intro: "Clear terms so you know where you stand before you pay. If cost is a barrier, please talk to us before deciding not to come.",
     sections: [
-      { heading: "Paying for sessions", body: ["Fees are shown on our Pricing page and are payable in advance. Payment is taken securely by our payment provider — ThrivSphere never sees or stores your card details."] },
+      { heading: "Paying for sessions", body: ["Fees are shown on our Pricing page. Payment is taken securely by our payment provider — ThriveSphere never sees or stores your card details. The Initial Wellbeing Needs Review is charged separately from the packages."] },
       {
         heading: "Session packages",
-        bullets: ["Packages of 4 or 6 sessions are paid for up front", "Your remaining sessions are shown in your ThrivSphere account", "Sessions can be booked at your own pace within the package validity period", "Packages are for your use only and cannot be transferred"],
+        bullets: ["Packages are optional — you can continue with individual sessions without buying one", "Packages of four or six sessions are paid for up front", "Your remaining sessions are shown in your ThriveSphere account", "Sessions can be booked at your own pace within the package validity period", "Packages are for your use only and cannot be transferred"],
       },
       {
         heading: "Cancelling or rearranging",
-        bullets: ["Give at least 24 hours' notice and we will rebook at no charge", "Less than 24 hours' notice: the session may be charged or deducted from your package", "We understand emergencies happen — talk to us and we will be fair"],
+        bullets: ["You can cancel or reschedule from your ThriveSphere account", "With at least 24 hours' notice there is no charge — the session is returned to your account to use again", "With less than 24 hours' notice the session is treated as used", "We understand emergencies happen — message us and we will be fair"],
       },
       { heading: "No-shows", body: ["If you do not attend and have not told us, the session is treated as used. If you miss sessions repeatedly we will contact you to check you are alright and to talk about whether now is the right time for you."] },
       { heading: "If we cancel", body: ["If we have to cancel, you will be offered an alternative time or a full refund of that session — your choice."] },
-      { heading: "Refunds", body: [`Unused sessions within their validity period can be refunded on request, less any sessions already delivered. Refunds are made to the original payment method within 14 days. If cost is a barrier at any point, contact us — concessionary places may be available. ${updated}.`] },
+      { heading: "Refunds", body: [`Unused sessions within their validity period can be refunded on request, less any sessions already delivered. Refunds are made to the original payment method within 14 days. ${revised}.`] },
     ],
   },
   terms: {
     slug: "terms",
     requiresConsent: true,
-    version: V,
-    effectiveFrom: FROM,
+    version: V2,
+    effectiveFrom: FROM2,
     audience: "public",
     title: "Terms & Conditions",
     eyebrow: "Terms & Conditions",
-    intro: "These terms explain the basis on which you may use the ThrivSphere website and services.",
+    intro: "These terms explain the basis on which you may use the ThriveSphere website and services.",
     sections: [
-      { heading: "About our service", body: ["ThrivSphere Wellbeing CIC provides wellbeing education, emotional wellbeing support, coaching, mindfulness, peer support and signposting to adults aged 18 and over. We are a non-clinical service. We do not carry out clinical assessment, make diagnoses, or provide medical or psychological treatment, and we do not provide crisis services, emergency care, legal advice or fitness-for-work assessments."] },
+      { heading: "Who we are", body: [`${whoWeAre} References to "ThriveSphere", "we" and "us" mean ${legal.companyName}.`] },
+      { heading: "About our service", body: ["ThriveSphere Wellbeing provides online non-clinical mental wellbeing support, psychoeducation, coping skills education, emotional resilience and personal wellbeing development to adults aged 18 and over. We are a non-clinical service. We do not carry out clinical assessment, make diagnoses, or provide medical or psychological treatment, and we do not provide crisis services, emergency care, legal advice or fitness-for-work assessments."] },
       { heading: "Not a crisis service", body: ["Our services are not a substitute for medical, psychiatric or emergency care, or for your GP. In an emergency call 999 or Samaritans on 116 123."] },
-      { heading: "Eligibility", body: ["Our services are available to adults aged 18 and over, women and men. You will be asked to confirm you are 18 or over when you register. We do not currently provide services to under-18s."] },
+      { heading: "Eligibility", body: ["Our services are available to adults aged 18 and over. You will be asked to confirm you are 18 or over when you register. We do not currently provide services to under-18s."] },
       {
         heading: "Bookings and payments",
-        bullets: ["Sessions are booked through your ThrivSphere account and confirmed automatically", "Fees are shown on our Pricing page and are payable in advance", "Please give at least 24 hours' notice to cancel or reschedule", "See our Payments, Cancellations, Refunds & No-Shows policy for full details"],
+        bullets: ["Sessions are booked through your ThriveSphere account and confirmed automatically", "Sessions are delivered online by one of our practitioners", "Fees are shown on our Pricing page", "You can cancel or reschedule from your account; please give at least 24 hours' notice", "See our Cancellation and Refund Policy for full details"],
       },
       { heading: "Your responsibilities", body: ["You agree to provide accurate information and to engage with our services respectfully. You remain responsible for your own decisions and wellbeing."] },
-      { heading: "Website content", body: [`Content on this site is for general wellbeing information only and does not constitute medical or legal advice. ${updated}.`] },
+      { heading: "Website content", body: [`Content on this site is for general wellbeing information only and does not constitute medical or legal advice. ${revised}.`] },
     ],
   },
 };

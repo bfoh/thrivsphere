@@ -13,11 +13,11 @@ import { Support } from "@/components/sections/Support";
 
 const hints: Record<string, string> = {
   home: "Discover who we are and who we help",
-  about: "Meet the founder behind ThrivSphere",
+  about: "Meet the founder behind ThriveSphere",
   founder: "Explore our wellbeing services",
   services: "See our flagship resilience programme",
   programme: "Ready when you are — book your session",
-  support: "You belong here. Welcome to ThrivSphere.",
+  support: "You belong here. Welcome to ThriveSphere.",
 };
 
 export default function Home() {

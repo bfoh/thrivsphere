@@ -24,7 +24,7 @@ export function Support() {
         <div className="bleed-right">
           <Image
             src="/images/people/support-woman.png"
-            alt="A warm, reassuring ThrivSphere wellbeing practitioner"
+            alt="A warm, reassuring ThriveSphere wellbeing practitioner"
             width={643}
             height={737}
             sizes="(max-width: 900px) 1px, 50vw"

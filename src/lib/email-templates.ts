@@ -16,6 +16,8 @@
  * actually render — Outlook in particular ignores most modern CSS.
  */
 
+import { legal } from "@/data/site";
+
 const NAVY = "#1f3a5f";
 const TEAL = "#3d8a8a";
 const GOLD = "#bd951f";
@@ -24,6 +26,7 @@ const MUTED = "#5d7089";
 const GROUND = "#f2f5f4";
 const SURFACE = "#ffffff";
 const RULE = "#e2e7ea";
+const PURPLE = "#5a2d82";
 
 export type Email = { subject: string; html: string; text: string };
 
@@ -31,10 +34,18 @@ function siteUrl(): string {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "https://thrivsphere.org";
 }
 
-/** Absolute URL — email clients cannot resolve relative paths. */
+/**
+ * Absolute URL — email clients cannot resolve relative paths.
+ *
+ * The emblem only: the full logo artwork carries an outdated name, so the
+ * wordmark is set as text beneath it in the shell.
+ */
 function logoUrl(): string {
-  return `${siteUrl()}/images/email/logo.png`;
+  return `${siteUrl()}/images/email/emblem.png`;
 }
+
+/** Company details every business email must carry, in HTML and in text. */
+const LEGAL_LINE = `${legal.statement} Registered office: ${legal.registeredOffice}.`;
 
 type ShellOptions = {
   /** Short line under the logo. Kept neutral. */
@@ -63,7 +74,7 @@ function shell(o: ShellOptions): string {
                 <tr>
                   <td style="padding:18px 22px;font-family:Arial,Helvetica,sans-serif;">
                     <p style="margin:0 0 8px;font-size:14px;font-weight:bold;color:#ffffff;line-height:1.4;">
-                      ThrivSphere is not an emergency or crisis service
+                      ThriveSphere is not an emergency or crisis service
                     </p>
                     <p style="margin:0;font-size:13px;color:#c8d6e8;line-height:1.6;">
                       If you need help right now: emergency <strong style="color:#ffffff;">999</strong>
@@ -99,7 +110,7 @@ function shell(o: ShellOptions): string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>ThrivSphere</title>
+<title>ThriveSphere</title>
 </head>
 <body style="margin:0;padding:0;background:${GROUND};">
   <!-- preheader: shown beside the subject in an inbox list, hidden in the message -->
@@ -114,8 +125,13 @@ function shell(o: ShellOptions): string {
 
           <tr>
             <td align="center" style="padding:30px 32px 10px;">
-              <img src="${logoUrl()}" width="140" alt="ThrivSphere Wellbeing CIC"
-                   style="display:block;width:140px;max-width:140px;height:auto;border:0;">
+              <img src="${logoUrl()}" width="72" height="72" alt=""
+                   style="display:block;width:72px;max-width:72px;height:auto;border:0;">
+              <p style="margin:10px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:21px;
+                        font-weight:bold;line-height:1;"><span style="color:${PURPLE};">Thrive</span><span
+                        style="color:${TEAL};">Sphere</span></p>
+              <p style="margin:6px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;
+                        font-weight:bold;letter-spacing:3px;color:${GOLD};">WELLBEING</p>
             </td>
           </tr>
 
@@ -139,10 +155,12 @@ ${cta}${crisis}
               </p>
               <p style="margin:12px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12.5px;
                         line-height:1.6;color:${MUTED};">
-                ThrivSphere Wellbeing CIC &middot; a non-clinical wellbeing, education and
+                ThriveSphere Wellbeing &middot; a non-clinical wellbeing, education and
                 signposting service &middot;
                 <a href="${siteUrl()}" style="color:${TEAL};">thrivsphere.org</a>
               </p>
+              <p style="margin:12px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11.5px;
+                        line-height:1.6;color:${MUTED};">${LEGAL_LINE}</p>
             </td>
           </tr>
         </table>
@@ -156,7 +174,7 @@ ${cta}${crisis}
 
 /** Plain-text crisis block, matching the HTML one. */
 const CRISIS_TEXT = [
-  "ThrivSphere is not an emergency or crisis service.",
+  "ThriveSphere is not an emergency or crisis service.",
   "If you need help right now: emergency 999 · Samaritans, free 24/7, 116 123",
   "· urgent NHS mental health 111.",
 ].join("\n");
@@ -168,7 +186,8 @@ function textShell(lines: string[], opts: { crisis?: boolean; footer?: string } 
     ...(opts.crisis === false ? [] : ["—", CRISIS_TEXT, ""]),
     opts.footer ?? "We never include personal details or joining links in email.",
     "",
-    `ThrivSphere Wellbeing CIC · ${siteUrl()}`,
+    `ThriveSphere Wellbeing · ${siteUrl()}`,
+    LEGAL_LINE,
   ].join("\n");
 }
 
@@ -275,13 +294,13 @@ export function secureMessageNotice(): Email {
       preheader: "Sign in to read it.",
       heading: "You have a new message",
       body: `
-        <p style="margin:0 0 14px;">Someone at ThrivSphere has sent you a message.</p>
+        <p style="margin:0 0 14px;">Someone at ThriveSphere has sent you a message.</p>
         <p style="margin:0;">Messages stay inside your account, so you'll need to sign in
         to read it.</p>`,
       cta: { label: "Read my message", href: `${siteUrl()}/portal/messages` },
     }),
     text: textShell([
-      "Someone at ThrivSphere has sent you a message.",
+      "Someone at ThriveSphere has sent you a message.",
       "",
       "Messages stay inside your account, so you'll need to sign in to read it:",
       `${siteUrl()}/portal/messages`,
@@ -333,7 +352,7 @@ export function paymentReceipt(planName: string, amountPence: number, sessions: 
 /**
  * Internal enquiry notification.
  *
- * Goes to ThrivSphere, not a client, so it carries the enquiry details and
+ * Goes to ThriveSphere, not a client, so it carries the enquiry details and
  * drops the crisis block — staff do not need signposting in their own inbox.
  */
 export function enquiryNotification(fields: {

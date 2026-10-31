@@ -45,7 +45,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
-          <Link href="/admin" aria-label="ThrivSphere admin" style={{ display: "flex", background: "#fff", borderRadius: 8, padding: 4 }}>
+          <Link href="/admin" aria-label="ThriveSphere admin" style={{ display: "flex", background: "#fff", borderRadius: 8, padding: 4 }}>
             <Logo height={32} />
           </Link>
 

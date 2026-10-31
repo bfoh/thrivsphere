@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PolicyPage } from "@/components/PolicyPage";
 
 export const metadata: Metadata = {
-  title: "Payments, Cancellations, Refunds & No-Shows",
+  title: "Cancellation and Refund Policy",
 };
 
 export default function Page() {

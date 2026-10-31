@@ -2,10 +2,9 @@
 
 import * as React from "react";
 import { PillButton } from "./PillButton";
-import { Icon } from "./icons";
-import { footerPolicyLinks } from "@/data/site";
+import { Icon, Logo } from "./icons";
+import { brand, footerPolicyLinks, legal } from "@/data/site";
 import Link from "next/link";
-import Image from "next/image";
 
 const footerLink: React.CSSProperties = {
   display: "block",
@@ -83,20 +82,14 @@ export function SiteFooter() {
         className="footer-grid"
       >
         <div>
-          <Image
-            src="/images/thrivsphere-logo.png"
-            alt="ThrivSphere Wellbeing CIC"
-            width={86}
-            height={88}
-            style={{ height: 88, width: "auto", background: "#fff", borderRadius: 14, padding: 8 }}
-          />
+          <span style={{ display: "inline-flex", background: "#fff", borderRadius: 14, padding: "10px 14px" }}>
+            <Logo height={56} />
+          </span>
           <p style={{ marginTop: 16, fontSize: 14, lineHeight: 1.6, maxWidth: 340, color: "#b9c8dd" }}>
-            A UK Community Interest Company providing accessible, confidential online wellbeing
-            support, education and signposting to adults aged 18+ — helping you heal, grow and
-            thrive.
+            {brand.positioning} {brand.audienceLine}
           </p>
           <p style={{ marginTop: 12, fontSize: 12.5, lineHeight: 1.55, maxWidth: 340, color: "#9db0c9" }}>
-            ThrivSphere is a non-clinical service and is not an emergency or crisis service. We do
+            ThriveSphere is a non-clinical service and is not an emergency or crisis service. We do
             not provide clinical assessment, diagnosis or treatment.
           </p>
         </div>
@@ -149,9 +142,13 @@ export function SiteFooter() {
         }}
       >
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-          <Icon name="mail" size={15} /> hello@thrivsphere.org
+          <Icon name="mail" size={15} /> {brand.email}
         </span>
-        <span>© {new Date().getFullYear()} ThrivSphere Wellbeing CIC. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} {brand.name}. All rights reserved.</span>
+        {/* Trading disclosure: the company behind the trading name. */}
+        <p style={{ flexBasis: "100%", margin: "6px 0 0", lineHeight: 1.6 }}>
+          {legal.statement} Registered office: {legal.registeredOffice}.
+        </p>
       </div>
     </div>
   );

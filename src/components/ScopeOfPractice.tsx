@@ -6,7 +6,7 @@ import Link from "next/link";
 /**
  * "What we are / what we are not" panel.
  *
- * ThrivSphere is a non-clinical service, and saying so plainly is a
+ * ThriveSphere is a non-clinical service, and saying so plainly is a
  * safeguarding measure as much as a positioning one — people need to know
  * before they rely on us. Shown on About, Services and Book, and reused by the
  * Stage 2 intake flow where the client must read it before consenting.

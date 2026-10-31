@@ -142,7 +142,7 @@ export function EnquiryForm() {
         >
           <input id="consent" name="consent" type="checkbox" style={{ marginTop: 3 }} />
           <span>
-            I agree to ThrivSphere handling my details in line with its{" "}
+            I agree to ThriveSphere handling my details in line with its{" "}
             <Link href="/privacy" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
               Privacy
             </Link>{" "}

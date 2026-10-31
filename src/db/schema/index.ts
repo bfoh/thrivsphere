@@ -1,5 +1,5 @@
 /**
- * ThrivSphere operating-system schema.
+ * ThriveSphere operating-system schema.
  *
  * Grouped by domain rather than kept in one file, because the safeguarding and
  * records tables carry very different access rules from commerce and should be

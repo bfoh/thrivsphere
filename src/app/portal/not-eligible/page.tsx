@@ -30,7 +30,7 @@ export default function NotEligiblePage() {
         We can&apos;t support you here — but you&apos;re not stuck
       </h1>
       <p style={{ margin: "0 0 10px", fontSize: 16, lineHeight: 1.65, color: "var(--ink)" }}>
-        ThrivSphere works with adults aged 18 and over, so we&apos;re not able to offer you
+        ThriveSphere works with adults aged 18 and over, so we&apos;re not able to offer you
         sessions right now. That isn&apos;t a judgement about you, and it doesn&apos;t mean what
         you&apos;re going through doesn&apos;t matter.
       </p>
@@ -64,7 +64,7 @@ export default function NotEligiblePage() {
 
       <p style={{ margin: "28px 0 0", fontSize: 13.5 }}>
         <Link href="/" style={{ color: "var(--teal-deep)", fontWeight: 700, textDecoration: "none" }}>
-          Back to the ThrivSphere website
+          Back to the ThriveSphere website
         </Link>
       </p>
     </div>

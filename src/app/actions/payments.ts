@@ -64,7 +64,7 @@ export async function startCheckout(
     const session = await createCheckoutSession({
       amountPence: plan.amountPence,
       currency: plan.currency,
-      productName: `ThrivSphere — ${plan.name}`,
+      productName: `ThriveSphere — ${plan.name}`,
       description: plan.blurb ?? undefined,
       successUrl: `${siteUrl()}/portal/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${siteUrl()}/portal/payment/cancelled`,

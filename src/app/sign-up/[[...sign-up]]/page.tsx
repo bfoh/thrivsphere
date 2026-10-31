@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <AuthShell
-      title="Create your ThrivSphere account"
+      title="Create your ThriveSphere account"
       intro="You'll confirm you're 18 or over and read our consent and confidentiality policies before your first session."
     >
       {/* Straight into registration — the 18+ gate and consent come

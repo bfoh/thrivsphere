@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Wellbeing insights, gentle guidance and stories of resilience from the ThrivSphere community.",
+  description: "Wellbeing insights, gentle guidance and stories of resilience from the ThriveSphere community.",
 };
 
 const cat = ["#4fa8a8", "#d4af37", "#c77fa0", "#7a9e6e"];

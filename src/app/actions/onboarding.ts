@@ -32,7 +32,7 @@ async function requestMeta() {
 /**
  * Step 1 — the 18+ gate.
  *
- * ThrivSphere is an adults-only service, so this has to actually refuse rather
+ * ThriveSphere is an adults-only service, so this has to actually refuse rather
  * than merely ask. Age is computed from the date of birth on the server; the
  * confirmation checkbox is recorded alongside it but is not what decides.
  *

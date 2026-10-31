@@ -34,7 +34,7 @@ export function PolicyPage({ slug }: { slug: string }) {
           ))}
           <div style={{ marginTop: 20, padding: "14px 18px", background: "rgba(212,175,55,0.1)", borderRadius: 12, fontSize: 13, color: "var(--navy)" }}>
             This is a plain-language summary provided for transparency and should be reviewed and formally
-            adopted by ThrivSphere. It does not constitute legal advice.
+            adopted by ThriveSphere. It does not constitute legal advice.
           </div>
         </div>
 

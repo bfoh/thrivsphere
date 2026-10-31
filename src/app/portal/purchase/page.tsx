@@ -26,7 +26,7 @@ export default async function PurchasePage() {
         Buy sessions
       </h1>
       <p style={{ margin: "0 0 28px", fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>
-        Payment is handled securely by Stripe — your card details never reach ThrivSphere. Sessions
+        Payment is handled securely by Stripe — your card details never reach ThriveSphere. Sessions
         appear in your account as soon as payment clears.
       </p>
 

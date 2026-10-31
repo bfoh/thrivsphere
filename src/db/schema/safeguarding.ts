@@ -12,7 +12,7 @@ import { users } from "./identity";
 import { clients } from "./clients";
 
 /**
- * The categories the brief requires ThrivSphere to be able to record and
+ * The categories the brief requires ThriveSphere to be able to record and
  * escalate. Kept as an enum so that reporting can count them reliably.
  */
 export const concernCategory = pgEnum("concern_category", [

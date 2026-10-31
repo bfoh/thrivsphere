@@ -113,7 +113,7 @@ export function AgeGateForm() {
         labelText="Date of birth"
         type="date"
         error={fe.dateOfBirth}
-        hintText="We ask because ThrivSphere is only able to support adults aged 18 and over."
+        hintText="We ask because ThriveSphere is only able to support adults aged 18 and over."
         required
       />
 
@@ -172,7 +172,7 @@ export function IntakeForm() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <label htmlFor="presentingConcern" style={label}>
-          What brings you to ThrivSphere?
+          What brings you to ThriveSphere?
         </label>
         <textarea
           id="presentingConcern"
@@ -271,19 +271,19 @@ const CONSENT_ITEMS = [
     name: "privacy",
     title: "Privacy",
     href: "/privacy",
-    text: "I have read the Privacy Policy and agree to ThrivSphere handling my information as described (UK GDPR).",
+    text: "I have read the Privacy Policy and agree to ThriveSphere handling my information as described (UK GDPR).",
   },
   {
     name: "confidentiality_limits",
     title: "Confidentiality and its limits",
     href: "/confidentiality",
-    text: "I understand what I share is confidential, and that if there is a serious risk of harm to me or someone else, ThrivSphere may need to share information to keep people safe.",
+    text: "I understand what I share is confidential, and that if there is a serious risk of harm to me or someone else, ThriveSphere may need to share information to keep people safe.",
   },
   {
     name: "consent_to_support",
     title: "Consent to support",
     href: "/consent",
-    text: "I understand ThrivSphere is a non-clinical wellbeing service — not therapy, diagnosis, treatment, or a crisis service — and I consent to receiving support on that basis.",
+    text: "I understand ThriveSphere is a non-clinical wellbeing service — not therapy, diagnosis, treatment, or a crisis service — and I consent to receiving support on that basis.",
   },
 ];
 
@@ -334,7 +334,7 @@ export function ConsentForm() {
           <Icon name="shield" size={18} stroke="var(--gold)" />
         </span>
         <span>
-          ThrivSphere is not an emergency or crisis service. If you need help right now, call{" "}
+          ThriveSphere is not an emergency or crisis service. If you need help right now, call{" "}
           <strong style={{ color: "#fff" }}>999</strong> or Samaritans on{" "}
           <strong style={{ color: "#fff" }}>116 123</strong>.
         </span>

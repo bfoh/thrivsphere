@@ -84,7 +84,17 @@ describe("every client email", () => {
   });
 
   it("uses an absolute logo URL, since email cannot resolve relative paths", () => {
-    assert.match(bookingConfirmation(when).html, /https:\/\/thrivsphere\.org\/images\/email\/logo\.png/);
+    assert.match(bookingConfirmation(when).html, /https:\/\/thrivsphere\.org\/images\/email\/emblem\.png/);
+  });
+
+  it("names the company behind the trading name, in both parts", () => {
+    for (const e of [bookingConfirmation(when), reminder24h(when), secureMessageNotice()]) {
+      for (const part of [e.html, e.text]) {
+        assert.match(part, /3G AND PAT HEALTHCARE LIMITED/);
+        assert.match(part, /11615975/);
+        assert.match(part, /SN25 2SD/);
+      }
+    }
   });
 });
 

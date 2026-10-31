@@ -17,7 +17,7 @@ export function Hero() {
         <div className="hero-bleed">
           <Image
             src="/images/people/hero-woman.png"
-            alt="A person smiling, supported by ThrivSphere Wellbeing"
+            alt="A person smiling, supported by ThriveSphere Wellbeing"
             width={580}
             height={750}
             priority
@@ -29,7 +29,7 @@ export function Hero() {
     >
       <div className="hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr", gap: 48 }}>
         <div className="fadeUp" style={{ maxWidth: 600 }}>
-          <span className="eyebrow">ThrivSphere Wellbeing CIC</span>
+          <span className="eyebrow">ThriveSphere Wellbeing</span>
           <h1
             className="hero-title"
             style={{
@@ -53,7 +53,7 @@ export function Hero() {
           <div className="hero-mobile-visual">
             <Image
               src="/images/people/hero-woman.png"
-              alt="A person smiling, supported by ThrivSphere Wellbeing"
+              alt="A person smiling, supported by ThriveSphere Wellbeing"
               width={580}
               height={750}
               sizes="(max-width: 900px) 95vw, 1px"

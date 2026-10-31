@@ -5,18 +5,18 @@ import { Icon } from "@/components/icons";
 import { founder, values, programme, impact } from "@/data/site";
 
 export const metadata: Metadata = {
-  title: "About ThrivSphere",
+  title: "About ThriveSphere",
   description:
-    "ThrivSphere Wellbeing CIC is a UK Community Interest Company providing non-clinical wellbeing support, education and signposting to adults aged 18+ — women and men.",
+    "ThriveSphere Wellbeing is a UK Community Interest Company providing non-clinical wellbeing support, education and signposting to adults aged 18+ — women and men.",
 };
 
 export default function AboutPage() {
   return (
     <PageShell
-      eyebrow="About ThrivSphere"
+      eyebrow="About ThriveSphere"
       watermark="About"
       title="A trusted, accessible wellbeing community"
-      intro="ThrivSphere Wellbeing CIC is a UK-based Community Interest Company with an international vision. We exist to improve the emotional, mental and social wellbeing of adults aged 18 and over — women and men."
+      intro="ThriveSphere Wellbeing is a UK-based Community Interest Company with an international vision. We exist to improve the emotional, mental and social wellbeing of adults aged 18 and over — women and men."
       aura="sage"
     >
       <div className="two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22 }}>
@@ -45,10 +45,10 @@ export default function AboutPage() {
 
       {/* founder */}
       <h2 style={{ margin: "48px 0 6px", fontSize: 26, fontWeight: 800, color: "var(--navy)" }}>
-        Who runs ThrivSphere
+        Who runs ThriveSphere
       </h2>
       <p style={{ margin: "0 0 22px", fontSize: 15.5, lineHeight: 1.6, color: "var(--ink)", maxWidth: 680 }}>
-        ThrivSphere is founded and delivered by experienced professionals with backgrounds in mental
+        ThriveSphere is founded and delivered by experienced professionals with backgrounds in mental
         health and wellbeing.
       </p>
       <div

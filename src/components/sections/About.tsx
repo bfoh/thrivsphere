@@ -23,7 +23,7 @@ export function About() {
         ]}
       />
       <p style={{ margin: "16px 0 0", fontSize: 17, lineHeight: 1.6, maxWidth: 760, color: "var(--ink)" }}>
-        ThrivSphere Wellbeing CIC is a UK-based Community Interest Company with an international
+        ThriveSphere Wellbeing is a UK-based Community Interest Company with an international
         vision. We exist to improve the emotional, mental and social wellbeing of adults aged 18 and
         over — women and men — offering a confidential, compassionate and empowering environment to
         heal, grow and thrive.

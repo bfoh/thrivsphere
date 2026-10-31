@@ -8,7 +8,7 @@ import { ScopeOfPractice } from "@/components/ScopeOfPractice";
 
 export const metadata: Metadata = {
   title: "Book a Consultation",
-  description: "Book a confidential online wellbeing session with ThrivSphere. Reach out in confidence and we'll be in touch.",
+  description: "Book a confidential online wellbeing session with ThriveSphere. Reach out in confidence and we'll be in touch.",
 };
 
 const steps = [

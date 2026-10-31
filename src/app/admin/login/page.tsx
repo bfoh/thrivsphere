@@ -62,7 +62,7 @@ export default async function AdminLoginPage() {
         Staff sign in
       </h1>
       <p style={{ margin: "0 0 30px", fontSize: 14.5, color: "#a9bcd4", textAlign: "center", maxWidth: 420, lineHeight: 1.6 }}>
-        For ThrivSphere staff. Everything you open in the back office is recorded
+        For ThriveSphere staff. Everything you open in the back office is recorded
         against your name.
       </p>
 

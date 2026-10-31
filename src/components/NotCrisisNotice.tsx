@@ -32,7 +32,7 @@ export function NotCrisisNotice({ style }: { style?: React.CSSProperties }) {
         }}
       >
         <Icon name="shield" size={20} stroke="var(--gold)" />
-        ThrivSphere is not an emergency or crisis service
+        ThriveSphere is not an emergency or crisis service
       </h2>
       <p style={{ margin: "0 0 14px", fontSize: 14.5, lineHeight: 1.6, maxWidth: 620 }}>
         We are a non-clinical wellbeing, education and support service. We do not provide crisis,

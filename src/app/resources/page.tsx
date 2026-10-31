@@ -46,7 +46,7 @@ export default function ResourcesPage() {
         Where else you can turn
       </h2>
       <p style={{ margin: "0 0 26px", fontSize: 15.5, lineHeight: 1.6, color: "var(--ink)", maxWidth: 700 }}>
-        ThrivSphere is a non-clinical service and is not an emergency or crisis service. If what you
+        ThriveSphere is a non-clinical service and is not an emergency or crisis service. If what you
         need sits outside what we offer, these organisations can help.
       </p>
       <SignpostList />

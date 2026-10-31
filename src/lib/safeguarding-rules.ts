@@ -43,7 +43,7 @@ export type ValidationErrors = Record<string, string>;
  *    consent is lawful in the right circumstances, but only if the
  *    justification is written down at the time.
  *  - A child-at-risk concern must say what action was taken regardless of
- *    level, because it falls outside ThrivSphere's adults-only remit and
+ *    level, because it falls outside ThriveSphere's adults-only remit and
  *    always needs referring on.
  */
 export function validateConcern(input: ConcernInput): ValidationErrors {

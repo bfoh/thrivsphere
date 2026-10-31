@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { CookieBanner } from "@/components/CookieBanner";
 import { Analytics } from "@/components/Analytics";
 import { CursorFX } from "@/components/CursorFX";
+import { brand } from "@/data/site";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -41,29 +42,30 @@ const clerkLocalization = {
 };
 
 const description =
-  "ThrivSphere Wellbeing CIC is a UK Community Interest Company providing accessible, confidential online wellbeing support, education, coaching, mindfulness and signposting to adults aged 18+ — women and men. A non-clinical service helping you heal, grow and thrive.";
+  "ThriveSphere Wellbeing provides professional, compassionate and personalised online wellbeing support for adults aged 18 and above — helping individuals understand their emotional wellbeing, develop practical coping strategies and strengthen resilience. A non-clinical service; not an emergency mental health service.";
+
+const fullTitle = `${brand.name} — ${brand.tagline}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default:
-      "ThrivSphere Wellbeing CIC — Empowering Wellbeing. Building Resilience. Inspiring Hope.",
-    template: "%s — ThrivSphere Wellbeing CIC",
+    default: fullTitle,
+    template: `%s — ${brand.name}`,
   },
   description,
-  applicationName: "ThrivSphere Wellbeing CIC",
+  applicationName: brand.name,
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    siteName: "ThrivSphere Wellbeing CIC",
+    siteName: brand.name,
     locale: "en_GB",
     url: SITE_URL,
-    title: "ThrivSphere Wellbeing CIC — Empowering Wellbeing. Building Resilience. Inspiring Hope.",
+    title: fullTitle,
     description,
   },
-  twitter: { card: "summary_large_image", title: "ThrivSphere Wellbeing CIC", description },
+  twitter: { card: "summary_large_image", title: brand.name, description },
   robots: { index: true, follow: true },
-  // favicon/apple-icon auto-detected from app/icon.png, app/apple-icon.png, app/favicon.ico (the ThrivSphere logo)
+  // favicon/apple-icon auto-detected from app/icon.png, app/apple-icon.png, app/favicon.ico (the ThriveSphere logo)
 };
 
 export default function RootLayout({

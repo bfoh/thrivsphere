@@ -90,7 +90,7 @@ export const orderStatus = pgEnum("order_status", [
  * A payment attempt.
  *
  * Card details never reach this application — checkout is hosted by the payment
- * provider, so PCI scope stays outside ThrivSphere. Only identifiers and
+ * provider, so PCI scope stays outside ThriveSphere. Only identifiers and
  * amounts are recorded here.
  */
 export const orders = pgTable(

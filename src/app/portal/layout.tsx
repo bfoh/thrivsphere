@@ -32,7 +32,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
-          <Link href="/portal" aria-label="ThrivSphere portal" style={{ display: "flex" }}>
+          <Link href="/portal" aria-label="ThriveSphere portal" style={{ display: "flex" }}>
             <Logo height={46} />
           </Link>
           <nav style={{ display: "flex", gap: 16 }}>

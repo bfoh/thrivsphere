@@ -77,7 +77,7 @@ export const progressMeasure = pgEnum("progress_measure", [
  * Simple progress tracking.
  *
  * Deliberately a self-rated 0–10 scale rather than a clinical instrument:
- * ThrivSphere is a non-clinical service and must not appear to be administering
+ * ThriveSphere is a non-clinical service and must not appear to be administering
  * a diagnostic measure.
  */
 export const progressEntries = pgTable(

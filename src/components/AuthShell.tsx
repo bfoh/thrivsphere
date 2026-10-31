@@ -33,7 +33,7 @@ export function AuthShell({
         }}
       >
         <div style={{ padding: "28px 20px 8px" }}>
-          <Link href="/" aria-label="ThrivSphere home" style={{ display: "block" }}>
+          <Link href="/" aria-label="ThriveSphere home" style={{ display: "block" }}>
             <Logo height={54} />
           </Link>
         </div>
@@ -75,7 +75,7 @@ export function AuthShell({
               color: "var(--navy-soft)",
             }}
           >
-            ThrivSphere is for adults aged 18 and over. We are not an emergency or crisis
+            ThriveSphere is for adults aged 18 and over. We are not an emergency or crisis
             service — if you need help now, call <strong>999</strong> or Samaritans on{" "}
             <strong>116 123</strong>.
           </p>

@@ -37,7 +37,7 @@ export function TopNav() {
       <Link
         href="/"
         style={{ display: "flex", alignItems: "center" }}
-        aria-label="ThrivSphere home"
+        aria-label="ThriveSphere home"
       >
         <Logo height={50} />
       </Link>

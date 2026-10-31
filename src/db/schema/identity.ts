@@ -28,7 +28,7 @@ export const userStatus = pgEnum("user_status", ["active", "suspended", "deleted
  * Mirror of the identity provider's user record.
  *
  * Authentication lives with the provider (Clerk); this table holds only what
- * ThrivSphere needs to make authorisation decisions and to own its own foreign
+ * ThriveSphere needs to make authorisation decisions and to own its own foreign
  * keys. Passwords and MFA secrets are never stored here.
  */
 export const users = pgTable(

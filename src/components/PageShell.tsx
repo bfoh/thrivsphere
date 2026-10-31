@@ -52,7 +52,7 @@ export function PageShell({
           marginTop: 30,
         }}
       >
-        <Link href="/" style={{ display: "flex", alignItems: "center" }} aria-label="ThrivSphere home">
+        <Link href="/" style={{ display: "flex", alignItems: "center" }} aria-label="ThriveSphere home">
           <Logo height={50} />
         </Link>
         <nav style={{ display: "flex", alignItems: "center", gap: 24 }} className="nav-links">

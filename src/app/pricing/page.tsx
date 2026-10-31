@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Clear, affordable pricing for ThrivSphere wellbeing support, coaching and our resilience programme.",
+  description: "Clear, affordable pricing for ThriveSphere wellbeing support, coaching and our resilience programme.",
 };
 
 export default function PricingPage() {
