@@ -28,7 +28,10 @@ async function seedServices() {
   const rows = staticServices.map((s, i) => ({
     slug: s.slug,
     name: s.title,
+    summary: s.summary,
     description: s.desc,
+    points: s.points,
+    note: s.note ?? null,
     // Everything offered at launch is one-to-one.
     kind: "one_to_one" as const,
     durationMinutes: 50,

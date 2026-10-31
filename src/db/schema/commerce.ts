@@ -2,6 +2,7 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -36,7 +37,13 @@ export const services = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     slug: text("slug").notNull().unique(),
     name: text("name").notNull(),
+    /** One line for the homepage card. */
+    summary: text("summary"),
     description: text("description").notNull(),
+    /** The bullet list beneath the description on /services. */
+    points: jsonb("points").$type<string[]>().notNull().default([]),
+    /** A boundary or clarification shown beneath the points. */
+    note: text("note"),
     kind: serviceKind("kind").notNull().default("one_to_one"),
     /** Default appointment length used when booking this service. */
     durationMinutes: integer("duration_minutes").notNull().default(50),

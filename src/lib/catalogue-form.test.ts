@@ -1,6 +1,13 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { describePlanChanges, parsePlanEdit, type PlanEdit } from "./catalogue-form";
+import {
+  describePlanChanges,
+  describeServiceChanges,
+  parsePlanEdit,
+  parseServiceEdit,
+  type PlanEdit,
+  type ServiceEdit,
+} from "./catalogue-form";
 
 const form = (values: Record<string, string>) => (name: string) => values[name] ?? "";
 
@@ -74,3 +81,51 @@ describe("describePlanChanges", () => {
     assert.equal(describePlanChanges(before, { ...before }), "");
   });
 });
+
+describe("parseServiceEdit", () => {
+  const base = { name: "Workplace Wellbeing", description: "Support with:", sortOrder: "4", active: "on" };
+
+  it("reads one point per line, ignoring blanks and typed bullets", () => {
+    const r = serviceOk(parseServiceEdit(form({ ...base, points: "• Workplace stress\r\n\n- Work-life balance\n  Resilience  " })));
+    assert.deepEqual(r.points, ["Workplace stress", "Work-life balance", "Resilience"]);
+  });
+
+  it("keeps an empty summary and note as null", () => {
+    const r = serviceOk(parseServiceEdit(form({ ...base, summary: "  ", note: "" })));
+    assert.equal(r.summary, null);
+    assert.equal(r.note, null);
+  });
+
+  it("refuses a missing name or description", () => {
+    assert.equal(parseServiceEdit(form({ ...base, name: "" })).ok, false);
+    assert.equal(parseServiceEdit(form({ ...base, description: " " })).ok, false);
+  });
+});
+
+describe("describeServiceChanges", () => {
+  const before: ServiceEdit = {
+    name: "Workplace Wellbeing",
+    summary: "s",
+    description: "Support with:",
+    points: ["Workplace stress"],
+    note: null,
+    sortOrder: 4,
+    active: true,
+  };
+
+  it("names each kind of change", () => {
+    assert.equal(
+      describeServiceChanges(before, { ...before, points: ["Workplace stress", "Burnout"], active: false }),
+      "points changed; hidden from the website"
+    );
+  });
+
+  it("is empty when nothing changed", () => {
+    assert.equal(describeServiceChanges(before, { ...before, points: [...before.points] }), "");
+  });
+});
+
+function serviceOk(r: ReturnType<typeof parseServiceEdit>): ServiceEdit {
+  assert.ok(r.ok, r.ok ? "" : r.message);
+  return r.service;
+}

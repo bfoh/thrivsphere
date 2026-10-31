@@ -36,7 +36,7 @@ export const ADMIN_NAV: NavItem[] = [
   // Running the organisation.
   { label: "Staff", href: "/admin/staff", capability: "staff:read", group: "organisation" },
   { label: "Activity", href: "/admin/activity", capability: "audit:read", group: "organisation" },
-  { label: "Prices", href: "/admin/catalogue", capability: "catalogue:manage", group: "organisation" },
+  { label: "Services & prices", href: "/admin/catalogue", capability: "catalogue:manage", group: "organisation" },
   { label: "Revenue", href: "/admin/revenue", capability: "revenue:read", group: "organisation" },
   { label: "HR", href: "/admin/hr", capability: "hr:read", group: "organisation" },
   { label: "Accounting", href: "/admin/accounting", capability: "accounting:read", group: "organisation" },

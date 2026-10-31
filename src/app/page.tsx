@@ -1,6 +1,10 @@
 import { HomeDeck } from "@/components/HomeDeck";
-import { services } from "@/data/site";
+import { getPublishedServices } from "@/lib/queries/catalogue";
 
-export default function Home() {
-  return <HomeDeck services={services} />;
+// Service wording is edited in the back office; edits also refresh this page
+// straight away, so this is only a backstop.
+export const revalidate = 300;
+
+export default async function Home() {
+  return <HomeDeck services={await getPublishedServices()} />;
 }

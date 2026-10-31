@@ -2,7 +2,8 @@ import "server-only";
 
 import { asc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
-import { pricePlans } from "@/db/schema";
+import { pricePlans, services } from "@/db/schema";
+import { toService } from "@/lib/service-content";
 
 /**
  * The plans on sale, in display order.
@@ -16,4 +17,14 @@ export async function getActivePlans() {
     .from(pricePlans)
     .where(eq(pricePlans.active, true))
     .orderBy(asc(pricePlans.sortOrder));
+}
+
+/** The services shown on the website, in display order, worded as the owner set them. */
+export async function getPublishedServices() {
+  const rows = await getDb()
+    .select()
+    .from(services)
+    .where(eq(services.active, true))
+    .orderBy(asc(services.sortOrder));
+  return rows.map(toService);
 }

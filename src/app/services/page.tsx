@@ -4,7 +4,8 @@ import { PageShell } from "@/components/PageShell";
 import { ScopeOfPractice } from "@/components/ScopeOfPractice";
 import { ServiceDetail } from "@/components/ServiceDetail";
 import { Icon } from "@/components/icons";
-import { bookCta, brand, services } from "@/data/site";
+import { bookCta, brand } from "@/data/site";
+import { getPublishedServices } from "@/lib/queries/catalogue";
 
 export const metadata: Metadata = {
   title: "Our Services",
@@ -12,7 +13,11 @@ export const metadata: Metadata = {
     "Wellbeing Needs Reviews, emotional wellbeing support, psychoeducation and coping skills, resilience and personal development, and workplace wellbeing — online, for adults aged 18 and above.",
 };
 
-export default function ServicesPage() {
+// See src/app/page.tsx.
+export const revalidate = 300;
+
+export default async function ServicesPage() {
+  const services = await getPublishedServices();
   return (
     <PageShell
       eyebrow="Our Services"

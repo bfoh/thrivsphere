@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { updatePricePlan } from "@/app/actions/catalogue";
+import { updatePricePlan, updateService } from "@/app/actions/catalogue";
 import { initialBookingState } from "@/lib/booking-state";
 
 const input: React.CSSProperties = {
@@ -59,6 +59,69 @@ export function PlanForm({ plan }: { plan: EditablePlan }) {
         </label>
         <label style={{ display: "flex", gap: 7, alignItems: "center", fontSize: 13.5, color: "var(--ink)" }}>
           <input type="checkbox" name="featured" defaultChecked={plan.featured} /> Highlight on the pricing page
+        </label>
+        <button className="pill pill-teal" disabled={pending} style={{ marginLeft: "auto", padding: "9px 20px", fontSize: 13.5, opacity: pending ? 0.6 : 1 }}>
+          {pending ? "Saving…" : "Save"}
+        </button>
+      </div>
+      {state.status !== "idle" && (
+        <p role="status" style={{ margin: 0, fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>
+          {state.message}
+        </p>
+      )}
+    </form>
+  );
+}
+
+export type EditableService = {
+  id: string;
+  slug: string;
+  name: string;
+  summary: string | null;
+  description: string;
+  points: string[];
+  note: string | null;
+  sortOrder: number;
+  active: boolean;
+};
+
+/** One service's wording, edited in place. */
+export function ServiceForm({ service }: { service: EditableService }) {
+  const [state, action, pending] = useActionState(updateService, initialBookingState);
+  const id = (field: string) => `${service.slug}-${field}`;
+
+  return (
+    <form action={action} style={{ display: "grid", gap: 12 }}>
+      <input type="hidden" name="serviceId" value={service.id} />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
+        <div style={{ gridColumn: "span 2" }}>
+          <label htmlFor={id("name")} style={lbl}>Name</label>
+          <input id={id("name")} name="name" defaultValue={service.name} required style={input} />
+        </div>
+        <div>
+          <label htmlFor={id("sortOrder")} style={lbl}>Order on page</label>
+          <input id={id("sortOrder")} name="sortOrder" type="number" defaultValue={service.sortOrder} style={input} />
+        </div>
+      </div>
+      <div>
+        <label htmlFor={id("summary")} style={lbl}>Homepage summary (one line)</label>
+        <input id={id("summary")} name="summary" defaultValue={service.summary ?? ""} style={input} />
+      </div>
+      <div>
+        <label htmlFor={id("description")} style={lbl}>Description</label>
+        <textarea id={id("description")} name="description" defaultValue={service.description} required rows={3} style={{ ...input, resize: "vertical" }} />
+      </div>
+      <div>
+        <label htmlFor={id("points")} style={lbl}>Points (one per line)</label>
+        <textarea id={id("points")} name="points" defaultValue={service.points.join("\n")} rows={Math.min(Math.max(service.points.length, 2), 12)} style={{ ...input, resize: "vertical" }} />
+      </div>
+      <div>
+        <label htmlFor={id("note")} style={lbl}>Note beneath the points (optional)</label>
+        <textarea id={id("note")} name="note" defaultValue={service.note ?? ""} rows={2} style={{ ...input, resize: "vertical" }} />
+      </div>
+      <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
+        <label style={{ display: "flex", gap: 7, alignItems: "center", fontSize: 13.5, color: "var(--ink)" }}>
+          <input type="checkbox" name="active" defaultChecked={service.active} /> Shown on the website
         </label>
         <button className="pill pill-teal" disabled={pending} style={{ marginLeft: "auto", padding: "9px 20px", fontSize: 13.5, opacity: pending ? 0.6 : 1 }}>
           {pending ? "Saving…" : "Save"}

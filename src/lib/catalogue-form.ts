@@ -62,3 +62,58 @@ export function describePlanChanges(before: PlanEdit, after: PlanEdit): string {
   if (before.featured !== after.featured) changes.push(after.featured ? "highlighted" : "no longer highlighted");
   return changes.join("; ");
 }
+
+/** The parts of a service the owner edits. */
+export type ServiceEdit = {
+  name: string;
+  summary: string | null;
+  description: string;
+  points: string[];
+  note: string | null;
+  sortOrder: number;
+  active: boolean;
+};
+
+/** Read the service form. Points are entered one per line. */
+export function parseServiceEdit(get: (name: string) => string): { ok: true; service: ServiceEdit } | { ok: false; message: string } {
+  const name = get("name").trim();
+  if (!name) return { ok: false, message: "Please give the service a name." };
+
+  const description = get("description").trim();
+  if (!description) return { ok: false, message: "Please add a description." };
+
+  const points = get("points")
+    .split(/\r?\n/)
+    .map((p) => p.replace(/^[•\-*]\s*/, "").trim())
+    .filter(Boolean);
+  if (points.length > 20) return { ok: false, message: "Please keep the list to 20 points or fewer." };
+
+  const sortOrder = Number(get("sortOrder") || "0");
+  if (!Number.isInteger(sortOrder)) return { ok: false, message: "Order must be a whole number." };
+
+  return {
+    ok: true,
+    service: {
+      name,
+      summary: get("summary").trim() || null,
+      description,
+      points,
+      note: get("note").trim() || null,
+      sortOrder,
+      active: get("active") === "on",
+    },
+  };
+}
+
+/** What changed on a service, for the activity log. Empty if nothing changed. */
+export function describeServiceChanges(before: ServiceEdit, after: ServiceEdit): string {
+  const changes: string[] = [];
+  if (before.name !== after.name) changes.push(`name "${before.name}" → "${after.name}"`);
+  if ((before.summary ?? "") !== (after.summary ?? "")) changes.push("summary changed");
+  if (before.description !== after.description) changes.push("description changed");
+  if (before.points.join("\n") !== after.points.join("\n")) changes.push("points changed");
+  if ((before.note ?? "") !== (after.note ?? "")) changes.push("note changed");
+  if (before.sortOrder !== after.sortOrder) changes.push(`order ${before.sortOrder} → ${after.sortOrder}`);
+  if (before.active !== after.active) changes.push(after.active ? "shown on the website" : "hidden from the website");
+  return changes.join("; ");
+}

@@ -23,7 +23,7 @@ a member who can be removed.
 | Who | Can |
 |---|---|
 | **Founder** | Everything, including staff, roles, HR, revenue and accounting |
-| **Admin** | Day-to-day running: prices, every practitioner's calendar, activity log |
+| **Admin** | Day-to-day running: services and prices, every practitioner's calendar, activity log |
 | **Practitioner** | Their clients, appointments and their own availability |
 
 - **Add a practitioner:** invite them at **Staff**. They sign in and do two
@@ -38,11 +38,10 @@ a member who can be removed.
 - **Allocate appointments:** **Appointments** shows who each session is with.
   *Reassign* moves it to another practitioner, and the system refuses if they
   are already booked at that time.
-- **Prices:** **Prices** (`/admin/catalogue`). Changes reach the pricing page,
-  the client's *Buy sessions* page and card checkout together, and are
-  recorded in **Activity**.
-- **Service descriptions:** these live in `src/data/site.ts` and are changed by
-  a developer.
+- **Prices and service descriptions:** **Services & prices**
+  (`/admin/catalogue`). A price change reaches the pricing page, the client's
+  *Buy sessions* page and card checkout together. Service wording shows on the
+  homepage and *Our Services*. Every change is recorded in **Activity**.
 
 ## Environment variables
 
@@ -88,7 +87,8 @@ the pages, so they always need a redeploy.
 
 ## One-off steps after the pre-launch release
 
-- [ ] Apply migration `0007_practitioner_settings` (`npm run db:migrate`).
+- [ ] Apply migrations `0007_practitioner_settings` and `0008_service_content`
+      (`npm run db:migrate`).
 - [ ] Set `EMAIL_FROM_NAME` to `ThriveSphere Wellbeing`.
 - [ ] Rename the application in Clerk (Dashboard → Settings) and re-run
       `npx dotenv -e .env.local -- npx tsx scripts/brand-clerk-emails.ts`.

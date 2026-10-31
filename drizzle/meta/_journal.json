@@ -57,6 +57,13 @@
       "when": 1793462823953,
       "tag": "0007_practitioner_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793464196857,
+      "tag": "0008_service_content",
+      "breakpoints": true
     }
   ]
 }
