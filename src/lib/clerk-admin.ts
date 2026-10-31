@@ -158,3 +158,13 @@ export async function blockUser(authId: string): Promise<Result> {
 export function unblockUser(authId: string): Promise<Result> {
   return call(`/users/${authId}/unban`, { method: "POST" });
 }
+
+/**
+ * Delete someone's sign-in for good: their account, sessions and password.
+ *
+ * Only the provider's copy goes. Our own row stays, marked removed, because
+ * past sessions, notes and the activity log must keep saying who did what.
+ */
+export function deleteUser(authId: string): Promise<Result> {
+  return call(`/users/${authId}`, { method: "DELETE" });
+}

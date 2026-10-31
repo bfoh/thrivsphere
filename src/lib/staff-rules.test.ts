@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { assignableRoles, canManageStaff, type ActingUser, type TargetUser } from "./staff-rules";
+import { assignableRoles, canCancelInvitation, canManageStaff, type ActingUser, type TargetUser } from "./staff-rules";
 
 /**
  * These rules decide who can reach every client record in the service, and
@@ -151,5 +151,54 @@ describe("assignableRoles", () => {
   it("gives everyone else nothing, so the picker cannot offer what the rules refuse", () => {
     assert.deepEqual(assignableRoles(admin), []);
     assert.deepEqual(assignableRoles(practitioner), []);
+  });
+});
+
+describe("removing a colleague who has left", () => {
+  const remove = (actor: ActingUser, over: Partial<TargetUser> = {}, foundersRemaining = 2) =>
+    canManageStaff({ actor, target: target(over), action: "remove", foundersRemaining });
+
+  it("lets a founder or an admin remove a practitioner or supervisor", () => {
+    for (const actor of [founder, admin]) {
+      assert.equal(remove(actor).allowed, true);
+      assert.equal(remove(actor, { role: "supervisor" }).allowed, true);
+    }
+  });
+
+  it("refuses a practitioner", () => {
+    assert.equal(remove(practitioner).allowed, false);
+  });
+
+  it("lets only a founder remove an admin or founder", () => {
+    assert.equal(remove(admin, { role: "admin" }).allowed, false);
+    assert.equal(remove(admin, { role: "founder" }).allowed, false);
+    assert.equal(remove(founder, { role: "admin" }).allowed, true);
+    assert.equal(remove(founder, { role: "founder" }).allowed, true);
+  });
+
+  it("refuses removing the only founder", () => {
+    assert.equal(remove(founder, { role: "founder" }, 1).allowed, false);
+  });
+
+  it("refuses removing yourself, a client, or someone already removed", () => {
+    assert.equal(remove(admin, { userId: admin.userId, role: "admin" }).allowed, false);
+    assert.equal(remove(admin, { userId: "a2", role: "practitioner", status: "active" }).allowed, true);
+    assert.equal(remove(founder, { role: "client" }).allowed, false);
+    assert.equal(remove(founder, { status: "deleted" }).allowed, false);
+  });
+
+  it("still keeps admins away from every other staff action", () => {
+    for (const action of ["block", "unblock", "change_role", "invite"] as const) {
+      assert.equal(can({ actor: admin, target: target(), action, newRole: "supervisor", foundersRemaining: 2 }), false);
+    }
+  });
+});
+
+describe("canCancelInvitation", () => {
+  it("follows the removal rules", () => {
+    assert.equal(canCancelInvitation(founder, "admin"), true);
+    assert.equal(canCancelInvitation(admin, "practitioner"), true);
+    assert.equal(canCancelInvitation(admin, "admin"), false);
+    assert.equal(canCancelInvitation(practitioner, "practitioner"), false);
   });
 });

@@ -49,8 +49,10 @@ export type Capability =
   | "catalogue:manage"
   | "report:read"
   | "audit:read"
-  // Founder-only: running the organisation rather than delivering the service.
+  // Seeing the team, and removing a colleague who has left.
   | "staff:read"
+  | "staff:remove"
+  // Founder-only: running the organisation rather than delivering the service.
   | "staff:manage"
   | "role:assign"
   | "revenue:read"
@@ -100,6 +102,8 @@ const ADMIN_CAPS: Capability[] = [
   "enquiry:manage",
   "catalogue:manage",
   "audit:read",
+  "staff:read",
+  "staff:remove",
 ];
 
 /**
@@ -112,7 +116,6 @@ const ADMIN_CAPS: Capability[] = [
  */
 const FOUNDER_CAPS: Capability[] = [
   ...ADMIN_CAPS,
-  "staff:read",
   "staff:manage",
   "role:assign",
   "revenue:read",

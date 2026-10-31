@@ -2,7 +2,13 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { changeStaffRole, inviteStaffMember, setStaffBlocked } from "@/app/actions/staff";
+import {
+  cancelStaffInvitation,
+  changeStaffRole,
+  inviteStaffMember,
+  removeStaffMember,
+  setStaffBlocked,
+} from "@/app/actions/staff";
 import { initialStaffState } from "@/lib/staff-state";
 import type { Role } from "@/lib/authz";
 import { roleLabel } from "@/lib/staff-rules";
@@ -111,6 +117,61 @@ export function BlockControl({
         style={{ padding: "8px 16px", fontSize: 12.5, opacity: pending ? 0.6 : 1, color: blocked ? "var(--teal-deep)" : "#b4553f" }}
       >
         {pending ? "Working…" : blocked ? "Unblock" : "Block"}
+      </button>
+      <Result state={state} />
+    </form>
+  );
+}
+
+/** Remove a colleague who has left. Confirmed first: their sign-in goes for good. */
+export function RemoveStaffControl({ userId, email }: { userId: string; email: string }) {
+  const [state, action, pending] = useActionState(removeStaffMember, initialStaffState);
+
+  return (
+    <form
+      action={action}
+      onSubmit={(e) => {
+        const ok = window.confirm(
+          `Remove ${email} from the staff? Their sign-in is deleted for good and they are signed out. Their name stays on past sessions and notes.`
+        );
+        if (!ok) e.preventDefault();
+      }}
+      style={{ display: "flex", flexDirection: "column", gap: 5, alignItems: "flex-start" }}
+    >
+      <input type="hidden" name="userId" value={userId} />
+      <button
+        className="pill pill-ghost"
+        disabled={pending}
+        style={{ padding: "8px 16px", fontSize: 12.5, opacity: pending ? 0.6 : 1, color: "#b4553f" }}
+      >
+        {pending ? "Removing…" : "Remove"}
+      </button>
+      <Result state={state} />
+    </form>
+  );
+}
+
+/** Cancel an invitation that has not been accepted, so its link stops working. */
+export function CancelInvitationControl({ invitationId, email }: { invitationId: string; email: string }) {
+  const [state, action, pending] = useActionState(cancelStaffInvitation, initialStaffState);
+
+  return (
+    <form
+      action={action}
+      onSubmit={(e) => {
+        if (!window.confirm(`Cancel the invitation for ${email}? The link in their email will stop working.`)) {
+          e.preventDefault();
+        }
+      }}
+      style={{ display: "inline-flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}
+    >
+      <input type="hidden" name="invitationId" value={invitationId} />
+      <button
+        className="pill pill-ghost"
+        disabled={pending}
+        style={{ padding: "5px 13px", fontSize: 12, opacity: pending ? 0.6 : 1, color: "#b4553f" }}
+      >
+        {pending ? "Cancelling…" : "Cancel invitation"}
       </button>
       <Result state={state} />
     </form>

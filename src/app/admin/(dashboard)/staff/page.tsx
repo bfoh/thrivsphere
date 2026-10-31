@@ -3,8 +3,14 @@ import { Section, Empty } from "@/components/admin/RecordUI";
 import { getCurrentActor } from "@/lib/session";
 import { listStaff } from "@/app/actions/staff";
 import { listInvitations } from "@/lib/clerk-admin";
-import { assignableRoles, roleLabel } from "@/lib/staff-rules";
-import { BlockControl, InviteStaffForm, RoleControl } from "@/components/admin/StaffControls";
+import { assignableRoles, canCancelInvitation, canManageStaff, roleLabel } from "@/lib/staff-rules";
+import {
+  BlockControl,
+  CancelInvitationControl,
+  InviteStaffForm,
+  RemoveStaffControl,
+  RoleControl,
+} from "@/components/admin/StaffControls";
 import type { Role } from "@/lib/authz";
 
 export const metadata: Metadata = { title: "Staff", robots: { index: false, follow: false } };
@@ -15,16 +21,31 @@ const d = (v: Date | null) =>
 /**
  * Staff accounts.
  *
- * Founder only, via `staff:read`. Until now the only way to add a colleague or
- * change what they can see was a developer running a CLI script — which meant
- * no record of who changed whose access, and no way for the organisation to
- * manage itself. Every action on this page writes an audit row.
+ * Founders and admins, via `staff:read`. Founders invite, change roles and
+ * block; admins can also remove a colleague who has left. Until now the only
+ * way to add a colleague or change what they can see was a developer running a
+ * CLI script — which meant no record of who changed whose access, and no way
+ * for the organisation to manage itself. Every action on this page writes an
+ * audit row.
+ *
+ * Each control is offered only where the rules in `staff-rules` would allow
+ * it, so nobody is shown a button that would then refuse them.
  */
 export default async function StaffPage() {
   const staff = await listStaff();
   const actor = await getCurrentActor();
-  const roles = actor ? assignableRoles({ userId: actor.userId, role: actor.role }) : [];
+  const acting = actor ? { userId: actor.userId, role: actor.role } : null;
+  const roles = acting ? assignableRoles(acting) : [];
   const pending = await listInvitations();
+  const foundersRemaining = staff.filter((s) => s.role === "founder" && s.status === "active").length;
+  const canRemove = (s: (typeof staff)[number]) =>
+    !!acting &&
+    canManageStaff({
+      actor: acting,
+      target: { userId: s.id, role: s.role as Role, status: s.status },
+      action: "remove",
+      foundersRemaining,
+    }).allowed;
 
   return (
     <div style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 24px 72px" }}>
@@ -34,9 +55,11 @@ export default async function StaffPage() {
         in <strong>Activity</strong>.
       </p>
 
-      <Section title="Invite a colleague" subtitle="They receive an email and choose their own password. The role is applied when the account is created.">
-        <InviteStaffForm roles={roles} />
-      </Section>
+      {roles.length > 0 && (
+        <Section title="Invite a colleague" subtitle="They receive an email and choose their own password. The role is applied when the account is created.">
+          <InviteStaffForm roles={roles} />
+        </Section>
+      )}
 
       <Section title="Accounts" subtitle={`${staff.length} back-office ${staff.length === 1 ? "account" : "accounts"}`}>
         {staff.length === 0 ? (
@@ -75,9 +98,12 @@ export default async function StaffPage() {
                       </td>
                       <td style={{ ...td, color: "var(--navy-soft)" }}>{d(s.lastSeenAt)}</td>
                       <td style={td}>
-                        {!isSelf && roles.length > 0 && (
-                          <BlockControl userId={s.id} email={s.email} blocked={s.status === "suspended"} />
-                        )}
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-start" }}>
+                          {!isSelf && roles.length > 0 && (
+                            <BlockControl userId={s.id} email={s.email} blocked={s.status === "suspended"} />
+                          )}
+                          {canRemove(s) && <RemoveStaffControl userId={s.id} email={s.email} />}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -92,11 +118,16 @@ export default async function StaffPage() {
         <Section title="Invitations not yet accepted" subtitle="These people have been emailed but have not created an account.">
           <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
             {pending.value.map((i) => (
-              <li key={i.id} style={{ fontSize: 14, color: "var(--ink)" }}>
-                <strong style={{ color: "var(--navy)" }}>{i.email}</strong>{" "}
-                <span style={{ color: "var(--navy-soft)" }}>
-                  — {roleLabel(i.role as Role)}, invited {d(i.createdAt)}
+              <li key={i.id} style={{ fontSize: 14, color: "var(--ink)", display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                <span>
+                  <strong style={{ color: "var(--navy)" }}>{i.email}</strong>{" "}
+                  <span style={{ color: "var(--navy-soft)" }}>
+                    — {roleLabel(i.role as Role)}, invited {d(i.createdAt)}
+                  </span>
                 </span>
+                {acting && canCancelInvitation(acting, i.role as Role) && (
+                  <CancelInvitationControl invitationId={i.id} email={i.email} />
+                )}
               </li>
             ))}
           </ul>

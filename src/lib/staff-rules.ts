@@ -11,7 +11,7 @@ import { PRIVILEGED_ROLES, type Role } from "./authz";
  * Every rule here is a refusal. The permissive path is the short one.
  */
 
-export type StaffAction = "change_role" | "block" | "unblock" | "invite";
+export type StaffAction = "change_role" | "block" | "unblock" | "invite" | "remove";
 
 export type ActingUser = { userId: string; role: Role };
 
@@ -43,9 +43,11 @@ export function canManageStaff(params: {
 }): Decision {
   const { actor, target, action, newRole, foundersRemaining } = params;
 
-  // Only a founder manages people at all. Admins run the service; they do not
-  // decide who else gets access to it.
-  if (actor.role !== "founder") {
+  // Only a founder manages people, with one exception: an admin can remove a
+  // colleague who has left. Admins run the service; they do not decide who
+  // else gets access to it, so they never grant it.
+  const adminRemoving = action === "remove" && actor.role === "admin";
+  if (actor.role !== "founder" && !adminRemoving) {
     return deny("Only a founder can manage staff accounts.");
   }
 
@@ -95,7 +97,28 @@ export function canManageStaff(params: {
     return deny("That account is not blocked.");
   }
 
+  if (action === "remove") {
+    if (target.status === "deleted") return deny("That account has already been removed.");
+    // The mirror of granting: only a founder takes admin or founder access away.
+    if (actor.role !== "founder" && PRIVILEGED_ROLES.includes(target.role)) {
+      return deny("Only a founder can remove an administrator or founder.");
+    }
+    if (target.role === "founder" && foundersRemaining <= 1) {
+      return deny("This is the only founder and cannot be removed.");
+    }
+  }
+
   return ALLOW;
+}
+
+/**
+ * Whether `actor` may cancel an invitation that has not been accepted.
+ *
+ * The same people who could remove that colleague once they had joined.
+ */
+export function canCancelInvitation(actor: ActingUser, invitedRole: Role): boolean {
+  if (actor.role === "founder") return true;
+  return actor.role === "admin" && !PRIVILEGED_ROLES.includes(invitedRole);
 }
 
 /**

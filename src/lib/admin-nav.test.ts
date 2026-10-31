@@ -35,11 +35,12 @@ describe("navFor", () => {
     assert.equal(l.filter((x) => ["Staff", "Revenue", "HR", "Accounting"].includes(x)).length, 0);
   });
 
-  it("gives an admin the activity log and catalogue but not staff management or the money pages", () => {
+  it("gives an admin the activity log, catalogue and staff list but not the money pages", () => {
     const l = labels("admin");
     assert.ok(l.includes("Activity"), "admin should see the audit log");
     assert.ok(l.includes("Services & prices"), "admin should be able to update services and prices");
-    for (const forbidden of ["Staff", "Revenue", "HR", "Accounting"]) {
+    assert.ok(l.includes("Staff"), "admin should be able to remove a colleague who has left");
+    for (const forbidden of ["Revenue", "HR", "Accounting"]) {
       assert.ok(!l.includes(forbidden), `admin must not see ${forbidden}`);
     }
   });

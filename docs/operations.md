@@ -23,7 +23,7 @@ a member who can be removed.
 | Who | Can |
 |---|---|
 | **Founder** | Everything, including staff, roles, HR, revenue and accounting |
-| **Admin** | Day-to-day running: services and prices, every practitioner's calendar, activity log |
+| **Admin** | Day-to-day running: services and prices, every practitioner's calendar, activity log, and removing practitioners and supervisors who have left |
 | **Practitioner** | Their clients, appointments and their own availability |
 
 - **Add a practitioner:** invite them at **Staff**. They sign in and do two
@@ -32,6 +32,14 @@ a member who can be removed.
   - set their hours and default meeting room at **Availability**.
 
   From then on clients are offered their times automatically (§7, §16).
+- **Remove a colleague who has left:** **Staff → Remove**. Their sign-in is
+  deleted for good; their name stays on past sessions, notes and the activity
+  log. Reassign any upcoming sessions first — the website refuses until there
+  are none. Admins can remove practitioners and supervisors; only a founder
+  can remove an admin or founder. *Cancel invitation* does the same for
+  someone invited who has not joined yet.
+- **Password rules** (such as the minimum length) are set in Clerk:
+  Dashboard → the production instance → User & authentication → Password.
 - **More days and times:** **Availability**. Use the weekly pattern for
   regular hours, *Extra hours* for one-off dates and *Blocked time* for leave.
   The founder and admins can manage anyone's calendar there.
