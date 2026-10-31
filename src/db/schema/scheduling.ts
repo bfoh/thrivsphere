@@ -146,3 +146,18 @@ export const remindersSent = pgTable(
   },
   (t) => [index("reminders_appointment_idx").on(t.appointmentId, t.kind)]
 );
+
+/**
+ * Per-practitioner settings.
+ *
+ * The default meeting room is copied onto each new appointment, so a client
+ * has a joining link the moment they book without anyone pasting one in. Like
+ * the per-appointment link it is encrypted at rest and never emailed.
+ */
+export const practitionerSettings = pgTable("practitioner_settings", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  defaultMeetingLinkEncrypted: text("default_meeting_link_encrypted"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

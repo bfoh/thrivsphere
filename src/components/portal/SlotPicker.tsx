@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import { useActionState } from "react";
+import Link from "next/link";
 import { bookAppointment } from "@/app/actions/booking";
+import { rescheduleOwnAppointment } from "@/app/actions/appointments";
 import { initialBookingState } from "@/lib/booking-state";
-
-type SlotGroup = { date: string; label: string; slots: { iso: string; time: string }[] };
+import type { SlotGroup } from "@/lib/slot-groups";
 
 /**
  * Slot picker.
@@ -14,15 +15,30 @@ type SlotGroup = { date: string; label: string; slots: { iso: string; time: stri
  * time is echoed back in full before confirming — a mis-tapped slot is a
  * missed session for someone who may have waited weeks for it.
  */
-export function SlotPicker({ groups, durationMinutes }: { groups: SlotGroup[]; durationMinutes: number }) {
+export function SlotPicker({
+  groups,
+  rescheduleId,
+}: {
+  groups: SlotGroup[];
+  /** Set when moving an existing appointment rather than booking a new one. */
+  rescheduleId?: string;
+}) {
   const [selected, setSelected] = React.useState<string | null>(null);
-  const [state, action, pending] = useActionState(bookAppointment, initialBookingState);
+  const [state, action, pending] = useActionState(
+    rescheduleId ? rescheduleOwnAppointment : bookAppointment,
+    initialBookingState
+  );
 
   if (state.status === "ok") {
     return (
       <div className="card" style={{ padding: 32, textAlign: "center" }}>
-        <h2 style={{ margin: "0 0 8px", fontSize: 21, color: "var(--navy)" }}>You&apos;re booked</h2>
-        <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>{state.message}</p>
+        <h2 style={{ margin: "0 0 8px", fontSize: 21, color: "var(--navy)" }}>
+          {rescheduleId ? "Your appointment has moved" : "You're booked"}
+        </h2>
+        <p style={{ margin: "0 0 18px", fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>{state.message}</p>
+        <Link href="/portal/appointments" className="pill pill-teal" style={{ padding: "11px 22px", fontSize: 14 }}>
+          See my appointments
+        </Link>
       </div>
     );
   }
@@ -32,7 +48,7 @@ export function SlotPicker({ groups, durationMinutes }: { groups: SlotGroup[]; d
   return (
     <form action={action}>
       <input type="hidden" name="startsAt" value={selected ?? ""} />
-      <input type="hidden" name="durationMinutes" value={durationMinutes} />
+      {rescheduleId && <input type="hidden" name="appointmentId" value={rescheduleId} />}
 
       {state.status === "error" && (
         <p role="alert" style={{ margin: "0 0 16px", padding: "11px 14px", borderRadius: 10, background: "rgba(180,85,63,0.1)", border: "1px solid rgba(180,85,63,0.3)", fontSize: 13.5, color: "#8c3f2e" }}>
@@ -74,7 +90,7 @@ export function SlotPicker({ groups, durationMinutes }: { groups: SlotGroup[]; d
 
       <div style={{ marginTop: 26, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
         <button className="pill pill-gold" disabled={!selected || pending} style={{ padding: "14px 28px", fontSize: 15, opacity: !selected || pending ? 0.55 : 1 }}>
-          {pending ? "Booking…" : "Confirm this time"}
+          {pending ? (rescheduleId ? "Moving…" : "Booking…") : rescheduleId ? "Move to this time" : "Confirm this time"}
         </button>
         <span style={{ fontSize: 13.5, color: "var(--navy-soft)" }}>
           {chosen ? `${chosen.time}, ${groups.find((g) => g.slots.some((s) => s.iso === selected))?.label}` : "Choose a time above."}

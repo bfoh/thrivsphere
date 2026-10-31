@@ -282,6 +282,68 @@ export function reminder1h(startsAt: Date): Email {
 }
 
 /**
+ * An appointment was cancelled.
+ *
+ * `late` follows the Cancellation and Refund Policy: with less than 24 hours'
+ * notice the session counts as used, and the client is told so plainly rather
+ * than finding out from their balance.
+ */
+export function appointmentCancelled(startsAt: Date, o: { by: "client" | "service"; late?: boolean }): Email {
+  const w = when(startsAt);
+  const outcome =
+    o.by === "service"
+      ? "We're sorry for the change. Any session it used has been returned to your account."
+      : o.late
+        ? "As it was cancelled with less than 24 hours' notice, the session counts as used, in line with our Cancellation and Refund Policy."
+        : "Any session it used has been returned to your account.";
+  const lead = o.by === "service" ? "We have had to cancel your appointment on:" : "Your appointment has been cancelled:";
+  return {
+    subject: "Your appointment has been cancelled",
+    html: shell({
+      preheader: "A change to your appointments.",
+      heading: "Your appointment has been cancelled",
+      body: `
+        <p style="margin:0 0 14px;">${lead}</p>
+        <p style="margin:0 0 18px;font-size:17px;font-weight:bold;color:${NAVY};">${w}</p>
+        <p style="margin:0 0 14px;">${outcome}</p>
+        <p style="margin:0;">You can book another time from your account whenever you're ready.</p>`,
+      cta: { label: "Book another time", href: `${siteUrl()}/portal/book` },
+    }),
+    text: textShell([
+      lead,
+      w,
+      "",
+      outcome,
+      "",
+      `Book another time from your account: ${siteUrl()}/portal/book`,
+    ]),
+  };
+}
+
+/** An appointment was moved to a new time. */
+export function appointmentMoved(startsAt: Date): Email {
+  const w = when(startsAt);
+  return {
+    subject: "Your appointment has changed",
+    html: shell({
+      preheader: "Your new appointment time is in your account.",
+      heading: "Your appointment has moved",
+      body: `
+        <p style="margin:0 0 14px;">Your appointment is now on:</p>
+        <p style="margin:0 0 18px;font-size:17px;font-weight:bold;color:${NAVY};">${w}</p>
+        <p style="margin:0;">Sign in to your account to join or see the details.</p>`,
+      cta: { label: "Go to my account", href: `${siteUrl()}/portal/appointments` },
+    }),
+    text: textShell([
+      `Your appointment is now on ${w}.`,
+      "",
+      "Sign in to your account to join or see the details:",
+      `${siteUrl()}/portal/appointments`,
+    ]),
+  };
+}
+
+/**
  * New secure message.
  *
  * Says only that a message exists. The whole point of in-portal messaging is
@@ -348,6 +410,44 @@ export function paymentReceipt(planName: string, amountPence: number, sessions: 
 }
 
 /* ----------------------------------------------------------------- staff */
+
+/**
+ * A practitioner's diary changed.
+ *
+ * Sent to the practitioner, with the time only: the client's name and details
+ * stay in the back office rather than in an inbox.
+ */
+export function staffAppointmentNotice(
+  change: "booked" | "cancelled" | "moved" | "assigned",
+  startsAt: Date
+): Email {
+  const w = when(startsAt);
+  const line = {
+    booked: "A client has booked a session with you:",
+    cancelled: "A client has cancelled their session:",
+    moved: "A client has moved their session to:",
+    assigned: "A session has been assigned to you:",
+  }[change];
+  const subject = {
+    booked: "New booking",
+    cancelled: "Booking cancelled",
+    moved: "Booking moved",
+    assigned: "Booking assigned to you",
+  }[change];
+  return {
+    subject: `${subject} — ${w}`,
+    html: shell({
+      preheader: "A change to your appointments.",
+      heading: subject,
+      body: `
+        <p style="margin:0 0 14px;">${line}</p>
+        <p style="margin:0;font-size:17px;font-weight:bold;color:${NAVY};">${w}</p>`,
+      cta: { label: "Open appointments", href: `${siteUrl()}/admin/appointments` },
+      showCrisis: false,
+    }),
+    text: textShell([line, w, "", `Appointments: ${siteUrl()}/admin/appointments`], { crisis: false }),
+  };
+}
 
 /**
  * Internal enquiry notification.

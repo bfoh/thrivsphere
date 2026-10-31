@@ -69,6 +69,9 @@ describe("can", () => {
     // are deliberately above a practitioner.
     assert.equal(can(practitioner, "notes:amend"), false);
     assert.equal(can(practitioner, "catalogue:manage"), false);
+    // A practitioner runs their own calendar, not their colleagues'.
+    assert.equal(can(practitioner, "availability:manage"), true);
+    assert.equal(can(practitioner, "availability:manage:any"), false);
     assert.equal(can(practitioner, "audit:read"), false);
   });
 
@@ -81,6 +84,7 @@ describe("can", () => {
   it("gives admins the administrative capabilities", () => {
     assert.equal(can(admin, "audit:read"), true);
     assert.equal(can(admin, "catalogue:manage"), true);
+    assert.equal(can(admin, "availability:manage:any"), true);
     assert.equal(can(admin, "payment:read:any"), true);
   });
 

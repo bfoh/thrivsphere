@@ -39,6 +39,8 @@ export type Capability =
   | "appointment:book:own"
   | "appointment:manage:any"
   | "availability:manage"
+  // Manage another practitioner's calendar: allocating work across the team.
+  | "availability:manage:any"
   | "payment:read:own"
   | "payment:read:any"
   | "document:read:own"
@@ -93,6 +95,7 @@ const SUPERVISOR_CAPS: Capability[] = [
 
 const ADMIN_CAPS: Capability[] = [
   ...SUPERVISOR_CAPS,
+  "availability:manage:any",
   "payment:read:any",
   "enquiry:manage",
   "catalogue:manage",

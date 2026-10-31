@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { and, eq, gte, lte } from "drizzle-orm";
+import { and, eq, gt, inArray } from "drizzle-orm";
 import { getDb } from "@/db";
 import { appointments, clients, remindersSent } from "@/db/schema";
 import { dueReminders, type ReminderKind } from "@/lib/reminders";
@@ -9,8 +9,10 @@ import { sendEmail } from "@/lib/email";
 /**
  * Scheduled reminder send.
  *
- * Runs hourly. Looks a little way ahead, works out which reminders are due,
- * sends them, and records what was sent so the next run cannot repeat itself.
+ * Runs hourly. Looks at every upcoming appointment, works out which reminders
+ * are due, sends them, and records what was sent so the next run cannot
+ * repeat itself. Booking confirmations normally go out the moment a session is
+ * booked; this picks up any that failed, however far ahead the session is.
  *
  * Protected by a shared secret rather than a user session, since the caller is
  * Vercel Cron. Without it, anyone who found the URL could make the service
@@ -38,7 +40,6 @@ export async function GET(request: Request) {
 
   const db = getDb();
   const now = new Date();
-  const horizon = new Date(now.getTime() + 26 * 60 * 60 * 1000);
 
   const rows = await db
     .select({
@@ -51,11 +52,7 @@ export async function GET(request: Request) {
     .from(appointments)
     .innerJoin(clients, eq(clients.id, appointments.clientId))
     .where(
-      and(
-        eq(appointments.status, "scheduled"),
-        gte(appointments.startsAt, now),
-        lte(appointments.startsAt, horizon)
-      )
+      and(eq(appointments.status, "scheduled"), gt(appointments.startsAt, now))
     );
 
   if (rows.length === 0) {
@@ -64,7 +61,13 @@ export async function GET(request: Request) {
 
   const sentRows = await db
     .select({ appointmentId: remindersSent.appointmentId, kind: remindersSent.kind })
-    .from(remindersSent);
+    .from(remindersSent)
+    .where(
+      inArray(
+        remindersSent.appointmentId,
+        rows.map((r) => r.appointmentId)
+      )
+    );
 
   const sentByAppointment = new Map<string, ReminderKind[]>();
   for (const s of sentRows) {

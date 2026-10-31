@@ -1,38 +1,32 @@
-# Appointment reminders: schedule
+# Appointment emails: schedule
 
-`vercel.json` runs the reminder job **once a day at 08:00 UTC**.
+## When each email goes
 
-That is not the intended schedule. `src/lib/reminders.ts` is built for an
-**hourly** run (`0 * * * *`):
+- **Booking confirmation:** sent the moment a client books, unless they have
+  turned appointment emails off. If that send fails, the hourly job retries it.
+- **Moved / cancelled:** sent straight away when a client reschedules or
+  cancels, or when staff cancel.
+- **24-hour reminder:** sent within ±90 minutes of 24 hours before.
+- **1-hour reminder:** sent within ±30 minutes of 1 hour before.
 
-- `booking_confirmation` — sent on the first run after a booking is made.
-- `reminder_24h` — fires within ±90 minutes of 24 hours before the appointment.
-- `reminder_1h` — fires within ±30 minutes of 1 hour before.
+None of these emails contains the joining link or any personal detail. The
+link is only shown in the client's account under **Appointments**.
 
-On a daily schedule only the confirmation is reliable. The 24-hour reminder
-reaches only appointments that happen to fall in the three-hour band around the
-run, and the one-hour reminder effectively never fires.
+## The job
 
-## Why it is daily
+`vercel.json` runs `/api/cron/reminders` **hourly** (`0 * * * *`), which needs
+the Vercel Pro plan. The reminder windows in `src/lib/reminders.ts` are sized
+for an hourly run, so each reminder fires exactly once.
 
-The Vercel Hobby plan limits cron jobs to once per day, and an hourly
-expression fails the deployment outright:
+Each run:
 
-```
-Hobby accounts are limited to daily cron jobs. This cron expression
-(0 * * * *) would run more than once per day.
-```
+- looks at every upcoming `scheduled` appointment;
+- works out what is due;
+- sends it;
+- records it in `reminders_sent`.
 
-## To fix
+Because of that record, a run can never send the same email twice. Sends that
+fail are not recorded, so the next run retries them.
 
-Upgrade the project to the Pro plan — which ThrivSphere needs regardless, since
-Hobby is for non-commercial use and the CIC takes payments — then set:
-
-```json
-{ "path": "/api/cron/reminders", "schedule": "0 * * * *" }
-```
-
-No code changes are required; the reminder windows already assume hourly.
-
-Reminders cannot send at all until the email provider is provisioned, so this
-is not currently visible to clients.
+The job is protected by `CRON_SECRET`, which Vercel Cron sends automatically.
+Without the secret the route refuses every request.

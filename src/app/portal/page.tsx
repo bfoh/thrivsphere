@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePortalClient } from "@/lib/portal-guard";
-import { desc, eq } from "drizzle-orm";
+import { and, asc, eq, gt } from "drizzle-orm";
 import { requireClientAccess } from "@/lib/guard";
 import { getDb } from "@/db";
 import { appointments, clients, packages } from "@/db/schema";
 import { Icon } from "@/components/icons";
 import { NotCrisisNotice } from "@/components/NotCrisisNotice";
 import { ReminderToggle } from "@/components/portal/ReminderToggle";
+import { sessionsRemaining } from "@/lib/allocation";
+import { formatAppointment } from "@/lib/slot-groups";
 
 export const metadata: Metadata = {
   title: "Your account",
@@ -22,13 +24,20 @@ export default async function PortalPage() {
   await requireClientAccess(state.clientId, { entity: "portal_dashboard", action: "view" });
 
   const db = getDb();
+  const now = new Date();
   const [upcoming, balances, me] = await Promise.all([
     db
-      .select()
+      .select({ id: appointments.id, startsAt: appointments.startsAt })
       .from(appointments)
-      .where(eq(appointments.clientId, state.clientId))
-      .orderBy(desc(appointments.startsAt))
-      .limit(5),
+      .where(
+        and(
+          eq(appointments.clientId, state.clientId),
+          eq(appointments.status, "scheduled"),
+          gt(appointments.endsAt, now)
+        )
+      )
+      .orderBy(asc(appointments.startsAt))
+      .limit(3),
     db.select().from(packages).where(eq(packages.clientId, state.clientId)),
     db
       .select({ emailRemindersEnabled: clients.emailRemindersEnabled })
@@ -37,9 +46,7 @@ export default async function PortalPage() {
       .limit(1),
   ]);
 
-  const remaining = balances
-    .filter((p) => p.status === "active")
-    .reduce((n, p) => n + (p.sessionsTotal - p.sessionsUsed), 0);
+  const remaining = sessionsRemaining(balances, now);
 
   return (
     <div style={{ maxWidth: 860, margin: "0 auto", padding: "40px 24px 72px" }}>
@@ -57,42 +64,43 @@ export default async function PortalPage() {
           </h2>
           <div style={{ fontSize: 34, fontWeight: 800, color: "var(--teal-deep)" }}>{remaining}</div>
           <p style={{ margin: "8px 0 0", fontSize: 13.5, color: "var(--navy-soft)", lineHeight: 1.5 }}>
-            {remaining > 0
-              ? "Book whenever you're ready."
-              : "Once you book your Initial Wellbeing Needs Review it will show here."}
+            {remaining > 0 ? (
+              <>
+                <Link href="/portal/book" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
+                  Book
+                </Link>{" "}
+                whenever you&apos;re ready.
+              </>
+            ) : (
+              "Prepaid sessions and packages show here."
+            )}
           </p>
         </div>
 
         <div className="card" style={{ padding: 24 }}>
           <h2 style={{ margin: "0 0 10px", fontSize: 17, color: "var(--navy)", display: "flex", alignItems: "center", gap: 8 }}>
-            <Icon name="compass" size={19} stroke="var(--teal)" /> Your appointments
+            <Icon name="compass" size={19} stroke="var(--teal)" /> Your next appointments
           </h2>
           {upcoming.length === 0 ? (
             <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--ink)" }}>
-              You don&apos;t have any appointments yet.{" "}
-              <Link href="/contact" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
-                Get in touch
+              You have no upcoming appointments.{" "}
+              <Link href="/portal/book" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
+                Book a session
               </Link>{" "}
-              and we&apos;ll arrange your first session.
+              — the first is your Initial Wellbeing Needs Review.
             </p>
           ) : (
             <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
               {upcoming.map((a) => (
-                <li key={a.id} style={{ fontSize: 14, color: "var(--ink)" }}>
-                  <strong style={{ color: "var(--navy)" }}>
-                    {new Date(a.startsAt).toLocaleString("en-GB", {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </strong>{" "}
-                  — {a.status.replace(/_/g, " ")}
+                <li key={a.id} style={{ fontSize: 14, color: "var(--navy)", fontWeight: 700 }}>
+                  {formatAppointment(a.startsAt)}
                 </li>
               ))}
             </ul>
           )}
+          <Link href="/portal/appointments" style={{ display: "inline-block", marginTop: 12, fontSize: 13.5, fontWeight: 700, color: "var(--teal-deep)" }}>
+            Join, cancel or reschedule →
+          </Link>
         </div>
       </div>
 

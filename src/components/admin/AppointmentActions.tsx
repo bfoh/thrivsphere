@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { setAppointmentStatus, setMeetingLink } from "@/app/actions/booking";
+import { reassignAppointment, setAppointmentStatus, setMeetingLink } from "@/app/actions/booking";
 import { initialBookingState } from "@/lib/booking-state";
 
 const btn: React.CSSProperties = {
@@ -60,6 +60,45 @@ export function MeetingLinkForm({ appointmentId, hasLink }: { appointmentId: str
       <span style={{ fontSize: 11.5, color: "var(--navy-soft)", flexBasis: "100%" }}>
         Encrypted, and shown only in the client&apos;s account — never emailed.
       </span>
+      {state.status !== "idle" && (
+        <span style={{ fontSize: 12, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>
+          {state.message}
+        </span>
+      )}
+    </form>
+  );
+}
+
+/** Give a session to another practitioner. */
+export function ReassignForm({
+  appointmentId,
+  currentPractitionerId,
+  staff,
+}: {
+  appointmentId: string;
+  currentPractitionerId: string;
+  staff: { id: string; name: string }[];
+}) {
+  const [state, action, pending] = useActionState(reassignAppointment, initialBookingState);
+  return (
+    <form action={action} style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginTop: 10 }}>
+      <input type="hidden" name="appointmentId" value={appointmentId} />
+      <label htmlFor={`reassign-${appointmentId}`} style={{ fontSize: 12.5, fontWeight: 700, color: "var(--navy)" }}>
+        Practitioner
+      </label>
+      <select
+        id={`reassign-${appointmentId}`}
+        name="practitionerId"
+        defaultValue={currentPractitionerId}
+        style={{ fontFamily: "inherit", fontSize: 13, padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(31,58,95,0.18)", background: "#fff" }}
+      >
+        {staff.map((p) => (
+          <option key={p.id} value={p.id}>{p.name}</option>
+        ))}
+      </select>
+      <button disabled={pending} style={{ ...btn, opacity: pending ? 0.6 : 1 }}>
+        {pending ? "Reassigning…" : "Reassign"}
+      </button>
       {state.status !== "idle" && (
         <span style={{ fontSize: 12, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>
           {state.message}

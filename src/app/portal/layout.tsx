@@ -31,14 +31,16 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           borderBottom: "1px solid rgba(31,58,95,0.08)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
-          <Link href="/portal" aria-label="ThriveSphere portal" style={{ display: "flex" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 22, minWidth: 0, flex: 1 }}>
+          <Link href="/portal" aria-label="ThriveSphere portal" style={{ display: "flex", flexShrink: 0 }}>
             <Logo height={46} />
           </Link>
-          <nav style={{ display: "flex", gap: 16 }}>
+          {/* Scrolls sideways on a phone rather than pushing the account button off screen. */}
+          <nav style={{ display: "flex", gap: 16, overflowX: "auto", whiteSpace: "nowrap", scrollbarWidth: "none", paddingRight: 12 }}>
             {[
               { label: "Overview", href: "/portal" },
               { label: "Book", href: "/portal/book" },
+              { label: "Appointments", href: "/portal/appointments" },
               { label: "Buy sessions", href: "/portal/purchase" },
               { label: "Messages", href: "/portal/messages" },
               { label: "Documents", href: "/portal/documents" },

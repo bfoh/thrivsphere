@@ -5,7 +5,9 @@ import { useActionState } from "react";
 import {
   addAvailabilityException,
   addAvailabilityRule,
+  removeAvailabilityException,
   removeAvailabilityRule,
+  setDefaultMeetingLink,
 } from "@/app/actions/booking";
 import { initialBookingState } from "@/lib/booking-state";
 
@@ -26,10 +28,16 @@ function Status({ state }: { state: { status: string; message: string } }) {
   );
 }
 
-export function AddRuleForm() {
+/** Whose calendar a form changes; empty means the signed-in practitioner's own. */
+function For({ practitionerId }: { practitionerId?: string }) {
+  return practitionerId ? <input type="hidden" name="practitionerId" value={practitionerId} /> : null;
+}
+
+export function AddRuleForm({ practitionerId }: { practitionerId?: string }) {
   const [state, action, pending] = useActionState(addAvailabilityRule, initialBookingState);
   return (
     <form action={action} style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
+      <For practitionerId={practitionerId} />
       <div>
         <label htmlFor="dayOfWeek" style={lbl}>Day</label>
         <select id="dayOfWeek" name="dayOfWeek" defaultValue="1" style={input}>
@@ -67,10 +75,11 @@ export function RemoveRuleButton({ ruleId }: { ruleId: string }) {
   );
 }
 
-export function BlockDateForm() {
+export function BlockDateForm({ practitionerId }: { practitionerId?: string }) {
   const [state, action, pending] = useActionState(addAvailabilityException, initialBookingState);
   return (
     <form action={action} style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
+      <For practitionerId={practitionerId} />
       <div>
         <label htmlFor="date" style={lbl}>Date</label>
         <input id="date" name="date" type="date" style={input} />
@@ -90,6 +99,81 @@ export function BlockDateForm() {
       <button className="pill pill-ghost" disabled={pending} style={{ padding: "10px 20px", fontSize: 13.5, opacity: pending ? 0.6 : 1 }}>
         {pending ? "Blocking…" : "Block time"}
       </button>
+      <Status state={state} />
+    </form>
+  );
+}
+
+/** Hours on one date outside the weekly pattern. */
+export function OpenHoursForm({ practitionerId }: { practitionerId?: string }) {
+  const [state, action, pending] = useActionState(addAvailabilityException, initialBookingState);
+  return (
+    <form action={action} style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
+      <For practitionerId={practitionerId} />
+      <input type="hidden" name="kind" value="open" />
+      <div>
+        <label htmlFor="oDate" style={lbl}>Date</label>
+        <input id="oDate" name="date" type="date" required style={input} />
+      </div>
+      <div>
+        <label htmlFor="oStart" style={lbl}>From</label>
+        <input id="oStart" name="startTime" type="time" required defaultValue="10:00" style={input} />
+      </div>
+      <div>
+        <label htmlFor="oEnd" style={lbl}>To</label>
+        <input id="oEnd" name="endTime" type="time" required defaultValue="13:00" style={input} />
+      </div>
+      <button className="pill pill-teal" disabled={pending} style={{ padding: "10px 20px", fontSize: 13.5, opacity: pending ? 0.6 : 1 }}>
+        {pending ? "Opening…" : "Open hours"}
+      </button>
+      <Status state={state} />
+    </form>
+  );
+}
+
+export function RemoveExceptionButton({ exceptionId }: { exceptionId: string }) {
+  const [, action, pending] = useActionState(removeAvailabilityException, initialBookingState);
+  return (
+    <form action={action} style={{ display: "inline" }}>
+      <input type="hidden" name="exceptionId" value={exceptionId} />
+      <button
+        disabled={pending}
+        style={{ background: "none", border: "none", cursor: "pointer", color: "#a1421c", fontWeight: 700, fontSize: 13, fontFamily: "inherit", padding: 0 }}
+      >
+        {pending ? "Removing…" : "Remove"}
+      </button>
+    </form>
+  );
+}
+
+/**
+ * Default meeting room.
+ *
+ * Added to every new booking with this practitioner, so clients find a joining
+ * link in their account without anyone pasting one per session.
+ */
+export function DefaultRoomForm({ practitionerId, hasLink }: { practitionerId?: string; hasLink: boolean }) {
+  const [state, action, pending] = useActionState(setDefaultMeetingLink, initialBookingState);
+  return (
+    <form action={action} style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
+      <For practitionerId={practitionerId} />
+      <div style={{ flex: "1 1 320px" }}>
+        <label htmlFor="meetingLink" style={lbl}>Meeting room link</label>
+        <input
+          id="meetingLink"
+          name="meetingLink"
+          type="url"
+          required
+          placeholder={hasLink ? "Saved — paste a new link to replace it" : "https://… (Zoom, Teams or Meet room)"}
+          style={{ ...input, width: "100%" }}
+        />
+      </div>
+      <button className="pill pill-teal" disabled={pending} style={{ padding: "10px 20px", fontSize: 13.5, opacity: pending ? 0.6 : 1 }}>
+        {pending ? "Saving…" : hasLink ? "Replace" : "Save room"}
+      </button>
+      <span style={{ fontSize: 12, color: "var(--navy-soft)", flexBasis: "100%" }}>
+        Encrypted, and shown only in the client&apos;s account — never emailed.
+      </span>
       <Status state={state} />
     </form>
   );

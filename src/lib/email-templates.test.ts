@@ -1,12 +1,15 @@
 import { describe, it, before } from "node:test";
 import assert from "node:assert/strict";
 import {
+  appointmentCancelled,
+  appointmentMoved,
   bookingConfirmation,
   enquiryNotification,
   paymentReceipt,
   reminder1h,
   reminder24h,
   secureMessageNotice,
+  staffAppointmentNotice,
 } from "./email-templates";
 
 /**
@@ -26,6 +29,9 @@ const brandedEmails = () => [
   reminder1h(when),
   secureMessageNotice(),
   paymentReceipt("4 Sessions", 10000, 4),
+  appointmentCancelled(when, { by: "client", late: true }),
+  appointmentCancelled(when, { by: "service" }),
+  appointmentMoved(when),
 ];
 
 const clientEmails = brandedEmails;
@@ -168,5 +174,25 @@ describe("enquiryNotification", () => {
   it("omits fields that were not provided rather than printing empty rows", () => {
     const e = enquiryNotification(fields);
     assert.ok(!/Preferred times/.test(e.html));
+  });
+});
+
+describe("appointmentCancelled", () => {
+  it("tells a late canceller the session counts as used", () => {
+    assert.match(appointmentCancelled(when, { by: "client", late: true }).text, /counts as used/);
+    assert.doesNotMatch(appointmentCancelled(when, { by: "client", late: false }).text, /counts as used/);
+  });
+
+  it("returns the session when the service cancels", () => {
+    assert.match(appointmentCancelled(when, { by: "service" }).text, /returned to your account/);
+  });
+});
+
+describe("staffAppointmentNotice", () => {
+  it("gives the time but nothing about the client, and no crisis block", () => {
+    const e = staffAppointmentNotice("booked", when);
+    assert.match(e.subject, /New booking/);
+    assert.match(e.text, /18:00/);
+    assert.ok(!/not an emergency or crisis service/i.test(e.html));
   });
 });
