@@ -5,7 +5,7 @@ import { getDb } from "@/db";
 import { appointments, clients } from "@/db/schema";
 import { requireCapability } from "@/lib/guard";
 import { Section, Empty } from "@/components/admin/RecordUI";
-import { StatusButtons, MeetingLinkForm, ReassignForm } from "@/components/admin/AppointmentActions";
+import { StatusButtons, MeetingLinkForm, ReassignForm, ReturnSessionButton } from "@/components/admin/AppointmentActions";
 import { getActiveStaff } from "@/lib/queries/availability";
 
 export const metadata: Metadata = { title: "Appointments", robots: { index: false, follow: false } };
@@ -135,7 +135,8 @@ export default async function AppointmentsPage({
                 </span>
                 <span>{a.clientName ?? "—"}</span>
                 <span style={{ color: "var(--navy-soft)" }}>{nameOf.get(a.practitionerId) ?? "—"}</span>
-                <span style={{ color: "var(--navy-soft)" }}>{a.status.replace(/_/g, " ")}{a.chargedToPackage ? " · charged" : ""}</span>
+                <span style={{ color: "var(--navy-soft)" }}>{a.status.replace(/_/g, " ")}{a.chargedToPackage ? " · counted as used" : ""}</span>
+                {a.chargedToPackage && <ReturnSessionButton appointmentId={a.id} />}
               </li>
             ))}
           </ul>

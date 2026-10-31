@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { requirePortalClient } from "@/lib/portal-guard";
 import { getActivePlans } from "@/lib/queries/catalogue";
+import { REVIEW_PLAN_SLUG } from "@/lib/allocation";
+import { canBuyReview } from "@/lib/booking-engine";
 import { PlanButton } from "@/components/portal/PlanButton";
 import { Icon } from "@/components/icons";
 
@@ -10,9 +12,11 @@ const money = (pence: number, currency: string) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency, minimumFractionDigits: 0 }).format(pence / 100);
 
 export default async function PurchasePage() {
-  await requirePortalClient();
+  const { clientId } = await requirePortalClient();
 
-  const plans = await getActivePlans();
+  const [all, reviewOnSale] = await Promise.all([getActivePlans(), canBuyReview(clientId)]);
+  // The review is bought once, before the first appointment.
+  const plans = reviewOnSale ? all : all.filter((p) => p.slug !== REVIEW_PLAN_SLUG);
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto", padding: "40px 24px 72px" }}>
@@ -24,7 +28,7 @@ export default async function PurchasePage() {
         appear in your account as soon as payment clears.
       </p>
 
-      <div className="prog-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
+      <div className="prog-grid" style={{ display: "grid", gridTemplateColumns: `repeat(${Math.max(plans.length, 1)},1fr)`, gap: 16 }}>
         {plans.map((p) => (
           <div key={p.id} className={`price-card${p.featured ? " featured" : ""}`}>
             <h2 style={{ margin: "0 0 6px", fontSize: 17, color: "var(--navy)" }}>{p.name}</h2>

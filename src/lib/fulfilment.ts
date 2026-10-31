@@ -84,12 +84,18 @@ export function amountMatches(
   return typeof chargedPence === "number" && chargedPence === expectedPence;
 }
 
+/** The events that settle a Checkout payment. */
+export const FULFILLING_EVENTS = ["checkout.session.completed", "checkout.session.async_payment_succeeded"];
+
 /**
  * Whether a webhook event should be acted on.
  *
  * Stripe retries until it gets a 2xx, so the same event can arrive repeatedly.
  * Fulfilment must happen exactly once — a client paying for four sessions and
  * receiving eight is a refund conversation; receiving zero is a complaint.
+ *
+ * A card payment is paid when the session completes. A method that confirms
+ * later completes unpaid and settles with `async_payment_succeeded`.
  */
 export function shouldFulfil(params: {
   eventType: string;
@@ -97,6 +103,52 @@ export function shouldFulfil(params: {
   alreadyProcessed: boolean;
 }): boolean {
   if (params.alreadyProcessed) return false;
-  if (params.eventType !== "checkout.session.completed") return false;
+  if (!FULFILLING_EVENTS.includes(params.eventType)) return false;
   return params.paymentStatus === "paid";
+}
+
+/**
+ * How many of a package's sessions the client keeps after a refund.
+ *
+ * Each session is worth an equal share of what was paid, and the client keeps
+ * the sessions that the money left with ThriveSphere still pays for, to the
+ * nearest session. That gives the policy refunds exactly: cancelling a
+ * four-session package within 14 days after one session (£112.50 back) keeps
+ * one; stopping it later with two used (£150 less 2 × £40) keeps two. A
+ * small goodwill refund keeps them all. Stripe reports the total refunded so
+ * far, so working from that makes a repeated event harmless.
+ */
+export function creditsAfterRefund(params: {
+  sessions: number;
+  amountPence: number;
+  refundedPence: number;
+}): number {
+  const { sessions, amountPence, refundedPence } = params;
+  if (refundedPence <= 0 || amountPence <= 0) return sessions;
+  if (refundedPence >= amountPence) return 0;
+  const kept = Math.round((sessions * (amountPence - refundedPence)) / amountPence);
+  return Math.min(Math.max(kept, 0), sessions);
+}
+
+/**
+ * A package's status from its balance and expiry, for putting it back after
+ * a dispute is decided in ThriveSphere's favour or a partial refund.
+ */
+export function packageStatusFor(
+  p: { sessionsTotal: number; sessionsUsed: number; expiresAt: Date | null },
+  now: Date = new Date()
+): "active" | "exhausted" | "expired" {
+  if (p.sessionsUsed >= p.sessionsTotal) return "exhausted";
+  if (p.expiresAt !== null && p.expiresAt <= now) return "expired";
+  return "active";
+}
+
+/**
+ * Whether a closed dispute leaves the client's sessions on hold.
+ *
+ * Only a lost dispute takes the money back for good. A won dispute, or an
+ * inquiry that closed without becoming one, returns them.
+ */
+export function disputeKeepsHold(status: string | null | undefined): boolean {
+  return status === "lost";
 }

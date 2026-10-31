@@ -1,6 +1,14 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { amountMatches, packageExpiry, parseCheckoutMetadata, shouldFulfil } from "./fulfilment";
+import {
+  amountMatches,
+  creditsAfterRefund,
+  disputeKeepsHold,
+  packageExpiry,
+  packageStatusFor,
+  parseCheckoutMetadata,
+  shouldFulfil,
+} from "./fulfilment";
 
 const good = {
   clientId: "c-1", planSlug: "package-4", planName: "4 Sessions",
@@ -80,5 +88,73 @@ describe("shouldFulfil", () => {
   it("ignores unrelated event types", () => {
     assert.equal(shouldFulfil({ ...base, eventType: "payment_intent.created" }), false);
     assert.equal(shouldFulfil({ ...base, eventType: "checkout.session.expired" }), false);
+  });
+
+  it("fulfils a payment that confirmed later", () => {
+    assert.equal(shouldFulfil({ ...base, eventType: "checkout.session.async_payment_succeeded" }), true);
+    // The session completes unpaid first; that must not credit anything.
+    assert.equal(shouldFulfil({ ...base, paymentStatus: "unpaid" }), false);
+  });
+});
+
+describe("creditsAfterRefund", () => {
+  const four = { sessions: 4, amountPence: 15000 };
+  const six = { sessions: 6, amountPence: 22500 };
+
+  it("removes everything on a full refund", () => {
+    assert.equal(creditsAfterRefund({ ...four, refundedPence: 15000 }), 0);
+    assert.equal(creditsAfterRefund({ sessions: 1, amountPence: 3000, refundedPence: 3000 }), 0);
+  });
+
+  it("keeps everything when nothing was refunded", () => {
+    assert.equal(creditsAfterRefund({ ...four, refundedPence: 0 }), 4);
+  });
+
+  it("keeps the sessions delivered before a 14-day cancellation", () => {
+    // £150 less £37.50 per session delivered.
+    assert.equal(creditsAfterRefund({ ...four, refundedPence: 11250 }), 1);
+    assert.equal(creditsAfterRefund({ ...six, refundedPence: 18750 }), 1);
+  });
+
+  it("keeps the sessions used when unused ones are refunded at £40 each used", () => {
+    assert.equal(creditsAfterRefund({ ...four, refundedPence: 15000 - 8000 }), 2);
+    assert.equal(creditsAfterRefund({ ...six, refundedPence: 22500 - 8000 }), 2);
+    assert.equal(creditsAfterRefund({ ...six, refundedPence: 22500 - 20000 }), 5);
+  });
+
+  it("takes one session for a one-session refund at either price", () => {
+    assert.equal(creditsAfterRefund({ ...four, refundedPence: 3750 }), 3);
+    assert.equal(creditsAfterRefund({ ...four, refundedPence: 4000 }), 3);
+  });
+
+  it("keeps every session after a small goodwill refund", () => {
+    assert.equal(creditsAfterRefund({ ...four, refundedPence: 1000 }), 4);
+  });
+});
+
+describe("packageStatusFor", () => {
+  const now = new Date("2026-11-01T12:00:00Z");
+
+  it("is active with sessions left and time to use them", () => {
+    assert.equal(packageStatusFor({ sessionsTotal: 4, sessionsUsed: 1, expiresAt: null }, now), "active");
+  });
+
+  it("is exhausted once every session is used", () => {
+    assert.equal(packageStatusFor({ sessionsTotal: 2, sessionsUsed: 3, expiresAt: null }, now), "exhausted");
+  });
+
+  it("is expired once past its expiry", () => {
+    assert.equal(
+      packageStatusFor({ sessionsTotal: 4, sessionsUsed: 1, expiresAt: new Date("2026-10-01T00:00:00Z") }, now),
+      "expired"
+    );
+  });
+});
+
+describe("disputeKeepsHold", () => {
+  it("keeps the hold only when the dispute is lost", () => {
+    assert.equal(disputeKeepsHold("lost"), true);
+    assert.equal(disputeKeepsHold("won"), false);
+    assert.equal(disputeKeepsHold("warning_closed"), false);
   });
 });

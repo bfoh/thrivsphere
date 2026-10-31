@@ -70,7 +70,7 @@ describe("rankPractitioners", () => {
 
 describe("selectPackage", () => {
   const now = at("2026-11-01T12:00:00Z");
-  const pkg = (id: string, over: Partial<{ status: string; sessionsTotal: number; sessionsUsed: number; expiresAt: Date | null; createdAt: Date }> = {}) => ({
+  const pkg = (id: string, over: Partial<{ status: string; sessionsTotal: number; sessionsUsed: number; expiresAt: Date | null; createdAt: Date; forReview: boolean }> = {}) => ({
     id,
     status: "active",
     sessionsTotal: 4,
@@ -81,8 +81,8 @@ describe("selectPackage", () => {
   });
 
   it("returns null when there is no credit", () => {
-    assert.equal(selectPackage([], now), null);
-    assert.equal(selectPackage([pkg("used", { sessionsUsed: 4 })], now), null);
+    assert.equal(selectPackage([], "session", now), null);
+    assert.equal(selectPackage([pkg("used", { sessionsUsed: 4 })], "session", now), null);
   });
 
   it("never draws on an expired, exhausted or refunded package", () => {
@@ -93,6 +93,7 @@ describe("selectPackage", () => {
         pkg("refunded", { status: "refunded" }),
         pkg("good"),
       ],
+      "session",
       now
     );
     assert.equal(chosen?.id, "good");
@@ -105,9 +106,35 @@ describe("selectPackage", () => {
         pkg("never"),
         pkg("sooner", { expiresAt: at("2027-01-01T00:00:00Z") }),
       ],
+      "session",
       now
     );
     assert.equal(chosen?.id, "sooner");
+  });
+
+  it("pays for the review with review credit first", () => {
+    const owned = [
+      pkg("four", { expiresAt: at("2026-12-01T00:00:00Z") }),
+      pkg("review", { sessionsTotal: 1, forReview: true, expiresAt: at("2027-04-01T00:00:00Z") }),
+    ];
+    assert.equal(selectPackage(owned, "review", now)?.id, "review");
+  });
+
+  it("lets session credit pay for the review when there is no review credit", () => {
+    assert.equal(selectPackage([pkg("four")], "review", now)?.id, "four");
+  });
+
+  it("never spends review credit on a later session", () => {
+    const review = pkg("review", { sessionsTotal: 1, forReview: true });
+    assert.equal(selectPackage([review], "session", now), null);
+    assert.equal(selectPackage([review, pkg("single", { sessionsTotal: 1 })], "session", now)?.id, "single");
+  });
+
+  it("counts only the credit that can pay for the next booking when asked", () => {
+    const owned = [pkg("review", { sessionsTotal: 1, forReview: true }), pkg("four", { sessionsUsed: 1 })];
+    assert.equal(sessionsRemaining(owned, now), 4);
+    assert.equal(sessionsRemaining(owned, now, "review"), 4);
+    assert.equal(sessionsRemaining(owned, now, "session"), 3);
   });
 
   it("counts remaining sessions only on packages that can still be used", () => {

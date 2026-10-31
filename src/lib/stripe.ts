@@ -88,6 +88,9 @@ export async function createCheckoutSession(params: {
     idempotencyKey: params.idempotencyKey,
     body: {
       mode: "payment",
+      // The button reads "Pay": the order button must make plain that pressing
+      // it commits the client to paying.
+      submit_type: "pay",
       success_url: params.successUrl,
       cancel_url: params.cancelUrl,
       customer_email: params.customerEmail,

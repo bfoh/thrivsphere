@@ -5,6 +5,7 @@ import {
   appointmentMoved,
   bookingConfirmation,
   enquiryNotification,
+  paymentAlert,
   paymentReceipt,
   reminder1h,
   reminder24h,
@@ -140,6 +141,25 @@ describe("paymentReceipt", () => {
 
   it("says one session rather than 1 sessions", () => {
     assert.match(paymentReceipt("Individual Session", 3000, 1).text, /1 session\b/);
+  });
+});
+
+describe("paymentAlert", () => {
+  const alert = () =>
+    paymentAlert({
+      subject: "A payment was refunded",
+      lines: ["3 of 4 sessions were removed."],
+      clientId: "0b1c2d3e-0000-4000-8000-000000000000",
+    });
+
+  it("is for staff, so it drops the crisis block", () => {
+    assert.ok(!/not an emergency or crisis service/i.test(alert().html));
+  });
+
+  it("links to the client's record instead of naming them", () => {
+    const e = alert();
+    assert.match(e.text, /\/admin\/clients\/0b1c2d3e-0000-4000-8000-000000000000/);
+    assert.match(e.html, /3 of 4 sessions were removed\./);
   });
 });
 

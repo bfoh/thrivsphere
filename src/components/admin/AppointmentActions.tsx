@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { reassignAppointment, setAppointmentStatus, setMeetingLink } from "@/app/actions/booking";
+import { reassignAppointment, returnSession, setAppointmentStatus, setMeetingLink } from "@/app/actions/booking";
 import { initialBookingState } from "@/lib/booking-state";
 
 const btn: React.CSSProperties = {
@@ -29,6 +29,25 @@ export function StatusButtons({ appointmentId }: { appointmentId: string }) {
         <span style={{ fontSize: 12, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>
           {state.message}
         </span>
+      )}
+    </form>
+  );
+}
+
+/** Stop a late cancellation or missed session counting as used. */
+export function ReturnSessionButton({ appointmentId }: { appointmentId: string }) {
+  const [state, action, pending] = useActionState(returnSession, initialBookingState);
+  if (state.status === "ok") {
+    return <span style={{ fontSize: 12, fontWeight: 700, color: "var(--teal-deep)" }}>{state.message}</span>;
+  }
+  return (
+    <form action={action} style={{ display: "inline-flex", gap: 7, alignItems: "center", flexWrap: "wrap" }}>
+      <input type="hidden" name="appointmentId" value={appointmentId} />
+      <button disabled={pending} style={{ ...btn, padding: "4px 11px", fontSize: 12 }}>
+        {pending ? "Returning…" : "Don't count it"}
+      </button>
+      {state.status === "error" && (
+        <span style={{ fontSize: 12, fontWeight: 700, color: "#a1421c" }}>{state.message}</span>
       )}
     </form>
   );

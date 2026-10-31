@@ -2,8 +2,23 @@ import "server-only";
 
 import { and, count, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import { getDb } from "@/db";
-import { appointments, clients, packages, practitionerSettings, remindersSent, users } from "@/db/schema";
-import { isOverlapViolation, rankPractitioners, selectPackage } from "./allocation";
+import {
+  appointments,
+  clients,
+  orders,
+  packages,
+  practitionerSettings,
+  pricePlans,
+  remindersSent,
+  users,
+} from "@/db/schema";
+import {
+  REVIEW_PLAN_SLUG,
+  isOverlapViolation,
+  rankPractitioners,
+  selectPackage,
+  type BookingKind,
+} from "./allocation";
 import { getPooledSlots } from "./queries/availability";
 import { sendEmail } from "./email";
 import { staffAppointmentNotice, type Email } from "./email-templates";
@@ -26,17 +41,61 @@ export function bookingRequiresPayment(): boolean {
   return process.env.BOOKING_REQUIRES_PAYMENT === "true";
 }
 
+/** A client's packages, each marked with whether it was bought as the review. */
+export async function getClientCredits(clientId: string) {
+  const rows = await getDb()
+    .select({ pkg: packages, planSlug: pricePlans.slug })
+    .from(packages)
+    .leftJoin(orders, eq(orders.id, packages.orderId))
+    .leftJoin(pricePlans, eq(pricePlans.id, orders.pricePlanId))
+    .where(eq(packages.clientId, clientId));
+  return rows.map((r) => ({ ...r.pkg, forReview: r.planSlug === REVIEW_PLAN_SLUG }));
+}
+
 /**
- * Take one session from the client's best package.
+ * What the client's next booking is. Their first appointment that went ahead
+ * or is still booked is the review (see `appointmentKinds`), so a cancelled
+ * one leaves the review still to book.
+ */
+export async function nextBookingKind(clientId: string): Promise<BookingKind> {
+  const [live] = await getDb()
+    .select({ id: appointments.id })
+    .from(appointments)
+    .where(
+      and(eq(appointments.clientId, clientId), inArray(appointments.status, ["scheduled", "completed", "no_show"]))
+    )
+    .limit(1);
+  return live ? "session" : "review";
+}
+
+/**
+ * Whether the client can still buy the review: not once they have had or
+ * booked it, and not while they hold review credit they have yet to use,
+ * which is all a second purchase could ever pay for.
+ */
+export async function canBuyReview(clientId: string, now: Date = new Date()): Promise<boolean> {
+  const [booking, owned] = await Promise.all([nextBookingKind(clientId), getClientCredits(clientId)]);
+  if (booking !== "review") return false;
+  return !owned.some(
+    (p) => p.forReview && p.status === "active" && p.sessionsUsed < p.sessionsTotal && (p.expiresAt === null || p.expiresAt > now)
+  );
+}
+
+/**
+ * Take one session from the client's best package for this kind of booking.
  *
  * The update re-checks the balance in SQL, so two bookings racing for a
  * package's last session cannot both have it. Returns the package used, or
- * null if the client has no credit.
+ * null if the client has no credit that can pay for it.
  */
-export async function reserveSession(clientId: string, now: Date = new Date()): Promise<string | null> {
+export async function reserveSession(
+  clientId: string,
+  booking: BookingKind,
+  now: Date = new Date()
+): Promise<string | null> {
   const db = getDb();
-  const owned = await db.select().from(packages).where(eq(packages.clientId, clientId));
-  const chosen = selectPackage(owned, now);
+  const owned = await getClientCredits(clientId);
+  const chosen = selectPackage(owned, booking, now);
   if (!chosen) return null;
 
   const [taken] = await db

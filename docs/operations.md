@@ -13,7 +13,7 @@ a member who can be removed.
 | Vercel (Pro) | Hosting, deployments, environment variables, the hourly reminder job |
 | Neon | The database: clients, appointments, payments, records |
 | Clerk | Sign-in for clients and staff |
-| Stripe | Card payments |
+| Stripe | Card payments (webhook: `docs/stripe-webhook.md`) |
 | Brevo | The website's emails (confirmations, reminders, receipts) |
 | GitHub (`bfoh/thrivsphere`) | The code — currently the developer's account |
 | Business email provider | See `docs/business-email.md` |
@@ -38,6 +38,13 @@ a member who can be removed.
 - **Allocate appointments:** **Appointments** shows who each session is with.
   *Reassign* moves it to another practitioner, and the system refuses if they
   are already booked at that time.
+- **Don't count a late cancellation or missed session:** under
+  **Appointments → Past & closed**, *Don't count it* returns the session to
+  the client's account. Use it for illness, an emergency, or when it wasn't
+  safe for the client to attend. The record says only "client circumstances".
+- **Refunds and disputes:** made and answered in the Stripe Dashboard. The
+  website adjusts the client's sessions itself and emails you
+  (`docs/stripe-webhook.md`).
 - **Prices and service descriptions:** **Services & prices**
   (`/admin/catalogue`). A price change reaches the pricing page, the client's
   *Buy sessions* page and card checkout together. Service wording shows on the
@@ -61,7 +68,7 @@ the pages, so they always need a redeploy.
 | `BLOB_READ_WRITE_TOKEN` | Client documents and receipts storage |
 | `NEXT_PUBLIC_SITE_URL` | The public address used in emails and links |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | The WhatsApp Business number, in any UK format. The WhatsApp button appears once this is set |
-| `BOOKING_REQUIRES_PAYMENT` | `true` means clients must buy a session before choosing a time. Anything else (the default) lets them book and pay afterwards |
+| `BOOKING_REQUIRES_PAYMENT` | `true` means clients must buy a session before choosing a time. Anything else (the default) lets them book and pay afterwards. The first appointment is the Initial Wellbeing Needs Review: Review credit pays only for it, and the Review can be bought once |
 
 ## Backups and recovery
 
@@ -95,7 +102,10 @@ the pages, so they always need a redeploy.
 - [ ] Patience adds her name under *Manage account → Profile* and her default
       meeting room under **Availability**.
 - [ ] Invite Lucy at **Staff**. She then completes the same two steps.
+- [ ] Add the five new events to the Stripe webhook endpoint, in the sandbox
+      and in live mode (`docs/stripe-webhook.md`).
 - [ ] Confirm Stripe is in live mode, then make one real £30 purchase and
-      refund it.
+      refund it. The owner should get a "payment was refunded" email, and the
+      session should leave the account.
 - [ ] Once the number exists, set `NEXT_PUBLIC_WHATSAPP_NUMBER`.
 - [ ] The owner decides on `BOOKING_REQUIRES_PAYMENT`.

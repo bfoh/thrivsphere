@@ -4,10 +4,12 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import { getDb } from "@/db";
-import { orders, pricePlans } from "@/db/schema";
+import { clients, orders, pricePlans } from "@/db/schema";
 import { getCurrentActor } from "@/lib/session";
 import { recordAudit } from "@/lib/audit";
 import { createCheckoutSession } from "@/lib/stripe";
+import { INITIAL_REVIEW, REVIEW_PLAN_SLUG } from "@/lib/allocation";
+import { canBuyReview } from "@/lib/booking-engine";
 import type { PaymentState } from "@/lib/payment-state";
 
 function siteUrl(): string {
@@ -46,6 +48,18 @@ export async function startCheckout(
     .limit(1);
 
   if (!plan) return { status: "error", message: "That plan is no longer available." };
+  if (plan.slug === REVIEW_PLAN_SLUG && !(await canBuyReview(actor.clientId))) {
+    return {
+      status: "error",
+      message: `You already have your ${INITIAL_REVIEW}. Please choose a session or package instead.`,
+    };
+  }
+
+  const [client] = await db
+    .select({ email: clients.email })
+    .from(clients)
+    .where(eq(clients.id, actor.clientId))
+    .limit(1);
 
   const [order] = await db
     .insert(orders)
@@ -68,6 +82,7 @@ export async function startCheckout(
       description: plan.blurb ?? undefined,
       successUrl: `${siteUrl()}/portal/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${siteUrl()}/portal/payment/cancelled`,
+      customerEmail: client?.email ?? undefined,
       metadata: {
         orderId: order.id,
         clientId: actor.clientId,

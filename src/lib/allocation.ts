@@ -78,23 +78,49 @@ export type PackageCandidate = {
   sessionsUsed: number;
   expiresAt: Date | null;
   createdAt: Date;
+  /** Bought as the Initial Wellbeing Needs Review rather than as sessions. */
+  forReview?: boolean;
 };
+
+/** The `price_plans.slug` of the Initial Wellbeing Needs Review (checklist §6). */
+export const REVIEW_PLAN_SLUG = "initial-consultation";
+
+/** What a booking is: the client's first appointment is their review. */
+export type BookingKind = "review" | "session";
+
+/**
+ * Whether a package can pay for a booking of this kind.
+ *
+ * Review credit pays only for the review, so a £30 review cannot be spent on
+ * a £40 session. The review itself can also be paid from session credit, for
+ * a client who bought a package before booking anything.
+ */
+function canPay(p: PackageCandidate, now: Date, booking?: BookingKind): boolean {
+  return (
+    p.status === "active" &&
+    p.sessionsUsed < p.sessionsTotal &&
+    (p.expiresAt === null || p.expiresAt > now) &&
+    (booking !== "session" || !p.forReview)
+  );
+}
 
 /**
  * The package a new booking draws on, or null if the client has no credit.
  *
- * Only active, unexpired packages with sessions left. The one expiring soonest
- * is spent first, so a client never loses sessions to expiry while holding a
- * longer-lasting package; packages with no expiry come last, oldest first.
+ * Only active, unexpired packages with sessions left that can pay for this
+ * kind of booking. A review is paid from review credit first. Otherwise the
+ * one expiring soonest is spent first, so a client never loses sessions to
+ * expiry while holding a longer-lasting package; packages with no expiry come
+ * last, oldest first.
  */
-export function selectPackage<P extends PackageCandidate>(packages: P[], now: Date = new Date()): P | null {
-  const usable = packages.filter(
-    (p) =>
-      p.status === "active" &&
-      p.sessionsUsed < p.sessionsTotal &&
-      (p.expiresAt === null || p.expiresAt > now)
-  );
+export function selectPackage<P extends PackageCandidate>(
+  packages: P[],
+  booking: BookingKind,
+  now: Date = new Date()
+): P | null {
+  const usable = packages.filter((p) => canPay(p, now, booking));
   usable.sort((a, b) => {
+    if (booking === "review" && !!a.forReview !== !!b.forReview) return a.forReview ? -1 : 1;
     if (a.expiresAt && b.expiresAt) return a.expiresAt.getTime() - b.expiresAt.getTime();
     if (a.expiresAt) return -1;
     if (b.expiresAt) return 1;
@@ -103,11 +129,18 @@ export function selectPackage<P extends PackageCandidate>(packages: P[], now: Da
   return usable[0] ?? null;
 }
 
-/** Sessions still to book across a client's packages. */
-export function sessionsRemaining(packages: PackageCandidate[], now: Date = new Date()): number {
+/**
+ * Sessions still to book across a client's packages: all of them, or only
+ * those that can pay for the next booking when its kind is given.
+ */
+export function sessionsRemaining(
+  packages: PackageCandidate[],
+  now: Date = new Date(),
+  booking?: BookingKind
+): number {
   return packages
-    .filter((p) => p.status === "active" && (p.expiresAt === null || p.expiresAt > now))
-    .reduce((n, p) => n + Math.max(p.sessionsTotal - p.sessionsUsed, 0), 0);
+    .filter((p) => canPay(p, now, booking))
+    .reduce((n, p) => n + (p.sessionsTotal - p.sessionsUsed), 0);
 }
 
 export const INITIAL_REVIEW = "Initial Wellbeing Needs Review";

@@ -15,9 +15,10 @@ import { requireCapability } from "@/lib/guard";
 import { recordAudit } from "@/lib/audit";
 import { ForbiddenError, STAFF_ROLES, UnauthenticatedError } from "@/lib/authz";
 import { encryptSecret } from "@/lib/crypto";
-import { isOverlapViolation } from "@/lib/allocation";
+import { INITIAL_REVIEW, isOverlapViolation } from "@/lib/allocation";
 import {
   bookingRequiresPayment,
+  nextBookingKind,
   notifyClient,
   notifyPractitioner,
   placeBooking,
@@ -75,11 +76,15 @@ export async function bookAppointment(
   }
 
   const now = new Date();
-  const packageId = await reserveSession(clientId, now);
+  const booking = await nextBookingKind(clientId);
+  const packageId = await reserveSession(clientId, booking, now);
   if (!packageId && bookingRequiresPayment()) {
     return {
       status: "error",
-      message: "Please buy a session before booking — you can do that under Buy sessions.",
+      message:
+        booking === "review"
+          ? `Please buy your ${INITIAL_REVIEW} before booking — you can do that under Buy sessions.`
+          : "Please buy a session before booking — you can do that under Buy sessions.",
     };
   }
 
@@ -180,6 +185,64 @@ export async function setAppointmentStatus(
 
   revalidateDiaries();
   return { status: "ok", message: "Appointment updated." };
+}
+
+/**
+ * Stop a late cancellation or missed session counting as used.
+ *
+ * The 24-hour rule is applied with discretion: illness, an emergency or it
+ * not being safe to attend are reasons not to count a session, and the client
+ * is never asked for evidence. The session goes back to the package it came
+ * from. The record says only that circumstances were taken into account.
+ */
+export async function returnSession(_prev: BookingState, formData: FormData): Promise<BookingState> {
+  const id = str(formData, "appointmentId");
+  if (!id) return { status: "error", message: "Missing appointment." };
+
+  let actorId: string;
+  try {
+    ({ userId: actorId } = await requireCapability("appointment:manage:any", {
+      entity: "appointments",
+      entityId: id,
+      action: "update",
+      detail: "returned a counted session",
+    }));
+  } catch (err) {
+    const mapped = guardMessage(err);
+    if (mapped) return mapped;
+    throw err;
+  }
+
+  // Conditional on still being counted, so pressing twice returns it once.
+  const [appt] = await getDb()
+    .update(appointments)
+    .set({ chargedToPackage: false, updatedAt: new Date() })
+    .where(
+      and(
+        eq(appointments.id, id),
+        eq(appointments.chargedToPackage, true),
+        inArray(appointments.status, ["cancelled_by_client", "no_show"])
+      )
+    )
+    .returning({ clientId: appointments.clientId, packageId: appointments.packageId });
+
+  if (!appt) return { status: "error", message: "This session is not counted as used." };
+  if (appt.packageId) await releaseSession(appt.packageId);
+
+  await recordAudit({
+    actorId,
+    action: "update",
+    entity: "appointments",
+    entityId: id,
+    subjectClientId: appt.clientId,
+    detail: "session not counted: client circumstances",
+  });
+
+  revalidateDiaries();
+  return {
+    status: "ok",
+    message: appt.packageId ? "Session returned to the client's account." : "No longer counted.",
+  };
 }
 
 /**

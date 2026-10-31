@@ -450,6 +450,27 @@ export function staffAppointmentNotice(
 }
 
 /**
+ * A payment changed in Stripe and a client's sessions changed with it.
+ *
+ * Goes to ThriveSphere. Like the diary notices it carries no client details:
+ * the link opens the client's record in the back office.
+ */
+export function paymentAlert(o: { subject: string; lines: string[]; clientId: string }): Email {
+  const href = `${siteUrl()}/admin/clients/${o.clientId}`;
+  return {
+    subject: o.subject,
+    html: shell({
+      preheader: "A change to a client's sessions.",
+      heading: o.subject,
+      body: o.lines.map((line) => `<p style="margin:0 0 12px;">${escapeHtml(line)}</p>`).join(""),
+      cta: { label: "Open the client's record", href },
+      showCrisis: false,
+    }),
+    text: textShell([...o.lines, "", `Client record: ${href}`], { crisis: false }),
+  };
+}
+
+/**
  * Internal enquiry notification.
  *
  * Goes to ThriveSphere, not a client, so it carries the enquiry details and
