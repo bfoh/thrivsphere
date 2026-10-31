@@ -43,6 +43,13 @@
       "when": 1789287523091,
       "tag": "0005_organisation",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793462247911,
+      "tag": "0006_launch_prices",
+      "breakpoints": true
     }
   ]
 }

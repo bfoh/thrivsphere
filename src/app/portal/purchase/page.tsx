@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { requirePortalClient } from "@/lib/portal-guard";
-import { asc, eq } from "drizzle-orm";
-import { getDb } from "@/db";
-import { pricePlans } from "@/db/schema";
+import { getActivePlans } from "@/lib/queries/catalogue";
 import { PlanButton } from "@/components/portal/PlanButton";
 import { Icon } from "@/components/icons";
 
@@ -14,11 +12,7 @@ const money = (pence: number, currency: string) =>
 export default async function PurchasePage() {
   await requirePortalClient();
 
-  const plans = await getDb()
-    .select()
-    .from(pricePlans)
-    .where(eq(pricePlans.active, true))
-    .orderBy(asc(pricePlans.sortOrder));
+  const plans = await getActivePlans();
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto", padding: "40px 24px 72px" }}>
@@ -33,11 +27,6 @@ export default async function PurchasePage() {
       <div className="prog-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
         {plans.map((p) => (
           <div key={p.id} className={`price-card${p.featured ? " featured" : ""}`}>
-            {p.featured && (
-              <span style={{ alignSelf: "flex-start", background: "var(--grad-gold)", color: "#3a2f06", fontSize: 11, fontWeight: 800, padding: "5px 12px", borderRadius: 50, marginBottom: 10 }}>
-                MOST POPULAR
-              </span>
-            )}
             <h2 style={{ margin: "0 0 6px", fontSize: 17, color: "var(--navy)" }}>{p.name}</h2>
             <div style={{ display: "flex", alignItems: "baseline", gap: 6, margin: "6px 0 10px" }}>
               <span style={{ fontSize: 30, fontWeight: 800, color: "var(--teal-deep)" }}>

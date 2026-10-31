@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { PageShell } from "@/components/PageShell";
 import { Icon } from "@/components/icons";
-import { brand, plans } from "@/data/site";
+import { brand, plans as planCopy } from "@/data/site";
 import { displayPrice } from "@/lib/money";
+import { toPricingCard } from "@/lib/pricing";
+import { getActivePlans } from "@/lib/queries/catalogue";
 import { NotCrisisNotice } from "@/components/NotCrisisNotice";
 import Link from "next/link";
 
@@ -12,10 +14,17 @@ export const metadata: Metadata = {
     "ThriveSphere Wellbeing prices: Initial Wellbeing Needs Review, individual 50-minute wellbeing support sessions, and optional four- and six-session packages.",
 };
 
+// Prices live in the database. The page is rebuilt at most every five minutes,
+// so a price change shows here without a redeploy.
+export const revalidate = 300;
+
 /** Packages are bought from the client's account; single appointments are booked. */
 const ctaHref = (sessions: number) => (sessions > 1 ? "/portal/purchase" : "/book");
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const copy = new Map(planCopy.map((p) => [p.slug, p]));
+  const plans = (await getActivePlans()).map((row) => toPricingCard(row, copy.get(row.slug)));
+
   return (
     <PageShell
       eyebrow="Pricing and Packages"
