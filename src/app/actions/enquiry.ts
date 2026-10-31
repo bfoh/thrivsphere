@@ -1,21 +1,12 @@
 "use server";
 
 import { headers } from "next/headers";
-import { brand } from "@/data/site";
+import { brand, enquiryTopics } from "@/data/site";
 import type { EnquiryState } from "@/lib/enquiry-state";
 import { sendEmail } from "@/lib/email";
 import { enquiryNotification } from "@/lib/email-templates";
 
-const SERVICES = [
-  "One-to-One Emotional Wellbeing Support",
-  "Wellbeing Coaching",
-  "Wellbeing Circle (peer support group)",
-  "Mindfulness Sessions",
-  "Wellbeing & Resilience Programme",
-  "Workplace Wellbeing",
-  "Not sure yet",
-  "Something else",
-];
+const SERVICES = enquiryTopics;
 
 /**
  * Very small in-memory rate limit.

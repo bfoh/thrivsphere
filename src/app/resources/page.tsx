@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageShell } from "@/components/PageShell";
 import { Icon } from "@/components/icons";
-import { resources } from "@/data/site";
+import { bookCta, resources } from "@/data/site";
 import { SignpostList } from "@/components/SignpostList";
 import Link from "next/link";
 
@@ -52,12 +52,13 @@ export default function ResourcesPage() {
       <SignpostList />
 
       <div style={{ marginTop: 34, textAlign: "center", background: "linear-gradient(135deg,#f2f6ee,#e6efe1)", borderRadius: 18, padding: "34px 24px" }}>
-        <h3 style={{ margin: "0 0 8px", fontSize: 21, color: "var(--navy)" }}>New resources every month</h3>
+        <h3 style={{ margin: "0 0 8px", fontSize: 21, color: "var(--navy)" }}>Looking for personalised support?</h3>
         <p style={{ margin: "0 auto 18px", maxWidth: 480, fontSize: 15, lineHeight: 1.55, color: "var(--ink)" }}>
-          Join our free wellbeing newsletter and be first to receive new guides, exercises and webinar invitations.
+          Support begins with an Initial Wellbeing Needs Review — a 50-minute online conversation
+          about your concerns, strengths and personal wellbeing goals.
         </p>
-        <Link href="/#support" className="pill pill-gold" style={{ padding: "13px 26px", fontSize: 14.5 }}>
-          Join the newsletter <Icon name="arrow" size={16} />
+        <Link href={bookCta.href} className="pill pill-gold" style={{ padding: "13px 26px", fontSize: 14.5 }}>
+          {bookCta.label} <Icon name="arrow" size={16} />
         </Link>
       </div>
     </PageShell>

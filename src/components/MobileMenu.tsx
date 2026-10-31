@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Icon } from "./icons";
-import { nav } from "@/data/site";
+import { bookCta, nav } from "@/data/site";
 
 /** Mobile navigation: hamburger toggles a full-width dropdown panel. */
 export function MobileMenu() {
@@ -41,12 +41,12 @@ export function MobileMenu() {
               </Link>
             ))}
             <Link
-              href="/book"
+              href={bookCta.href}
               onClick={close}
               className="pill pill-gold"
               style={{ marginTop: 8, padding: "13px 22px", fontSize: 15, justifyContent: "center" }}
             >
-              Book a Consultation <Icon name="arrow" size={17} />
+              {bookCta.label} <Icon name="arrow" size={17} />
             </Link>
           </nav>
         </>

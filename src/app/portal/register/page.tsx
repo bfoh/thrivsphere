@@ -122,7 +122,7 @@ export default async function RegisterPage() {
       </h1>
       <p style={{ margin: "0 0 24px", fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>
         {state.step === "age" &&
-          "ThriveSphere supports adults aged 18 and over, women and men. This takes a minute."}
+          "ThriveSphere supports adults aged 18 and over. This takes a minute."}
         {state.step === "intake" &&
           "This helps us understand how best to support you — and to be honest with you if we're not the right fit."}
         {state.step === "consent" &&

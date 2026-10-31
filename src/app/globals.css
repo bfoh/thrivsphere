@@ -996,3 +996,22 @@ body {
     width: 100% !important;
   }
 }
+
+/* Header: the full nav plus "Book an Appointment" needs more room than the
+   900px burger breakpoint allows, so tighten it before it collapses. */
+@media (max-width: 1180px) {
+  .nav-links {
+    gap: 16px !important;
+  }
+  .nav-links .nav-item {
+    font-size: 14px !important;
+  }
+}
+@media (max-width: 1040px) {
+  .nav-links .nav-item {
+    display: none;
+  }
+  .nav-burger {
+    display: inline-flex !important;
+  }
+}

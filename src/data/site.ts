@@ -31,224 +31,301 @@ export const legal = {
     "ThriveSphere Wellbeing is a trading name of 3G AND PAT HEALTHCARE LIMITED. Registered in England and Wales. Company Registration Number: 11615975.",
 };
 
-/** Primary nav. Every item is a real route — the client's 7-page structure. */
+/** Primary nav — the homepage links the owner listed (checklist §3). */
 export type NavItem = { label: string; href: string };
 
 export const nav: NavItem[] = [
-  { label: "About", href: "/about" },
-  { label: "Services", href: "/services" },
+  { label: "About Us", href: "/about" },
+  { label: "Our Services", href: "/services" },
+  { label: "How It Works", href: "/how-it-works" },
   { label: "Pricing", href: "/pricing" },
-  { label: "Resources", href: "/resources" },
-  { label: "Contact", href: "/contact" },
+  { label: "Contact Us", href: "/contact" },
 ];
+
+/** The call to action beside the nav, and on every "book" button. */
+export const bookCta: NavItem = { label: "Book an Appointment", href: "/book" };
 
 /**
  * Scope of practice — what ThriveSphere is and is not.
  * ThriveSphere is a non-clinical service: it does not assess, diagnose or treat.
- * Surfaced on About, Services and Book, and inside the Stage 2 intake flow.
+ * Surfaced on About, Services and Book, and inside the intake flow.
  */
 export const scopeOfPractice = {
   isTitle: "What ThriveSphere is",
   is: [
-    "A non-clinical wellbeing, education and support service",
-    "Emotional wellbeing support, coaching and mindfulness",
-    "Education on resilience, healthy relationships and self-care",
-    "A confidential space to talk things through without judgement",
+    "A non-clinical wellbeing education and support service",
+    "Wellbeing Needs Reviews and personalised emotional wellbeing support",
+    "Psychoeducation and practical coping skills",
+    "Resilience, personal development and workplace wellbeing",
     "Signposting to the right specialist service when you need one",
   ],
   isNotTitle: "What ThriveSphere is not",
   isNot: [
-    "An emergency, crisis or out-of-hours service",
+    "An emergency mental health service",
     "A clinical or medical service — we do not assess, diagnose or treat",
     "A substitute for your GP, NHS mental health services or medication",
-    "A counselling, psychotherapy or psychiatric service",
-    "A provider of legal advice or fitness-for-work assessments",
+    "A counselling or psychotherapy service",
+    "A provider of occupational health medical assessments or fitness-for-work reports",
   ],
   note: "If your needs fall outside what we offer, we will say so and help you find the right support.",
 };
 
 /** Every public policy — rendered in the sidebar on each policy page. */
 export const policyLinks = [
-  { label: "Scope of Practice", href: "/scope-of-practice" },
-  { label: "Terms & Conditions", href: "/terms" },
+  { label: "Service Boundaries (Scope of Practice)", href: "/scope-of-practice" },
+  { label: "Terms and Conditions", href: "/terms" },
   { label: "Consent Policy", href: "/consent" },
   { label: "Privacy Policy (UK GDPR)", href: "/privacy" },
-  { label: "Confidentiality Statement", href: "/confidentiality" },
+  { label: "Confidentiality", href: "/confidentiality" },
   { label: "Cookie Policy", href: "/cookies" },
   { label: "Safeguarding Policy", href: "/safeguarding" },
   { label: "Domestic Abuse & Safe Disclosure", href: "/domestic-abuse" },
   { label: "Suicide, Self-Harm & Crisis", href: "/crisis" },
   { label: "Cancellation and Refunds", href: "/payments" },
-  { label: "Complaints & Feedback", href: "/complaints" },
+  { label: "Complaints Procedure", href: "/complaints" },
   { label: "Equality, Diversity & Inclusion", href: "/edi" },
   { label: "Accessibility Statement", href: "/accessibility" },
 ];
 
-/** Curated subset for the site footer, which has limited room. */
+/** The policy pages the owner listed for review (checklist §14), for the footer. */
 export const footerPolicyLinks = [
-  { label: "Scope of Practice", href: "/scope-of-practice" },
-  { label: "Safeguarding Policy", href: "/safeguarding" },
-  { label: "Privacy Policy (UK GDPR)", href: "/privacy" },
-  { label: "Confidentiality Statement", href: "/confidentiality" },
-  { label: "Terms & Conditions", href: "/terms" },
-  { label: "All policies", href: "/scope-of-practice" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Cookie Policy", href: "/cookies" },
+  { label: "Terms and Conditions", href: "/terms" },
+  { label: "Cancellation and Refunds", href: "/payments" },
+  { label: "Confidentiality", href: "/confidentiality" },
+  { label: "Service Boundaries", href: "/scope-of-practice" },
+  { label: "Complaints Procedure", href: "/complaints" },
+  { label: "Safeguarding Information", href: "/safeguarding" },
 ];
 
+/** Checklist §2. */
+export const mission =
+  "To provide compassionate, accessible and personalised wellbeing education and support, empowering individuals to strengthen emotional resilience, develop practical coping strategies and improve their everyday wellbeing.";
+
+/** Checklist §2. */
 export const values = [
   "Compassion",
+  "Confidentiality",
+  "Professionalism",
+  "Dignity",
+  "Inclusivity",
   "Respect",
   "Empowerment",
-  "Inclusion",
-  "Hope",
-  "Integrity",
-  "Confidentiality",
-  "Accessibility",
-  "Professionalism",
-  "Community",
+  "Person-centred support",
 ];
 
+/** Checklist §3 — the homepage heading and introduction, as worded by the owner. */
+export const homeIntro = {
+  heading: "Supporting Your Wellbeing. Strengthening Your Resilience.",
+  paragraphs: [
+    "At ThriveSphere Wellbeing, we understand that life's challenges can affect emotional wellbeing, confidence, relationships and the ability to cope with everyday demands.",
+    "We provide professional, compassionate and personalised online wellbeing support to help individuals understand their emotional wellbeing, develop practical coping strategies and strengthen resilience. Our experienced Registered Mental Health Nurses bring extensive professional knowledge to providing supportive, evidence-informed wellbeing education tailored to individual needs.",
+    "We aim to create a welcoming, confidential and respectful environment where individuals feel heard, understood and empowered to make positive changes.",
+  ],
+};
+
 /**
- * What people come to us with. Deliberately non-clinical language —
- * these are presenting concerns, not conditions or diagnoses.
+ * What people come to us with (checklist §4B). Deliberately non-clinical —
+ * these are everyday challenges, not conditions or diagnoses.
  */
 export const audience = [
-  "Relationship & marital difficulties",
-  "Emotional distress",
-  "Stress & anxiety",
-  "Low mood & wellbeing difficulties",
-  "Domestic abuse or unhealthy relationships",
-  "Life changes & personal challenges",
-  "Confidence & resilience",
-  "General wellbeing & signposting",
+  "Everyday stress and worry",
+  "Low mood and emotional difficulties",
+  "Relationship and family pressures",
+  "Difficult life experiences and transitions",
+  "Low confidence and self-esteem",
+  "Emotional overwhelm",
+  "Challenges with personal boundaries",
 ];
 
 export type Service = {
+  /** Stable key — the `services.slug` column. */
+  slug: string;
   icon: string;
   title: string;
+  /** One line for the homepage card, drawn from the checklist's wording. */
+  summary: string;
   desc: string;
+  points: string[];
+  /** A boundary or clarification shown beneath the points. */
+  note?: string;
 };
 
+/**
+ * Our services (checklist §4).
+ *
+ * The seed for the `services` table; the public pages read the table, so the
+ * owner can edit these from the admin area after launch.
+ */
 export const services: Service[] = [
   {
-    icon: "heart",
-    title: "One-to-One Emotional Wellbeing Support",
-    desc: "Confidential individual sessions offering emotional support, guidance and practical tools to improve wellbeing and resilience.",
-  },
-  {
+    slug: "wellbeing-needs-review",
     icon: "compass",
-    title: "Wellbeing Coaching",
-    desc: "Goal-focused coaching to build confidence, develop resilience, strengthen emotional wellbeing and support personal growth.",
+    title: "Wellbeing Needs Review",
+    summary: "A structured, non-clinical conversation exploring your wellbeing concerns, strengths, coping strategies and personal goals.",
+    desc: "A structured, non-clinical conversation exploring the client's current wellbeing concerns, everyday challenges, strengths, existing coping strategies, support needs and personal goals. The review helps us identify appropriate wellbeing education, practical support and next steps.",
+    points: [],
   },
   {
-    icon: "users",
-    title: "Wellbeing Circles",
-    desc: "Facilitated online peer support groups — a safe space for discussion, encouragement and shared learning. Mixed groups, plus separate women's and men's circles.",
+    slug: "emotional-wellbeing-support",
+    icon: "heart",
+    title: "Emotional Wellbeing Support",
+    summary: "Personalised support for individuals navigating emotional challenges.",
+    desc: "Personalised support for individuals navigating emotional challenges such as:",
+    points: audience,
   },
   {
-    icon: "lotus",
-    title: "Mindfulness & Wellbeing Sessions",
-    desc: "Guided mindfulness to reduce stress, support emotional regulation, encourage relaxation and promote resilience.",
-  },
-  {
+    slug: "psychoeducation-and-coping-skills",
     icon: "book",
-    title: "Wellbeing Education",
-    desc: "Programmes covering emotional resilience, healthy relationships, coercive control awareness, boundaries and self-care.",
+    title: "Psychoeducation and Coping Skills",
+    summary: "Practical education to help individuals better understand their emotional wellbeing and develop skills for everyday challenges.",
+    desc: "Practical education to help individuals better understand their emotional wellbeing and develop skills for everyday challenges. This may include:",
+    points: [
+      "Understanding thoughts, feelings and behaviours",
+      "Stress awareness and management",
+      "Emotional awareness and regulation",
+      "Grounding and relaxation techniques",
+      "Mindfulness and present-moment awareness",
+      "Self-compassion and confidence-building",
+      "Problem-solving and decision-making",
+      "Assertiveness and communication",
+      "Healthy boundaries",
+      "Sleep and self-care education",
+      "Managing everyday worry and difficult emotions",
+    ],
+    note: "We may draw on evidence-informed educational principles from CBT, DBT, ACT, solution-focused approaches and other relevant wellbeing strategies. These approaches are used to support learning and coping skills development, not as formal psychotherapy.",
   },
   {
+    slug: "resilience-and-personal-development",
+    icon: "sun",
+    title: "Resilience and Personal Development",
+    summary: "Emotional resilience, confidence, healthy coping habits and practical strategies for navigating change.",
+    desc: "Support to build:",
+    points: [
+      "Emotional resilience",
+      "Greater self-awareness",
+      "Confidence and self-esteem",
+      "Healthy coping habits",
+      "Personal wellbeing goals",
+      "Positive routines",
+      "Stronger interpersonal boundaries",
+      "Practical strategies for navigating change",
+    ],
+  },
+  {
+    slug: "workplace-wellbeing",
     icon: "briefcase",
-    title: "Workplace Wellbeing Support",
-    desc: "Education and coaching to maintain wellbeing while working, returning to work or balancing life's responsibilities.",
-  },
-  {
-    icon: "webinar",
-    title: "Educational Webinars",
-    desc: "Evidence-informed webinars delivered by professionals and guest speakers, open to our growing community.",
-  },
-  {
-    icon: "library",
-    title: "Resource Centre",
-    desc: "A digital wellbeing library of articles, downloadable guides, videos, exercises and trusted self-help resources.",
-  },
-  {
-    icon: "shield",
-    title: "Signposting & Referral",
-    desc: "Where your needs fall outside what we offer, we help you find the right support — your GP, NHS services, safeguarding teams or specialist organisations.",
+    title: "Workplace Wellbeing",
+    summary: "Workplace stress, work-life balance, professional pressures, and resilience and burnout prevention.",
+    desc: "Support with:",
+    points: [
+      "Workplace stress",
+      "Emotional wellbeing at work",
+      "Work-life balance",
+      "Workplace relationships and communication",
+      "Managing professional pressures",
+      "Resilience and burnout prevention",
+      "Understanding general workplace wellbeing and occupational health processes",
+    ],
+    note: "The service does not include formal occupational health medical assessments or fitness-for-work reports.",
   },
 ];
 
-export const educationTopics = [
-  "Emotional wellbeing",
-  "Understanding stress & low mood",
-  "Emotional resilience",
-  "Healthy relationships",
-  "Emotional abuse awareness",
-  "Coercive control awareness",
-  "Self-care",
-  "Confidence building",
-  "Healthy boundaries",
-  "Personal growth",
+/** The topics offered on the enquiry and booking-request forms. */
+export const enquiryTopics = [...services.map((s) => s.title), "Not sure yet"];
+
+/** How our service works (checklist §5). */
+export const howItWorks = {
+  steps: [
+    {
+      title: "Enquiry or booking",
+      text: "Clients contact ThriveSphere through the website or book an initial appointment.",
+    },
+    {
+      title: "Initial Wellbeing Needs Review",
+      text: "A 50-minute online conversation exploring concerns, coping strategies, strengths and personal wellbeing goals.",
+    },
+    {
+      title: "Personalised Wellbeing Action Plan",
+      text: "The practitioner and client agree suitable wellbeing goals, educational approaches and practical strategies.",
+    },
+    {
+      title: "Ongoing Wellbeing Support",
+      text: "Clients attend individual 50-minute sessions or purchase an optional package. Support is tailored to their goals and may include psychoeducation, coping skills, emotional resilience and practical wellbeing strategies.",
+    },
+    {
+      title: "Progress Review",
+      text: "Progress is reviewed periodically, and the client and practitioner agree whether to continue, adjust goals or conclude support.",
+    },
+  ],
+  important:
+    "ThriveSphere does not restrict clients to a fixed four-week or six-week programme. Support may continue for as long as it remains appropriate, beneficial and mutually agreed.",
+};
+
+export type TeamMember = {
+  slug: string;
+  name: string;
+  role: string;
+  /** Shown in the avatar until a photograph is supplied. */
+  initials: string;
+  /**
+   * Path under /public, e.g. "/images/team/patience.jpg". Optional so a
+   * photograph can be added later without touching the design.
+   */
+  photo?: string;
+  credentials: string[];
+  bio: string[];
+};
+
+/** Meet our team (checklist §2). */
+export const team: TeamMember[] = [
+  {
+    slug: "patience-barning-t",
+    name: "Patience Barning T",
+    role: "Founder & Lead Wellbeing Consultant",
+    initials: "PB",
+    credentials: [
+      "BA Psychology & Sociology — University of Ghana, Legon",
+      "BSc Mental Health Nursing — Bournemouth University",
+      "Postgraduate Diploma in Specialist Community Public Health Nursing (Occupational Health)",
+      "Registered Mental Health Nurse",
+      "Specialist Occupational Health Nurse",
+    ],
+    bio: [
+      "Patience is an experienced Registered Mental Health Nurse and Specialist Occupational Health Nurse with extensive experience providing mental health support in both face-to-face and remote settings. Her academic background in psychology, sociology, mental health nursing and occupational health provides a broad understanding of emotional wellbeing, personal circumstances, social influences and workplace challenges.",
+      "She brings a compassionate, practical and person-centred approach to supporting individuals with emotional wellbeing, coping skills, self-esteem, confidence, stress management and resilience. Through ThriveSphere Wellbeing, she aims to empower individuals with practical knowledge and skills to support their everyday wellbeing.",
+    ],
+  },
+  {
+    slug: "lucy-johns",
+    name: "Lucy Johns",
+    role: "Wellbeing Consultant & Registered Mental Health Nurse",
+    initials: "LJ",
+    credentials: ["Registered Mental Health Nurse"],
+    bio: [
+      "Lucy is an experienced Registered Mental Health Nurse with extensive professional experience supporting individuals in both remote and face-to-face mental health settings. She brings a compassionate and person-centred approach to helping individuals navigate emotional challenges, develop practical coping strategies, strengthen resilience and improve their everyday wellbeing. Her work at ThriveSphere focuses on emotional wellbeing education, practical skills development, psychoeducation and personalised support.",
+    ],
+  },
 ];
 
-export const programme = {
-  name: "ThriveSphere Wellbeing & Resilience Programme",
-  aim: "To support adults aged 18+ — women and men — experiencing emotional distress, stress and anxiety, low mood, relationship difficulties, domestic abuse or life changes, through accessible, remote wellbeing support, education and signposting.",
-  objectives: [
-    "Improve emotional wellbeing",
-    "Strengthen resilience",
-    "Build confidence",
-    "Promote healthy coping strategies",
-    "Reduce isolation",
-    "Encourage mindfulness",
-    "Support recovery & long-term wellbeing",
-  ],
-  activities: [
-    "Monthly Wellbeing Circles",
-    "One-to-one emotional wellbeing support",
-    "Wellbeing coaching",
-    "Mindfulness sessions",
-    "Educational webinars",
-    "Guest speaker events",
-    "Downloadable resources",
-    "Community discussions",
-  ],
-  outcomes: [
-    "Feel more confident",
-    "Improve emotional wellbeing",
-    "Develop healthier coping strategies",
-    "Build resilience",
-    "Feel less isolated",
-    "Improve self-awareness",
-    "Feel empowered to move forward positively",
-  ],
-};
-
-export const founder = {
-  name: "Patience Barning T",
-  titles: ["Registered Mental Health Nurse (RMN)", "SCPHN · Occupational Health Nurse"],
-  bio: [
-    "ThriveSphere Wellbeing was founded by Patience Barning T, a Registered Mental Health Nurse and Specialist Community Public Health / Occupational Health Nurse with a deep commitment to emotional, mental and social wellbeing.",
-    "Drawing on years of professional and community experience, Patience created ThriveSphere as a safe, confidential and compassionate online space where adults can access wellbeing education, one-to-one support, coaching, mindfulness and peer connection — regardless of where they are.",
-    "ThriveSphere is a non-clinical service. It offers professional wellbeing support, education and signposting informed by extensive mental health experience — it does not provide clinical assessment, diagnosis or treatment.",
-    "The vision is simple and powerful: that every adult navigating emotional distress, difficult relationships, isolation or life change can find a place to heal, grow and thrive.",
-  ],
-};
-
+/** Short facts, all drawn from the checklist. */
 export const impact = [
-  { stat: "100%", label: "Confidential & compassionate" },
-  { stat: "Online", label: "Accessible anywhere in the UK" },
-  { stat: "18+", label: "Open to women and men" },
-  { stat: "CIC", label: "Community Interest Company" },
+  { stat: "RMN", label: "Registered Mental Health Nurses" },
+  { stat: "Online", label: "Evenings and weekends, subject to availability" },
+  { stat: "50 min", label: "Individual sessions" },
+  { stat: "18+", label: "Adults aged 18 and above" },
 ];
 
 export type Plan = {
-  /** Stable key — becomes the `price_plans.slug` column in Stage 2. */
+  /** Stable key — the `price_plans.slug` column. Never rename: orders refer to it. */
   slug: string;
   name: string;
-  price: string;
+  /** Shown under the price, e.g. "50 minutes". */
   unit: string;
-  /** Amount in pence — the value Stripe Checkout is created with. */
+  /** Amount in pence — the seed value only; the live price is in the database. */
   amountPence: number;
-  /** Sessions credited to the client's package on payment. */
+  /** Sessions credited to the client's account on payment. */
   sessions: number;
   blurb: string;
   features: string[];
@@ -257,78 +334,69 @@ export type Plan = {
 };
 
 /**
- * Launch pricing. In Stage 2 these move into the `price_plans` table and become
- * editable from the admin dashboard — this array is the seed for that table.
+ * Pricing and packages (checklist §6).
+ *
+ * The seed for the `price_plans` table. The public pricing page and checkout
+ * both read the table, so prices are changed from the admin area — this array
+ * only supplies the presentation (unit, features, button label) by slug.
  */
 export const plans: Plan[] = [
   {
     slug: "initial-consultation",
-    name: "Initial Consultation",
-    price: "£20",
-    unit: "one-off, 30 minutes",
-    amountPence: 2000,
+    name: "Initial Wellbeing Needs Review",
+    unit: "50 minutes",
+    amountPence: 3000,
     sessions: 1,
-    blurb: "Your first conversation — understand your needs and see if we're the right fit.",
+    blurb: "A structured, non-clinical conversation exploring your wellbeing concerns, strengths, coping strategies and personal goals.",
     features: [
-      "A confidential 30-minute conversation",
-      "Understand what you're looking for",
-      "Agree your goals together",
-      "Signposting if we're not the right fit",
-      "No obligation to continue",
+      "A 50-minute online conversation",
+      "Explore your concerns, strengths and coping strategies",
+      "Agree your personal wellbeing goals",
+      "Charged separately from the packages",
     ],
-    cta: "Book your consultation",
+    cta: "Book your review",
   },
   {
     slug: "individual-session",
-    name: "Individual Session",
-    price: "£30",
-    unit: "per 50-min session",
-    amountPence: 3000,
+    name: "Individual Wellbeing Support Session",
+    unit: "50 minutes",
+    amountPence: 4000,
     sessions: 1,
-    blurb: "Confidential one-to-one wellbeing support and coaching, as and when you need it.",
+    blurb: "Personalised one-to-one wellbeing support, tailored to your goals.",
     features: [
-      "1:1 emotional wellbeing session",
-      "Practical tools & resources",
-      "Secure online video session",
-      "Flexible evening availability",
-      "Book one at a time — no commitment",
+      "A 50-minute online session",
+      "Tailored to your goals",
+      "No package needed — book one session at a time",
     ],
     cta: "Book a session",
   },
   {
     slug: "package-4",
-    name: "4 Sessions",
-    price: "£100",
-    unit: "save £20",
-    amountPence: 10000,
+    name: "Four-session package",
+    unit: "Four 50-minute sessions",
+    amountPence: 15000,
     sessions: 4,
-    blurb: "A short block of support to work through something specific.",
+    blurb: "Four 50-minute sessions, paid together.",
     features: [
-      "4 one-to-one sessions",
-      "Personalised wellbeing plan",
+      "Four 50-minute online sessions",
       "Book at your own pace",
-      "Workbook & progress tracking",
-      "Saves £20 against single sessions",
+      "Optional — individual sessions are always available",
     ],
-    featured: true,
-    cta: "Get 4 sessions",
+    cta: "Buy four sessions",
   },
   {
     slug: "package-6",
-    name: "6 Sessions",
-    price: "£150",
-    unit: "save £30",
-    amountPence: 15000,
+    name: "Six-session package",
+    unit: "Six 50-minute sessions",
+    amountPence: 22500,
     sessions: 6,
-    blurb: "Our flagship structured journey to lasting resilience.",
+    blurb: "Six 50-minute sessions, paid together.",
     features: [
-      "6 guided sessions",
-      "Mindfulness & coaching blend",
-      "Wellbeing Circle membership",
-      "Workbook & progress tracking",
-      "Priority booking",
+      "Six 50-minute online sessions",
+      "Book at your own pace",
+      "Optional — individual sessions are always available",
     ],
-    cta: "Start the programme",
+    cta: "Buy six sessions",
   },
 ];
 
@@ -491,7 +559,7 @@ export const posts: Post[] = [
       "- Reach for connection, even a short message to someone kind",
       "## Be patient with the process",
       "Some days will feel like going backwards. That's not failure — it's how growth actually looks. Every gentle choice to keep going is resilience in action.",
-      "If you'd like support building your own resilience, our Wellbeing & Resilience Programme is a warm, structured place to start.",
+      "If you'd like support building your own resilience, our Resilience and Personal Development support is a good place to start.",
     ],
   },
   {
@@ -555,14 +623,17 @@ export const posts: Post[] = [
   },
 ];
 
+/** Frequently asked questions (checklist §12), as worded by the owner. */
 export const faqs = [
-  { q: "Who can access ThriveSphere?", a: "Any adult aged 18 or over — women and men. We ask everyone to confirm they are 18+ when registering. We do not currently work with under-18s." },
-  { q: "Is ThriveSphere a crisis service?", a: "No. We are a non-clinical wellbeing, education and support service. We do not provide crisis, emergency, out-of-hours or fitness-for-work assessments. In an emergency call 999, or Samaritans on 116 123 (free, 24/7)." },
-  { q: "Do you provide therapy, diagnosis or treatment?", a: "No. ThriveSphere offers professional wellbeing support, education and signposting informed by extensive mental health experience. We do not carry out clinical assessment, make diagnoses, or provide medical or psychological treatment. If that's what you need, we'll help you find it." },
-  { q: "What happens if my needs fall outside what you offer?", a: "We'll tell you honestly and help you find the right support — your GP, NHS mental health services, a domestic abuse service, safeguarding services or another specialist organisation. Signposting is part of what we do, not a sign that we've turned you away." },
-  { q: "Are sessions confidential?", a: "Yes. Confidentiality is central to everything we do and is handled in line with UK GDPR and our Confidentiality Policy. There are limits: if we believe you or someone else is at risk of serious harm, we may need to share information to keep people safe. We'll always try to discuss this with you first." },
-  { q: "Do I have to use my full name?", a: "To register and pay we need enough to identify you and keep safe records, but you're welcome to share only what feels comfortable in your sessions." },
-  { q: "Where are sessions held?", a: "All sessions are online via secure video, so you can access support from anywhere in the UK. Your joining link appears in your ThriveSphere account — we never send it by email." },
+  { q: "Who can use ThriveSphere?", a: "Adults aged 18 and above seeking practical support with emotional wellbeing, coping skills, resilience and everyday challenges." },
+  { q: "Do I need a mental health diagnosis?", a: "No. A diagnosis is not required to access our wellbeing support." },
+  { q: "Are your practitioners qualified?", a: "Yes. Our practitioners are experienced Registered Mental Health Nurses with professional backgrounds in face-to-face and remote mental health support." },
+  { q: "Is ThriveSphere a counselling or psychotherapy service?", a: "No. We provide non-clinical wellbeing support, psychoeducation and practical coping skills development." },
+  { q: "Can I have more than six sessions?", a: "Yes. Support is flexible and can continue according to individual needs, suitability and agreed goals." },
+  { q: "Can I book without purchasing a package?", a: "Yes. Individual sessions are available, and packages are optional." },
+  { q: "Do you offer evening and weekend appointments?", a: "Yes, subject to availability." },
+  { q: "Are sessions confidential?", a: "We respect confidentiality and handle personal information securely, subject to clearly explained safeguarding and legal obligations." },
+  { q: "What happens if I need urgent mental health support?", a: "ThriveSphere is not an emergency service. Clients requiring urgent or emergency support should contact appropriate local emergency or healthcare services." },
 ];
 
 /**

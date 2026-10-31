@@ -7,7 +7,8 @@ import { PillButton } from "../PillButton";
 import { FancyHeadline } from "../FancyHeadline";
 import { EnquiryForm } from "../EnquiryForm";
 import { NotCrisisNotice } from "../NotCrisisNotice";
-import { impact } from "@/data/site";
+import { WhatsAppLink } from "../WhatsAppLink";
+import { brand, impact } from "@/data/site";
 
 const GOLD = "#bd951f";
 const TEAL = "#3d8a8a";
@@ -45,8 +46,8 @@ export function Support() {
         ]}
       />
       <p style={{ margin: "14px 0 0", fontSize: 17, lineHeight: 1.6, maxWidth: 640, color: "var(--ink)" }}>
-        Reach out in confidence. Tell us a little about what you&apos;re looking for and we&apos;ll be
-        in touch to arrange your session.
+        Contact us through the website or book an initial appointment. Tell us a little about what
+        you&apos;re looking for and we&apos;ll be in touch.
       </p>
 
       <div className="support-grid" style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 24, marginTop: 32 }}>
@@ -56,29 +57,17 @@ export function Support() {
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="card" style={{ padding: 24 }}>
             <h3 style={{ margin: "0 0 8px", fontSize: 18, color: "var(--navy)", display: "flex", alignItems: "center", gap: 8 }}>
-              <Icon name="heart" size={20} stroke="var(--gold)" /> Support the CIC
+              <Icon name="heart" size={20} stroke="var(--gold)" /> Book an Appointment
             </h3>
             <p style={{ margin: "0 0 14px", fontSize: 14, lineHeight: 1.55, color: "var(--ink)" }}>
-              As a Community Interest Company, every donation helps us keep wellbeing support
-              accessible to the people who need it most. Get in touch and we&apos;ll tell you how.
+              {brand.availabilityLine} Create an account to choose a time online.
             </p>
-            <PillButton variant="teal" size="sm" href="/contact" icon="heart">
-              Ask about donating
+            <PillButton variant="gold" size="sm" href="/book" icon="arrow">
+              Book an Appointment
             </PillButton>
           </div>
 
-          <div className="card" style={{ padding: 24 }}>
-            <h3 style={{ margin: "0 0 8px", fontSize: 18, color: "var(--navy)", display: "flex", alignItems: "center", gap: 8 }}>
-              <Icon name="mail" size={20} stroke="var(--teal)" /> Wellbeing newsletter
-            </h3>
-            <p style={{ margin: "0 0 14px", fontSize: 14, lineHeight: 1.55, color: "var(--ink)" }}>
-              New guides, exercises and webinar invitations. Message us and we&apos;ll add you to
-              the list — you can unsubscribe whenever you like.
-            </p>
-            <PillButton variant="gold" size="sm" href="/contact" icon="arrow">
-              Join the list
-            </PillButton>
-          </div>
+          <WhatsAppLink heading="h3" />
 
           <div className="card" style={{ padding: 24 }}>
             <h3 style={{ margin: "0 0 8px", fontSize: 18, color: "var(--navy)", display: "flex", alignItems: "center", gap: 8 }}>

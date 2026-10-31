@@ -9,9 +9,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const core: MetadataRoute.Sitemap = [
     { url: SITE_URL, changeFrequency: "monthly", priority: 1 },
     { url: `${SITE_URL}/about`, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${SITE_URL}/team`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE_URL}/services`, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${SITE_URL}/how-it-works`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE_URL}/pricing`, changeFrequency: "monthly", priority: 0.9 },
     { url: `${SITE_URL}/book`, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${SITE_URL}/faq`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/resources`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/contact`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE_URL}/blog`, changeFrequency: "weekly", priority: 0.7 },

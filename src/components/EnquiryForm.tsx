@@ -7,6 +7,7 @@ import { PillButton } from "./PillButton";
 import { submitEnquiry } from "@/app/actions/enquiry";
 import { initialEnquiryState } from "@/lib/enquiry-state";
 import Link from "next/link";
+import { enquiryTopics } from "@/data/site";
 
 const labelStyle: React.CSSProperties = { fontSize: 12.5, fontWeight: 700, color: "var(--navy)" };
 
@@ -104,13 +105,9 @@ export function EnquiryForm() {
         </label>
         <select id="service" name="service" style={inputStyle} defaultValue="">
           <option value="">Choose a service…</option>
-          <option>One-to-One Emotional Wellbeing Support</option>
-          <option>Wellbeing Coaching</option>
-          <option>Wellbeing Circle (peer support group)</option>
-          <option>Mindfulness Sessions</option>
-          <option>Wellbeing &amp; Resilience Programme</option>
-          <option>Workplace Wellbeing</option>
-          <option>Not sure yet</option>
+          {enquiryTopics.map((t) => (
+            <option key={t}>{t}</option>
+          ))}
         </select>
         {fe.service && <p style={errorStyle}>{fe.service}</p>}
       </div>

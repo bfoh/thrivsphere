@@ -18,3 +18,17 @@ export function poundsToPence(input: string): number | null {
   const pence = Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
   return sign === "-" ? -pence : pence;
 }
+
+/**
+ * A public price: £30 for whole pounds, £30.50 otherwise.
+ *
+ * Prices on the website are set in whole pounds, and "£30.00" on a pricing
+ * card reads like an invoice.
+ */
+export function displayPrice(pence: number): string {
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    minimumFractionDigits: pence % 100 === 0 ? 0 : 2,
+  }).format(pence / 100);
+}

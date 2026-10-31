@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { poundsToPence } from "./money";
+import { displayPrice, poundsToPence } from "./money";
 
 test("whole pounds and pence", () => {
   assert.equal(poundsToPence("20"), 2000);
@@ -32,4 +32,11 @@ test("anything it cannot read exactly is refused rather than guessed", () => {
   for (const bad of ["", "twenty", "1.234", "1.2.3", "£", "--5", "1e3", "NaN", "5%"]) {
     assert.equal(poundsToPence(bad), null, `should refuse: ${bad}`);
   }
+});
+
+test("public prices drop the pence only when there are none", () => {
+  assert.equal(displayPrice(3000), "£30");
+  assert.equal(displayPrice(22500), "£225");
+  assert.equal(displayPrice(3050), "£30.50");
+  assert.equal(displayPrice(150000), "£1,500");
 });

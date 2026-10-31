@@ -3,7 +3,8 @@
 import * as React from "react";
 import { PillButton } from "./PillButton";
 import { Icon, Logo } from "./icons";
-import { brand, footerPolicyLinks, legal } from "@/data/site";
+import { WhatsAppLink } from "./WhatsAppLink";
+import { bookCta, brand, footerPolicyLinks, legal } from "@/data/site";
 import Link from "next/link";
 
 const footerLink: React.CSSProperties = {
@@ -14,13 +15,7 @@ const footerLink: React.CSSProperties = {
   textDecoration: "none",
 };
 
-export function FooterBar({
-  hint,
-  onBook,
-}: {
-  hint: string;
-  onBook: () => void;
-}) {
+export function FooterBar({ hint }: { hint: string }) {
   return (
     <div
       className="floatingBar"
@@ -59,8 +54,8 @@ export function FooterBar({
           {hint}
         </span>
         <span style={{ width: 1, height: 22, background: "rgba(255,255,255,0.2)" }} className="footer-div" />
-        <PillButton variant="gold" size="sm" onClick={onBook} icon="arrow">
-          Book a Consultation
+        <PillButton variant="gold" size="sm" href={bookCta.href} icon="arrow">
+          {bookCta.label}
         </PillButton>
       </div>
     </div>
@@ -98,13 +93,16 @@ export function SiteFooter() {
             Explore
           </h4>
           {[
-            { l: "About", h: "/about" },
+            { l: "About Us", h: "/about" },
+            { l: "Meet Our Team", h: "/team" },
             { l: "Our Services", h: "/services" },
-            { l: "Pricing", h: "/pricing" },
+            { l: "How It Works", h: "/how-it-works" },
+            { l: "Pricing and Packages", h: "/pricing" },
+            { l: "Book an Appointment", h: "/book" },
+            { l: "FAQ", h: "/faq" },
+            { l: "Contact Us", h: "/contact" },
             { l: "Resource Centre", h: "/resources" },
             { l: "Blog", h: "/blog" },
-            { l: "Contact Us", h: "/contact" },
-            { l: "Book a Consultation", h: "/book" },
             { l: "Sign in to your account", h: "/sign-in" },
           ].map((x) => (
             <Link key={x.l} href={x.h} style={footerLink}>
@@ -141,8 +139,11 @@ export function SiteFooter() {
           color: "#9db0c9",
         }}
       >
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-          <Icon name="mail" size={15} /> {brand.email}
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+          <a href={`mailto:${brand.email}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "inherit", textDecoration: "none" }}>
+            <Icon name="mail" size={15} /> {brand.email}
+          </a>
+          <WhatsAppLink variant="footer" />
         </span>
         <span>© {new Date().getFullYear()} {brand.name}. All rights reserved.</span>
         {/* Trading disclosure: the company behind the trading name. */}

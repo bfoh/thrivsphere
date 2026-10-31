@@ -3,6 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { Icon } from "./icons";
+import { bookCta } from "@/data/site";
 
 /**
  * Public-site account control.
@@ -10,7 +11,7 @@ import { Icon } from "./icons";
  * Signed in: a single "My account" button.
  * Signed out: a quiet "Sign in" link *beside* the booking CTA — not instead of
  * it. Until now the public site offered no way back in at all: the only
- * auth-adjacent link was "Book a Consultation", which goes to the enquiry form.
+ * auth-adjacent link was the booking CTA, which went to the enquiry form.
  * A client who had already registered had no route to their own portal.
  *
  * The two are weighted deliberately. Booking is what a new visitor needs and
@@ -55,11 +56,11 @@ export function AccountNavLink({ className }: { className?: string }) {
         Sign in
       </Link>
       <Link
-        href="/book"
+        href={bookCta.href}
         className={`pill pill-gold ${className ?? ""}`}
-        style={{ padding: "9px 18px", fontSize: 13 }}
+        style={{ padding: "9px 18px", fontSize: 13, whiteSpace: "nowrap" }}
       >
-        Book a Consultation
+        {bookCta.label}
         <Icon name="arrow" size={16} />
       </Link>
     </span>

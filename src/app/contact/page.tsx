@@ -4,7 +4,9 @@ import { NotCrisisNotice } from "@/components/NotCrisisNotice";
 import { SignpostList } from "@/components/SignpostList";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { Icon } from "@/components/icons";
-import { brand } from "@/data/site";
+import { WhatsAppLink } from "@/components/WhatsAppLink";
+import Link from "next/link";
+import { bookCta, brand } from "@/data/site";
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -18,7 +20,7 @@ export default function ContactPage() {
       eyebrow="Contact Us"
       watermark="Contact"
       title="Get in touch, in confidence"
-      intro="Tell us a little about what you're looking for and we'll be in touch. We usually reply within two working days."
+      intro="Send us a general enquiry and we'll be in touch. We usually reply within two working days. Please don't include detailed health information in your message — we'll talk about that privately."
     >
       <NotCrisisNotice style={{ marginBottom: 34 }} />
 
@@ -42,6 +44,21 @@ export default function ContactPage() {
               talk.
             </p>
           </div>
+
+          <div className="card" style={{ padding: 24 }}>
+            <h2 style={{ margin: "0 0 10px", fontSize: 18, color: "var(--navy)", display: "flex", alignItems: "center", gap: 8 }}>
+              <Icon name="heart" size={20} stroke="var(--gold)" /> Arranging an appointment
+            </h2>
+            <p style={{ margin: "0 0 14px", fontSize: 14.5, lineHeight: 1.6, color: "var(--ink)" }}>
+              {brand.availabilityLine} Book online by creating an account, or ask us to arrange a
+              time for you by enquiry form, email or WhatsApp.
+            </p>
+            <Link href={bookCta.href} className="pill pill-gold" style={{ padding: "10px 20px", fontSize: 13.5 }}>
+              {bookCta.label} <Icon name="arrow" size={16} />
+            </Link>
+          </div>
+
+          <WhatsAppLink />
 
           <div className="card" style={{ padding: 24 }}>
             <h2 style={{ margin: "0 0 10px", fontSize: 18, color: "var(--navy)", display: "flex", alignItems: "center", gap: 8 }}>

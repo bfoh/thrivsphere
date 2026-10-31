@@ -38,7 +38,7 @@ export default function BlogPage() {
         ))}
       </div>
       <p style={{ marginTop: 26, textAlign: "center", fontSize: 13.5, color: "var(--navy-soft)" }}>
-        More articles coming soon. Subscribe to our newsletter to be notified.
+        More articles coming soon.
       </p>
     </PageShell>
   );

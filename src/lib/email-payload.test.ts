@@ -7,7 +7,7 @@ const base = {
   subject: "Your appointment tomorrow",
   text: "This is a reminder of your appointment on Friday 5 June at 18:00.",
   fromEmail: "no-reply@thrivsphere.org",
-  fromName: "ThrivSphere Wellbeing CIC",
+  fromName: "ThriveSphere Wellbeing",
   replyTo: "hello@thrivsphere.org",
 };
 

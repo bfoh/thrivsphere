@@ -59,7 +59,7 @@ export default async function PortalPage() {
           <p style={{ margin: "8px 0 0", fontSize: 13.5, color: "var(--navy-soft)", lineHeight: 1.5 }}>
             {remaining > 0
               ? "Book whenever you're ready."
-              : "Once you book your first consultation it will show here."}
+              : "Once you book your Initial Wellbeing Needs Review it will show here."}
           </p>
         </div>
 

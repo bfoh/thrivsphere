@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Section } from "../Section";
 import { PillButton } from "../PillButton";
 import { Icon } from "../icons";
-import { audience } from "@/data/site";
+import { brand, homeIntro } from "@/data/site";
 
 export function Hero() {
   return (
@@ -29,7 +29,7 @@ export function Hero() {
     >
       <div className="hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr", gap: 48 }}>
         <div className="fadeUp" style={{ maxWidth: 600 }}>
-          <span className="eyebrow">ThriveSphere Wellbeing</span>
+          <span className="eyebrow">{brand.name}</span>
           <h1
             className="hero-title"
             style={{
@@ -41,11 +41,9 @@ export function Hero() {
               color: "var(--navy)",
             }}
           >
-            Empowering Wellbeing.
+            Supporting Your Wellbeing.
             <br />
-            Building Resilience.
-            <br />
-            <span style={{ color: "var(--teal-deep)" }}>Inspiring Hope</span>
+            <span style={{ color: "var(--teal-deep)" }}>Strengthening Your Resilience</span>
             <span style={{ color: "var(--gold)" }}>.</span>
           </h1>
 
@@ -60,42 +58,29 @@ export function Hero() {
             />
             <span className="hero-mobile-badge">
               <Icon name="shield" size={15} stroke="var(--teal-deep)" />
-              100% confidential
+              Registered Mental Health Nurses
             </span>
           </div>
 
+          {/* The rest of the introduction opens the About section. */}
           <p style={{ margin: "22px 0 0", fontSize: 17.5, lineHeight: 1.6, maxWidth: 540, color: "var(--ink)" }}>
-            A safe, confidential and compassionate online space for adults aged 18+ — women and men
-            — experiencing emotional distress, stress, relationship difficulties or life changes.
-            Wellbeing support, education, coaching and signposting, from anywhere in the UK.
+            {homeIntro.paragraphs[0]}
           </p>
           <div className="cta-stack" style={{ display: "flex", gap: 14, marginTop: 30, flexWrap: "wrap" }}>
             <PillButton variant="gold" size="lg" href="/book" icon="arrow">
-              Book a Consultation
+              Book an Appointment
             </PillButton>
             <PillButton variant="ghost" size="lg" href="/services">
-              Explore our services
+              Our Services
             </PillButton>
           </div>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginTop: 24, color: "var(--teal-deep)", fontSize: 13.5, fontWeight: 600, maxWidth: 540, lineHeight: 1.5 }}>
             <span style={{ flex: "0 0 auto", marginTop: 1 }}>
               <Icon name="shield" size={18} stroke="var(--teal-deep)" />
             </span>
-            <span>
-              100% confidential · Professional wellbeing support, education and signposting informed
-              by extensive mental health experience
-            </span>
+            <span>{brand.availabilityLine}</span>
           </div>
         </div>
-
-      </div>
-
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 9, marginTop: 44, maxWidth: 900 }} className="hero-chips hide-mobile">
-        {audience.slice(0, 8).map((a) => (
-          <span className="chip chip-dot" key={a}>
-            {a}
-          </span>
-        ))}
       </div>
     </Section>
   );

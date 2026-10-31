@@ -3,7 +3,7 @@
 import { Section } from "../Section";
 import { Icon } from "../icons";
 import { FancyHeadline } from "../FancyHeadline";
-import { values } from "@/data/site";
+import { homeIntro, mission, values } from "@/data/site";
 
 const GOLD = "#bd951f";
 const TEAL = "#3d8a8a";
@@ -15,59 +15,42 @@ export function About() {
       <FancyHeadline
         lines={[
           [{ t: "who we are —", size: 17, italic: true, color: GOLD }],
-          [{ t: "A TRUSTED,", size: 46, weight: 800, color: NAVY }],
+          [{ t: "PROFESSIONAL,", size: 46, weight: 800, color: NAVY }],
           [
-            { t: "accessible", size: 23, italic: true, color: TEAL },
-            { t: "COMMUNITY", size: 42, weight: 800, color: NAVY },
+            { t: "compassionate", size: 23, italic: true, color: TEAL },
+            { t: "SUPPORT", size: 42, weight: 800, color: NAVY },
           ],
         ]}
       />
-      <p style={{ margin: "16px 0 0", fontSize: 17, lineHeight: 1.6, maxWidth: 760, color: "var(--ink)" }}>
-        ThriveSphere Wellbeing is a UK-based Community Interest Company with an international
-        vision. We exist to improve the emotional, mental and social wellbeing of adults aged 18 and
-        over — women and men — offering a confidential, compassionate and empowering environment to
-        heal, grow and thrive.
-      </p>
+      {homeIntro.paragraphs.slice(1).map((p, i) => (
+        <p key={i} style={{ margin: i === 0 ? "16px 0 0" : "12px 0 0", fontSize: 16.5, lineHeight: 1.6, maxWidth: 780, color: "var(--ink)" }}>
+          {p}
+        </p>
+      ))}
 
-      <div className="two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22, marginTop: 34 }}>
+      <div className="two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22, marginTop: 30 }}>
         <div className="mv-card">
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
             <IconBadge name="lotus" />
             <h3 style={{ margin: 0, fontSize: 21, color: "var(--navy)" }}>Our Mission</h3>
           </div>
-          <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.6, color: "var(--ink)" }}>
-            To promote emotional, mental and social wellbeing through accessible education, emotional
-            support, coaching, mindfulness, peer support, community connection and signposting —
-            helping adults build resilience, support recovery, improve confidence and create
-            positive futures.
-          </p>
+          <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.6, color: "var(--ink)" }}>{mission}</p>
         </div>
         <div className="mv-card">
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-            <IconBadge name="sun" />
-            <h3 style={{ margin: 0, fontSize: 21, color: "var(--navy)" }}>Our Vision</h3>
+            <IconBadge name="heart" />
+            <h3 style={{ margin: 0, fontSize: 21, color: "var(--navy)" }}>Our Values</h3>
           </div>
-          <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.6, color: "var(--ink)" }}>
-            To create a trusted, accessible and empowering online wellbeing community where
-            individuals can heal, grow and thrive through life&apos;s challenges — reaching adults
-            across the UK, Ghana, the African diaspora and beyond.
-          </p>
-        </div>
-      </div>
-
-      <div className="hide-mobile">
-        <p style={{ margin: "34px 0 12px", fontWeight: 800, color: "var(--navy)", fontSize: 14, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-          The values that guide us
-        </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 9 }}>
-          {values.map((v) => (
-            <span className="chip" key={v}>
-              <span className="chip-check">
-                <Icon name="check" size={12} stroke="#fff" />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {values.map((v) => (
+              <span className="chip" key={v}>
+                <span className="chip-check">
+                  <Icon name="check" size={12} stroke="#fff" />
+                </span>
+                {v}
               </span>
-              {v}
-            </span>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </Section>
