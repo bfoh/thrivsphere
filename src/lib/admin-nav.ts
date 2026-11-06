@@ -31,6 +31,8 @@ export const ADMIN_NAV: NavItem[] = [
   { label: "Appointments", href: "/admin/appointments", capability: "appointment:manage:any", group: "service" },
   { label: "Availability", href: "/admin/availability", capability: "availability:manage", group: "service" },
   { label: "Safeguarding", href: "/admin/safeguarding", capability: "safeguarding:read", group: "service" },
+  // Supervision sheets, preparation tasks and the worksheet library.
+  { label: "Resources", href: "/admin/resources", capability: "worksheet:manage", group: "service" },
   { label: "Reports", href: "/admin/reports", capability: "report:read", group: "service" },
 
   // Running the organisation.

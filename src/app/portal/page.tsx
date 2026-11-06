@@ -10,6 +10,7 @@ import { NotCrisisNotice } from "@/components/NotCrisisNotice";
 import { ReminderToggle } from "@/components/portal/ReminderToggle";
 import { sessionsRemaining } from "@/lib/allocation";
 import { formatAppointment } from "@/lib/slot-groups";
+import { countMyOpenWorksheets } from "@/lib/queries/worksheets";
 
 export const metadata: Metadata = {
   title: "Your account",
@@ -25,7 +26,7 @@ export default async function PortalPage() {
 
   const db = getDb();
   const now = new Date();
-  const [upcoming, balances, me] = await Promise.all([
+  const [upcoming, balances, me, openWorksheets] = await Promise.all([
     db
       .select({ id: appointments.id, startsAt: appointments.startsAt })
       .from(appointments)
@@ -44,6 +45,7 @@ export default async function PortalPage() {
       .from(clients)
       .where(eq(clients.id, state.clientId))
       .limit(1),
+    countMyOpenWorksheets(state.clientId),
   ]);
 
   const remaining = sessionsRemaining(balances, now);
@@ -103,6 +105,20 @@ export default async function PortalPage() {
           </Link>
         </div>
       </div>
+
+      {openWorksheets > 0 && (
+        <Link
+          href="/portal/worksheets"
+          className="card"
+          style={{ marginTop: 18, padding: "18px 22px", display: "flex", gap: 12, alignItems: "center", textDecoration: "none" }}
+        >
+          <Icon name="book" size={20} stroke="var(--teal)" />
+          <span style={{ fontSize: 15, color: "var(--navy)", fontWeight: 700, flex: 1 }}>
+            Your practitioner has set {openWorksheets === 1 ? "a worksheet" : `${openWorksheets} worksheets`} for you
+          </span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: "var(--teal-deep)" }}>Open →</span>
+        </Link>
+      )}
 
       <div style={{ marginTop: 18 }}>
         <ReminderToggle enabled={me[0]?.emailRemindersEnabled ?? true} />

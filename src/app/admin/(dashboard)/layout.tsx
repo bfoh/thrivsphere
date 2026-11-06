@@ -33,6 +33,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div style={{ minHeight: "100vh", background: "var(--warm-white)", display: "flex", flexDirection: "column" }}>
       <header
+        className="no-print"
         style={{
           display: "flex",
           alignItems: "center",

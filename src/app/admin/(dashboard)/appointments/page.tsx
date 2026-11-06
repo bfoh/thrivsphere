@@ -137,6 +137,15 @@ export default async function AppointmentsPage({
                 <span style={{ color: "var(--navy-soft)" }}>{nameOf.get(a.practitionerId) ?? "—"}</span>
                 <span style={{ color: "var(--navy-soft)" }}>{a.status.replace(/_/g, " ")}{a.chargedToPackage ? " · counted as used" : ""}</span>
                 {a.chargedToPackage && <ReturnSessionButton appointmentId={a.id} />}
+                {/* Opens the session's existing sheet if there is one. */}
+                {a.clientId && (a.status === "completed" || a.status === "scheduled") && (
+                  <Link
+                    href={`/admin/clients/${a.clientId}/supervision/new?appointment=${a.id}`}
+                    style={{ fontSize: 13, fontWeight: 700, color: "var(--teal-deep)", textDecoration: "none" }}
+                  >
+                    Supervision sheet
+                  </Link>
+                )}
               </li>
             ))}
           </ul>

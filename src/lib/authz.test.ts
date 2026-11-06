@@ -88,7 +88,33 @@ describe("can", () => {
     assert.equal(can(admin, "payment:read:any"), true);
   });
 
+  it("gives every staff role the supervision sheets and worksheets", () => {
+    // The owner and admin oversee these, so access must not stop at practitioners.
+    const founder: Actor = { userId: "u8", role: "founder", status: "active" };
+    for (const staff of [practitioner, supervisor, admin, founder]) {
+      for (const cap of ["supervision:read", "supervision:write", "worksheet:manage"] as const) {
+        assert.equal(can(staff, cap), true, `${staff.role} should hold ${cap}`);
+      }
+    }
+  });
+
+  it("keeps a finalised supervision sheet's correction at supervisor level", () => {
+    // Amendments reuse notes:amend, so a practitioner cannot rewrite a locked sheet.
+    assert.equal(can(practitioner, "notes:amend"), false);
+    assert.equal(can(supervisor, "notes:amend"), true);
+  });
+
+  it("lets a client complete their own worksheets and nothing on the staff side", () => {
+    assert.equal(can(clientA, "worksheet:complete:own"), true);
+    for (const cap of ["supervision:read", "supervision:write", "worksheet:manage"] as const) {
+      assert.equal(can(clientA, cap), false, `client should not hold ${cap}`);
+    }
+    // Staff enter answers through worksheet:manage, not the client's capability.
+    assert.equal(can(practitioner, "worksheet:complete:own"), false);
+  });
+
   it("strips every capability from a suspended account", () => {
+    assert.equal(can(suspendedAdmin, "supervision:read"), false);
     assert.equal(can(suspendedAdmin, "audit:read"), false);
     assert.equal(can(suspendedAdmin, "client:read:any"), false);
   });

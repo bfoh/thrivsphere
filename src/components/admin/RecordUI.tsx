@@ -2,16 +2,19 @@ import * as React from "react";
 
 /** Card section used down the client record. */
 export function Section({
+  id,
   title,
   subtitle,
   children,
 }: {
+  /** An anchor, so other pages can link straight to this section. */
+  id?: string;
   title: string;
   subtitle?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="card" style={{ padding: "22px 24px", marginBottom: 18 }}>
+    <section id={id} className="card" style={{ padding: "22px 24px", marginBottom: 18, scrollMarginTop: 16 }}>
       <div style={{ marginBottom: 16 }}>
         <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "var(--navy)" }}>{title}</h2>
         {subtitle && (

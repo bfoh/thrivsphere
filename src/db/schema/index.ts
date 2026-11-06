@@ -19,3 +19,4 @@ export * from "./scheduling";
 export * from "./records";
 export * from "./safeguarding";
 export * from "./organisation";
+export * from "./resources";

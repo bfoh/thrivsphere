@@ -16,6 +16,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     <>
       <CrisisBar />
       <header
+        className="no-print"
         style={{
           position: "sticky",
           top: 30,
@@ -42,6 +43,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               { label: "Book", href: "/portal/book" },
               { label: "Appointments", href: "/portal/appointments" },
               { label: "Buy sessions", href: "/portal/purchase" },
+              { label: "Worksheets", href: "/portal/worksheets" },
               { label: "Messages", href: "/portal/messages" },
               { label: "Documents", href: "/portal/documents" },
             ].map((n) => (

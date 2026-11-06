@@ -36,6 +36,12 @@ export type Capability =
   | "safeguarding:escalate"
   | "incident:write"
   | "referral:write"
+  // Supervision & next-session planning sheets, and the worksheets staff set.
+  | "supervision:read"
+  | "supervision:write"
+  | "worksheet:manage"
+  // A client filling in a worksheet set for them, on their own record only.
+  | "worksheet:complete:own"
   | "appointment:book:own"
   | "appointment:manage:any"
   | "availability:manage"
@@ -67,6 +73,7 @@ const CLIENT_CAPS: Capability[] = [
   "appointment:book:own",
   "payment:read:own",
   "document:read:own",
+  "worksheet:complete:own",
 ];
 
 /**
@@ -87,6 +94,9 @@ const PRACTITIONER_CAPS: Capability[] = [
   "appointment:manage:any",
   "availability:manage",
   "document:write:any",
+  "supervision:read",
+  "supervision:write",
+  "worksheet:manage",
 ];
 
 const SUPERVISOR_CAPS: Capability[] = [

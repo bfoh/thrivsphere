@@ -64,6 +64,13 @@
       "when": 1793464196857,
       "tag": "0008_service_content",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793982907903,
+      "tag": "0009_resources",
+      "breakpoints": true
     }
   ]
 }

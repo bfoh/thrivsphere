@@ -11,6 +11,8 @@ import {
   reminder24h,
   secureMessageNotice,
   staffAppointmentNotice,
+  worksheetAssigned,
+  worksheetSubmitted,
 } from "./email-templates";
 
 /**
@@ -29,6 +31,7 @@ const brandedEmails = () => [
   reminder24h(when),
   reminder1h(when),
   secureMessageNotice(),
+  worksheetAssigned(),
   paymentReceipt("4 Sessions", 10000, 4),
   appointmentCancelled(when, { by: "client", late: true }),
   appointmentCancelled(when, { by: "service" }),
@@ -128,6 +131,25 @@ describe("secureMessageNotice", () => {
     const e = secureMessageNotice();
     assert.match(e.html, /new message/i);
     assert.ok(!/message:/i.test(e.text), "must not include message content");
+  });
+});
+
+describe("worksheet emails", () => {
+  it("tell the client something is waiting without saying what", () => {
+    const e = worksheetAssigned();
+    for (const part of [e.subject, e.html, e.text]) {
+      assert.ok(!/worksheet|emotion|intensity|feeling/i.test(part), `revealing: ${part.slice(0, 80)}`);
+    }
+    assert.match(e.text, /thrivsphere\.org\/portal\n/);
+  });
+
+  it("tell staff a worksheet is back by link only, without the crisis block", () => {
+    const e = worksheetSubmitted({
+      clientId: "0b1c2d3e-0000-4000-8000-000000000000",
+      assignmentId: "1a2b3c4d-0000-4000-8000-000000000000",
+    });
+    assert.match(e.text, /\/admin\/clients\/0b1c2d3e-0000-4000-8000-000000000000\/worksheets\/1a2b3c4d/);
+    assert.ok(!/not an emergency or crisis service/i.test(e.html));
   });
 });
 

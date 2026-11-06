@@ -370,6 +370,54 @@ export function secureMessageNotice(): Email {
   };
 }
 
+/**
+ * A worksheet has been set for the client.
+ *
+ * Says no more than that something is waiting in their account: not which
+ * worksheet, and nothing about why. A worksheet title about emotions is itself
+ * a disclosure to anyone else reading the inbox — so even the link goes to the
+ * account overview, which lists it, rather than to a /worksheets address.
+ */
+export function worksheetAssigned(): Email {
+  return {
+    subject: "Something new in your account",
+    html: shell({
+      preheader: "Sign in to see it.",
+      heading: "Something new in your account",
+      body: `
+        <p style="margin:0 0 14px;">Your practitioner has added something for you to look at in your
+        account, ready for when it suits you.</p>
+        <p style="margin:0;">It stays inside your account, so you'll need to sign in to see it.</p>`,
+      cta: { label: "Open my account", href: `${siteUrl()}/portal` },
+    }),
+    text: textShell([
+      "Your practitioner has added something for you to look at in your account, ready for when it suits you.",
+      "",
+      "It stays inside your account, so you'll need to sign in to see it:",
+      `${siteUrl()}/portal`,
+    ]),
+  };
+}
+
+/** Staff: a client has sent a worksheet back. Links to the record; names nobody. */
+export function worksheetSubmitted(o: { clientId: string; assignmentId: string }): Email {
+  const href = `${siteUrl()}/admin/clients/${o.clientId}/worksheets/${o.assignmentId}`;
+  return {
+    subject: "A worksheet is ready to review",
+    html: shell({
+      preheader: "A client has sent back a worksheet.",
+      heading: "A worksheet is ready to review",
+      body: `<p style="margin:0;">A client has sent back a worksheet you set. Their answers are in their record.</p>`,
+      cta: { label: "Open the worksheet", href },
+      showCrisis: false,
+    }),
+    text: textShell(
+      ["A client has sent back a worksheet you set. Their answers are in their record.", "", `Worksheet: ${href}`],
+      { crisis: false }
+    ),
+  };
+}
+
 export function paymentReceipt(planName: string, amountPence: number, sessions: number): Email {
   const amount = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(
     amountPence / 100

@@ -127,6 +127,53 @@ export async function requireClientAccess(
   return actor;
 }
 
+/**
+ * Require a capability on one client's record, as one audited access.
+ *
+ * For work that needs both — writing a supervision sheet needs
+ * `supervision:write` and access to that client — without writing two
+ * success rows for one action. Each refusal is still logged with its reason.
+ */
+export async function requireCapabilityForClient(
+  capability: Capability,
+  clientId: string,
+  options: Omit<GuardOptions, "subjectClientId">
+): Promise<Actor> {
+  const actor = await getCurrentActor();
+  const base = { entity: options.entity, entityId: options.entityId, subjectClientId: clientId };
+
+  if (!actor) {
+    await recordAudit({ ...base, actorId: null, action: "permission_denied", detail: `unauthenticated attempt: ${capability}` });
+    throw new UnauthenticatedError();
+  }
+  if (!can(actor, capability)) {
+    await recordAudit({
+      ...base,
+      actorId: actor.userId,
+      action: "permission_denied",
+      detail: `lacks ${capability} (role: ${actor.role})`,
+    });
+    throw new ForbiddenError();
+  }
+  if (!canAccessClient(actor, clientId)) {
+    await recordAudit({
+      ...base,
+      actorId: actor.userId,
+      action: "permission_denied",
+      detail: `role ${actor.role} may not access this client record`,
+    });
+    throw new ForbiddenError();
+  }
+
+  await recordAudit({
+    ...base,
+    actorId: actor.userId,
+    action: options.action ?? defaultAction(capability),
+    detail: options.detail ?? capability,
+  });
+  return actor;
+}
+
 function defaultAction(capability: Capability): AuditAction {
   if (capability.includes(":write") || capability.includes(":manage")) return "update";
   if (capability.includes(":escalate")) return "update";

@@ -17,6 +17,8 @@ import {
   users,
 } from "@/db/schema";
 import { requireCapability, requireClientAccess } from "@/lib/guard";
+import { listSupervisionForClient } from "@/lib/queries/supervision";
+import { listWorksheetsForClient } from "@/lib/queries/worksheets";
 import { summariseRisk } from "@/lib/risk-summary";
 
 export type ClientListRow = {
@@ -128,6 +130,8 @@ export async function getClientRecord(clientId: string) {
     consentRows,
     referralRows,
     docs,
+    supervision,
+    worksheets,
   ] = await Promise.all([
     db
       .select()
@@ -168,6 +172,9 @@ export async function getClientRecord(clientId: string) {
     db.select().from(consents).where(eq(consents.clientId, clientId)),
     db.select().from(referrals).where(eq(referrals.clientId, clientId)),
     db.select().from(documents).where(eq(documents.clientId, clientId)),
+    // Part of the record, so read under the same audited open.
+    listSupervisionForClient(clientId),
+    listWorksheetsForClient(clientId),
   ]);
 
   // Amendments are attached to their notes so the record reads as the original
@@ -205,6 +212,8 @@ export async function getClientRecord(clientId: string) {
     consents: consentRows,
     referrals: referralRows,
     documents: docs,
+    supervision,
+    worksheets,
   };
 }
 

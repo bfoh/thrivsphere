@@ -1,3 +1,4 @@
+import type * as React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -17,6 +18,11 @@ import { UploadDocumentForm, DeleteDocumentButton } from "@/components/admin/Doc
 import { MessageThread } from "@/components/MessageThread";
 import { getConversation } from "@/app/actions/messages";
 import { Icon } from "@/components/icons";
+import { AssignWorksheetForm } from "@/components/admin/ResourceForms";
+import { getTemplate, worksheetLibrary } from "@/lib/forms/registry";
+import { worksheetLabel } from "@/lib/forms/library";
+import { listSessionsForSheet } from "@/lib/queries/supervision";
+import { WORKSHEET_STATUS_LABEL, type WorksheetStatus } from "@/lib/resources-rules";
 
 export const metadata: Metadata = {
   title: "Client record",
@@ -34,6 +40,17 @@ const dt = (d: Date | string | null) =>
       })
     : "—";
 
+const chip = (draft: boolean): React.CSSProperties => ({
+  fontSize: 11.5,
+  fontWeight: 800,
+  letterSpacing: "0.04em",
+  textTransform: "uppercase",
+  padding: "3px 8px",
+  borderRadius: 999,
+  background: draft ? "rgba(212,175,55,0.18)" : "rgba(61,138,138,0.14)",
+  color: draft ? "#7a5c0c" : "var(--teal-deep)",
+});
+
 const d = (v: Date | string | null) =>
   v ? new Date(v).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
 
@@ -46,10 +63,25 @@ export default async function ClientRecordPage({
   const record = await getClientRecord(id);
   if (!record) notFound();
 
-  const conversation = await getConversation(id);
+  const [conversation, sessionsForWorksheet] = await Promise.all([getConversation(id), listSessionsForSheet(id)]);
 
-  const { client, intake, riskFlags, concerns, notes, appointments, packages, consents, referrals, documents } =
-    record;
+  const {
+    client,
+    intake,
+    riskFlags,
+    concerns,
+    notes,
+    appointments,
+    packages,
+    consents,
+    referrals,
+    documents,
+    supervision,
+    worksheets,
+  } = record;
+
+  const library = worksheetLibrary().map((w) => ({ key: w.key, label: worksheetLabel(w) }));
+  const pastSessions = sessionsForWorksheet.slice(0, 20).map((a) => ({ id: a.id, label: dt(a.startsAt) }));
 
   const answers = (intake?.answers ?? {}) as Record<string, unknown>;
   const remaining = packages
@@ -215,8 +247,69 @@ export default async function ClientRecordPage({
         )}
       </Section>
 
+      {/* supervision & session planning */}
+      <Section
+        id="supervision"
+        title="Supervision & session planning"
+        subtitle={`${supervision.length} ${supervision.length === 1 ? "sheet" : "sheets"} · locked once finalised`}
+      >
+        <Link href={`/admin/clients/${client.id}/supervision/new`} className="pill pill-teal" style={{ padding: "10px 20px", fontSize: 13.5 }}>
+          Start a supervision sheet
+        </Link>
+        {supervision.length === 0 ? (
+          <div style={{ marginTop: 14 }}>
+            <Empty>No supervision sheets yet.</Empty>
+          </div>
+        ) : (
+          <ul style={{ margin: "16px 0 0", padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
+            {supervision.map((r) => (
+              <li key={r.id} style={{ fontSize: 14, color: "var(--ink)", display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                <span style={chip(r.status === "draft")}>{r.status === "draft" ? "Draft" : "Final"}</span>
+                <Link href={`/admin/clients/${client.id}/supervision/${r.id}`} style={{ fontWeight: 700, color: "var(--teal-deep)", textDecoration: "none" }}>
+                  Supervision {d(r.supervisionDate)}
+                </Link>
+                <span style={{ color: "var(--navy-soft)" }}>{r.practitionerName ?? r.practitionerEmail ?? ""}</span>
+                {r.needsFollowUp && (
+                  <span style={{ fontSize: 11.5, fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: "#c853241a", color: "#8c2a1c" }}>
+                    Section 3 flag
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      {/* worksheets */}
+      <Section
+        id="worksheets"
+        title="Worksheets"
+        subtitle={`${worksheets.length} set · the client completes them in their account`}
+      >
+        <AssignWorksheetForm clientId={client.id} library={library} sessions={pastSessions} />
+        {worksheets.length === 0 ? (
+          <div style={{ marginTop: 14 }}>
+            <Empty>No worksheets set yet.</Empty>
+          </div>
+        ) : (
+          <ul style={{ margin: "16px 0 0", padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
+            {worksheets.map((w) => (
+              <li key={w.id} style={{ fontSize: 14, color: "var(--ink)", display: "flex", gap: 10, flexWrap: "wrap", alignItems: "baseline" }}>
+                <Link href={`/admin/clients/${client.id}/worksheets/${w.id}`} style={{ fontWeight: 700, color: "var(--teal-deep)", textDecoration: "none" }}>
+                  {getTemplate(w.templateKey, w.templateVersion)?.title ?? w.templateKey}
+                </Link>
+                <span style={{ fontWeight: 700, color: w.status === "submitted" ? "#a1421c" : "var(--navy-soft)" }}>
+                  {WORKSHEET_STATUS_LABEL[w.status as WorksheetStatus]}
+                </span>
+                <span style={{ color: "var(--navy-soft)" }}>set {d(w.assignedAt)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
       {/* safeguarding */}
-      <Section title="Safeguarding concerns" subtitle={`${concerns.length} recorded`}>
+      <Section id="safeguarding" title="Safeguarding concerns" subtitle={`${concerns.length} recorded`}>
         <div style={{ marginBottom: 16 }}>
           <RaiseConcernForm clientId={client.id} />
         </div>
@@ -254,7 +347,7 @@ export default async function ClientRecordPage({
       </Section>
 
       {/* referrals */}
-      <Section title="Referrals & signposting" subtitle={`${referrals.length} recorded`}>
+      <Section id="referrals" title="Referrals & signposting" subtitle={`${referrals.length} recorded`}>
         <ReferralForm clientId={client.id} />
         {referrals.length === 0 ? (
           <Empty>No referrals recorded.</Empty>
