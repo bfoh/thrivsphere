@@ -1977,7 +1977,9 @@ mark.lib-find.is-current {
   box-shadow: 0 20px 50px rgba(31, 58, 95, 0.22);
 }
 .lib-stage-frame {
-  width: 100%;
+  /* Never taller than the window, with room for the bar beneath, so the
+     whole slide is in view at once on a laptop. */
+  width: min(100%, calc((100vh - 140px) * var(--aspect)));
   margin: 0 auto;
 }
 .lib-stage-frame img {
