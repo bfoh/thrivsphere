@@ -79,6 +79,14 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // Next 16.3 keeps Turbopack's build cache in .next/cache, and Vercel
+    // restores that folder before each build. A restored cache once served
+    // the previous globals.css with the new code, so a deploy shipped
+    // without its styles. Building from scratch costs seconds; a deploy
+    // that silently drops CSS costs far more.
+    turbopackFileSystemCacheForBuild: false,
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
