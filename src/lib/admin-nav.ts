@@ -33,6 +33,8 @@ export const ADMIN_NAV: NavItem[] = [
   { label: "Safeguarding", href: "/admin/safeguarding", capability: "safeguarding:read", group: "service" },
   // Supervision sheets, preparation tasks and the worksheet library.
   { label: "Resources", href: "/admin/resources", capability: "worksheet:manage", group: "service" },
+  // Practitioner guides, teaching slides and client materials for every session.
+  { label: "Library", href: "/admin/library", capability: "library:read", group: "service" },
   { label: "Reports", href: "/admin/reports", capability: "report:read", group: "service" },
 
   // Running the organisation.

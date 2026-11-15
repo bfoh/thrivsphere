@@ -15,7 +15,8 @@ export const metadata: Metadata = { title: "Resources", robots: { index: false, 
 /**
  * Resources: everything staff use to plan and support a client's work
  * between sessions — supervision sheets, the preparation tasks they create,
- * and the worksheet library — with what needs attention first.
+ * and the worksheet library — with what needs attention first. The session
+ * materials themselves are in the resource library (/admin/library).
  */
 export default async function ResourcesPage() {
   const actor = await requireCapability("worksheet:manage", {
@@ -40,6 +41,15 @@ export default async function ResourcesPage() {
         Supervision &amp; next-session planning, your preparation tasks, and the worksheets you can set for clients.
         Everything here is part of the client&apos;s record and every access is logged.
       </p>
+
+      <Link href="/admin/library" className="card lib-promo">
+        <span>
+          <strong>Resource library</strong>
+          Every practitioner guide, teaching presentation, client learning guide and activity worksheet, to read,
+          present, print or download. Search them all at once.
+        </span>
+        <span className="lib-promo-go">Open the library →</span>
+      </Link>
 
       <div className="two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, alignItems: "start" }}>
         <Section title="Start a supervision sheet" subtitle="Review a completed session and plan the next one">

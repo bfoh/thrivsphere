@@ -98,6 +98,16 @@ describe("can", () => {
     }
   });
 
+  it("gives every staff role the resource library, and no client", () => {
+    const founder: Actor = { userId: "u9", role: "founder", status: "active" };
+    for (const staff of [practitioner, supervisor, admin, founder]) {
+      assert.equal(can(staff, "library:read"), true, `${staff.role} should hold library:read`);
+    }
+    // The owner's materials are for delivering sessions, not for browsing in the portal.
+    assert.equal(can(clientA, "library:read"), false);
+    assert.equal(can(suspendedAdmin, "library:read"), false);
+  });
+
   it("keeps a finalised supervision sheet's correction at supervisor level", () => {
     // Amendments reuse notes:amend, so a practitioner cannot rewrite a locked sheet.
     assert.equal(can(practitioner, "notes:amend"), false);

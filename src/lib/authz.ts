@@ -42,6 +42,8 @@ export type Capability =
   | "worksheet:manage"
   // A client filling in a worksheet set for them, on their own record only.
   | "worksheet:complete:own"
+  // The resource library: guides, teaching slides and client materials.
+  | "library:read"
   | "appointment:book:own"
   | "appointment:manage:any"
   | "availability:manage"
@@ -97,6 +99,7 @@ const PRACTITIONER_CAPS: Capability[] = [
   "supervision:read",
   "supervision:write",
   "worksheet:manage",
+  "library:read",
 ];
 
 const SUPERVISOR_CAPS: Capability[] = [

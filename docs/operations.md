@@ -53,6 +53,10 @@ a member who can be removed.
 - **Refunds and disputes:** made and answered in the Stripe Dashboard. The
   website adjusts the client's sessions itself and emails you
   (`docs/stripe-webhook.md`).
+- **Session materials:** **Library** (`/admin/library`) has every practitioner
+  guide, teaching presentation, client learning guide and activity worksheet,
+  searchable, with print-ready PDFs. To add or change a material, see
+  `docs/library.md`.
 - **Prices and service descriptions:** **Services & prices**
   (`/admin/catalogue`). A price change reaches the pricing page, the client's
   *Buy sessions* page and card checkout together. Service wording shows on the
@@ -86,6 +90,10 @@ the pages, so they always need a redeploy.
   (`pg_dump`) before any large change.
 - **Client documents:** these are stored in Vercel Blob, which has no automatic
   backup. Export them periodically if they are not kept elsewhere.
+- **Resource library:** built from the owner's files and stored in the same
+  Blob store under `library/assets/`. Keep the owner's original files: the
+  library can be rebuilt and uploaded from them at any time
+  (`docs/library.md`).
 - **Code:** GitHub. Every deployment can be rolled back from Vercel →
   Deployments → *Promote*.
 

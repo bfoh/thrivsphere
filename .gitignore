@@ -42,3 +42,7 @@ next-env.d.ts
 
 # playwright automation artifacts
 .playwright-mcp/
+
+# resource library: the owner's files and everything built from them (private Blob only)
+/resources/
+/library-build/
