@@ -124,7 +124,10 @@ Shown once `ANTHROPIC_API_KEY` is set. Model: Claude Opus 5.5
   (`src/lib/ai/brand-prompt.ts`): no treatment claims or promised outcomes, no
   testimonials, no personal details, Samaritans' guidance and the crisis line,
   no statements about the reader's health in social posts, facts only from the
-  sources given. The same kit gives the same text, so it is cached.
+  sources given. The instructions are cached for 5 minutes per button, so
+  using the same button again soon after costs less.
+- **Cost (first real run, 21 November 2026):** titles $0.03, summary $0.02,
+  rules check $0.05, rewrite $0.02; 4 to 15 seconds each.
 - Code: `src/lib/ai/` (`tasks.ts` for what each button does, `run.ts` for the
   checks and the request, `cost.ts`, `personal-data.ts`), the route
   `src/app/api/admin/ai/[task]/route.ts`, and `src/components/admin/ai/`.

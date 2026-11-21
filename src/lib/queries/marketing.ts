@@ -5,6 +5,9 @@ import { getDb } from "@/db";
 import { aiUsage, brandKitApprovals, brandKitVersions, marketingAssets, users } from "@/db/schema";
 import { kitStatus, seedKit, type BrandKit } from "@/lib/brand-kit";
 
+/** A member of staff's name, or their email if they haven't set one (as on other staff pages). */
+const staffName = sql<string | null>`coalesce(nullif(${users.displayName}, ''), ${users.email})`;
+
 /** Every Brand Kit version (newest first), with who made and approved each. */
 export async function getKitHistory() {
   const db = getDb();
@@ -16,7 +19,7 @@ export async function getKitHistory() {
         contentHash: brandKitVersions.contentHash,
         note: brandKitVersions.note,
         createdAt: brandKitVersions.createdAt,
-        createdByName: users.displayName,
+        createdByName: staffName,
       })
       .from(brandKitVersions)
       .leftJoin(users, eq(users.id, brandKitVersions.createdBy))
@@ -26,7 +29,7 @@ export async function getKitHistory() {
         versionId: brandKitApprovals.versionId,
         contentHash: brandKitApprovals.contentHash,
         approvedAt: brandKitApprovals.approvedAt,
-        approvedByName: users.displayName,
+        approvedByName: staffName,
       })
       .from(brandKitApprovals)
       .leftJoin(users, eq(users.id, brandKitApprovals.approvedBy))
@@ -67,7 +70,7 @@ export async function listAssets(o: { archived?: boolean; photosOnly?: boolean }
   const conditions = [o.archived ? isNotNull(marketingAssets.archivedAt) : isNull(marketingAssets.archivedAt)];
   if (o.photosOnly) conditions.push(eq(marketingAssets.source, "upload"));
   return getDb()
-    .select({ asset: marketingAssets, createdByName: users.displayName })
+    .select({ asset: marketingAssets, createdByName: staffName })
     .from(marketingAssets)
     .leftJoin(users, eq(users.id, marketingAssets.createdBy))
     .where(and(...conditions))
@@ -122,7 +125,7 @@ export async function aiUsageReport() {
       .groupBy(aiUsage.feature)
       .orderBy(sql`4 desc`),
     db
-      .select({ row: aiUsage, actorName: users.displayName })
+      .select({ row: aiUsage, actorName: staffName })
       .from(aiUsage)
       .leftJoin(users, eq(users.id, aiUsage.actorId))
       .orderBy(desc(aiUsage.createdAt))

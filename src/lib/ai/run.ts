@@ -92,7 +92,8 @@ export async function runTask<K extends TaskKey>(
     const response = await getClient().messages.parse({
       model: MODEL,
       max_tokens: settings.maxTokens,
-      // The kit's instructions are identical for every request, so they're cached.
+      // Cached for 5 minutes. Each task's answer format is part of what's cached,
+      // so the saving comes when the same button is used again soon after.
       system: [{ type: "text", text: brandSystemPrompt(kit), cache_control: { type: "ephemeral" } }],
       messages: [{ role: "user", content }],
       output_config: { effort: settings.effort, format: zodOutputFormat(outputSchema(task)) },

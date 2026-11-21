@@ -86,7 +86,7 @@ export function taskPrompt<K extends TaskKey>(task: K, input: TaskInput<K>): str
   const post = () => `Category: ${i.category || "not chosen"}\nWorking title: ${i.title || "none yet"}\n\n<post>\n${i.body}\n</post>`;
   switch (task) {
     case "blog-titles":
-      return `Suggest five titles for this blog post. Each should be under 65 characters, so it shows in full in search results; specific, calm and honest about what the post gives the reader. No clickbait, no questions about the reader's health, no promises. Give a short reason for each.\n\n${post()}`;
+      return `Suggest five titles for this blog post. Each should be under 65 characters, so it shows in full in search results; specific, calm and honest about what the post gives the reader. No clickbait, no questions about the reader's health, no promises. Give a short reason for each, without repeating its length (the page shows that).\n\n${post()}`;
     case "blog-summary":
       return `Write two things for this blog post:\n1. summary: one or two sentences, at most 280 characters, shown under the title on the blog page.\n2. searchDescription: 120 to 155 characters, shown by search engines.\nBoth should say what the reader will find, in our voice, without promising results.\n\n${post()}`;
     case "blog-review":

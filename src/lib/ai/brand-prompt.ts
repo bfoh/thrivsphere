@@ -3,7 +3,7 @@
  * that keep its marketing safe and lawful, and the approved Brand Kit.
  *
  * The same kit always gives exactly the same text, so the API can reuse it
- * from its cache rather than charging for it on every request.
+ * from its cache when a button is used again within a few minutes.
  */
 import { legal, scopeOfPractice } from "../../data/site";
 import { BOILERPLATES, type BrandKit } from "../brand-kit";
