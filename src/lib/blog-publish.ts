@@ -1,9 +1,9 @@
 import "server-only";
 
 import { revalidatePath } from "next/cache";
-import { and, desc, eq, lte } from "drizzle-orm";
+import { and, desc, eq, lt, lte } from "drizzle-orm";
 import { getDb } from "@/db";
-import { blogPostVersions, blogPosts, blogReviews } from "@/db/schema";
+import { blogComments, blogPostVersions, blogPosts, blogReviews } from "@/db/schema";
 import { contentHash } from "@/lib/blog-hash";
 import { canPublish } from "@/lib/blog-rules";
 import { toContent } from "@/lib/queries/blog";
@@ -78,4 +78,17 @@ export async function publishDuePosts(now: Date): Promise<{ published: number; r
     if (await markPublished(post, now)) published++;
   }
   return { published, refused };
+}
+
+/**
+ * Hidden comments, and the email that came with them, are kept 90 days in
+ * case a decision needs revisiting, then deleted. Run by the hourly job.
+ */
+export async function purgeHiddenComments(now: Date): Promise<number> {
+  const cutoff = new Date(now.getTime() - 90 * 24 * 3600_000);
+  const rows = await getDb()
+    .delete(blogComments)
+    .where(and(eq(blogComments.status, "hidden"), lt(blogComments.moderatedAt, cutoff)))
+    .returning({ id: blogComments.id });
+  return rows.length;
 }

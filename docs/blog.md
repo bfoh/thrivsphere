@@ -61,9 +61,33 @@ Blob under `blog/` and served by `/blog/images/<name>` only while they belong
 to a published post. Staff see drafts' photos through
 `/api/admin/blog/images/<name>`.
 
+## Readers' likes and comments
+
+- **Likes:** one per browser per post. The browser gets a random id in the
+  `ts_reader` cookie only when the reader presses Like; the database keeps a
+  hash of it (`blog_likes`), nothing else. The count is read by the browser
+  from `/api/blog/<slug>/like`, so the article page stays cached.
+- **Comments:** anyone can comment with a first name or nickname and an email
+  address. The email is encrypted (`APP_ENCRYPTION_KEY`) and never shown.
+  Every comment waits in **Blog → Readers' comments** (`/admin/blog/comments`)
+  until a member of staff who writes posts approves it (owner's decision,
+  21 November 2026). Comments are shown as plain text; links in them aren't
+  clickable.
+- **Comments that suggest risk** (suicide, self-harm, not being safe from
+  someone) are put first, marked *Possible risk*, and ThriveSphere's inbox is
+  emailed straight away with a link only. The writer is shown Samaritans and
+  999 after sending. The moderator sees their email address to follow up
+  under the safeguarding procedure. The checks are in
+  `src/lib/blog-comment-rules.ts`; they never refuse a comment.
+- Moderators can approve, hide (not published, or taken off the post) or
+  delete a comment with its email, e.g. when someone asks for theirs to be
+  removed. Hidden comments are deleted after 90 days by the hourly job.
+- Spam: a hidden honeypot field, and at most five comments per connection in
+  ten minutes (per server instance, like the enquiry form).
+- The privacy and cookie policies say what's kept (version 1.3.0).
+
 ## Still to come
 
-- Readers' likes and comments, with comments held for approval.
 - AI help in the editor (topic ideas, rewrites, checks, titles, alt text).
 - AI research and writing agents that draft a post from a brief, using
   trusted UK sources only.

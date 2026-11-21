@@ -21,6 +21,8 @@ export type ArticleViewProps = {
   firstPublishedAt: Date | null;
   publishedAt: Date | null;
   readTime: string;
+  /** Likes and comments, on the website only. */
+  engagement?: React.ReactNode;
 };
 
 export function ArticleView(p: ArticleViewProps) {
@@ -88,6 +90,8 @@ export function ArticleView(p: ArticleViewProps) {
           </ol>
         </section>
       )}
+
+      {p.engagement}
 
       <NotCrisisNotice style={{ marginTop: 32 }} />
 

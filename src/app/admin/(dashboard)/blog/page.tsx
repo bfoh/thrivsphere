@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireCapability } from "@/lib/guard";
 import { Section, Empty } from "@/components/admin/RecordUI";
-import { listPostsForAdmin, isBlogReviewer } from "@/lib/queries/blog";
+import { listPostsForAdmin, isBlogReviewer, pendingCommentCount } from "@/lib/queries/blog";
 import { STATUS_LABEL, type BlogStatus } from "@/lib/blog-rules";
 import { STATUS_COLOUR } from "@/components/admin/blog/StatusBadge";
 
@@ -27,7 +27,7 @@ export default async function BlogAdminPage({ searchParams }: { searchParams: Pr
   const actor = await requireCapability("blog:write", { entity: "blog_posts", action: "view", detail: "viewed blog posts" });
   const show = (await searchParams).show ?? "active";
   const view = VIEWS.find((v) => v.key === show) ?? VIEWS[0];
-  const [rows, reviewer] = await Promise.all([listPostsForAdmin(view.statuses), isBlogReviewer(actor.userId)]);
+  const [rows, reviewer, comments] = await Promise.all([listPostsForAdmin(view.statuses), isBlogReviewer(actor.userId), pendingCommentCount()]);
   const canApprove = actor.role === "founder" || reviewer;
 
   return (
@@ -45,6 +45,32 @@ export default async function BlogAdminPage({ searchParams }: { searchParams: Pr
           New post
         </Link>
       </div>
+
+      <Link
+        href="/admin/blog/comments"
+        style={{
+          display: "flex",
+          gap: 10,
+          alignItems: "center",
+          flexWrap: "wrap",
+          marginBottom: 18,
+          padding: "12px 16px",
+          borderRadius: 12,
+          textDecoration: "none",
+          border: `1px solid ${comments.urgent ? "rgba(161,66,28,0.45)" : "rgba(31,58,95,0.1)"}`,
+          background: comments.urgent ? "rgba(161,66,28,0.05)" : "#fff",
+          color: "var(--ink)",
+          fontSize: 14,
+        }}
+      >
+        <strong style={{ color: "var(--navy)" }}>Readers&apos; comments</strong>
+        <span>
+          {comments.total === 0
+            ? "nothing waiting for approval"
+            : `${comments.total} waiting for approval${comments.urgent ? `, ${comments.urgent} may need attention soon` : ""}`}
+        </span>
+        <span style={{ marginLeft: "auto", color: "var(--teal-deep)", fontWeight: 700 }}>Open</span>
+      </Link>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         {VIEWS.map((v) => (

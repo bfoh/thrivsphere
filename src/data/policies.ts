@@ -47,6 +47,13 @@ const FROM2 = "2026-11-01";
 const V3 = "1.2.0";
 const FROM3 = "2026-11-21";
 
+/**
+ * Readers' likes and comments on the blog (21 November 2026): the privacy
+ * and cookie policies say what is kept and why.
+ */
+const V4 = "1.3.0";
+const FROM4 = "2026-11-21";
+
 /** "ThriveSphere Wellbeing is a trading name of …", with the registered office. */
 const whoWeAre = `${legal.statement} Registered office: ${legal.registeredOffice}.`;
 
@@ -54,8 +61,8 @@ export const policies: Record<string, Policy> = {
   privacy: {
     slug: "privacy",
     requiresConsent: true,
-    version: V2,
-    effectiveFrom: FROM2,
+    version: V4,
+    effectiveFrom: FROM4,
     audience: "public",
     title: "Privacy Policy",
     eyebrow: "Privacy · UK GDPR",
@@ -66,7 +73,7 @@ export const policies: Record<string, Policy> = {
       {
         heading: "What we collect",
         body: ["We only collect information you choose to share with us, which may include:"],
-        bullets: ["Your name and contact details", "Information you provide in our enquiry form — please keep this brief and avoid detailed health information", "The registration details, consents and session records kept in your secure ThriveSphere account", "Payment confirmations (card details are handled by our payment provider and never reach us)", "Messages you send us by email or WhatsApp", "Website analytics data (only with your consent)"],
+        bullets: ["Your name and contact details", "Information you provide in our enquiry form — please keep this brief and avoid detailed health information", "The registration details, consents and session records kept in your secure ThriveSphere account", "Payment confirmations (card details are handled by our payment provider and never reach us)", "Messages you send us by email or WhatsApp", "If you comment on a blog post: the name you give, your email address and your comment", "Website analytics data (only with your consent)"],
       },
       {
         heading: "How we use your information",
@@ -75,14 +82,22 @@ export const policies: Record<string, Policy> = {
       { heading: "Lawful basis", body: ["We process your data on the basis of your consent, our legitimate interest in providing wellbeing services, and to meet legal obligations. Special category (health) data is processed only with your explicit consent or where necessary for the provision of care."] },
       { heading: "How we protect it", body: ["Your data is stored securely, access is restricted to those who need it, and we use reputable, GDPR-compliant service providers. We never sell your data."] },
       { heading: "WhatsApp", body: ["If you contact us on WhatsApp, your messages are also handled by WhatsApp (Meta). WhatsApp is for general enquiries and arranging appointments — please do not share personal health information there. Anything personal is best shared inside your secure ThriveSphere account."] },
+      {
+        heading: "Blog comments and likes",
+        body: [
+          "If you comment on a blog post, your comment and the name you give are published once our team has approved them. Your email address is never shown; it is stored encrypted and used only if we need to contact you about your comment, including if it suggests you may be at risk. We may decide not to publish a comment. Comments we don't publish are deleted after 90 days.",
+          `You can ask us to remove your comment at any time by emailing ${brand.email}. Please don't include health details or anything that could identify you or someone else in a comment.`,
+          "If you like a post, we keep only an anonymous record that this browser liked it, so you can't like a post twice. Nothing else about you is kept.",
+        ],
+      },
       { heading: "Your rights", body: [`You have the right to access, correct, delete or restrict your data, to withdraw consent, and to complain to the Information Commissioner's Office (ICO). To exercise any right, email ${brand.email}.`] },
       { heading: "Retention", body: ["We keep personal data only as long as necessary for the purposes above and in line with our Records Retention Policy, after which it is securely deleted."] },
     ],
   },
   cookies: {
     slug: "cookies",
-    version: V,
-    effectiveFrom: FROM,
+    version: V4,
+    effectiveFrom: FROM4,
     audience: "public",
     title: "Cookie Policy",
     eyebrow: "Cookies",
@@ -91,10 +106,10 @@ export const policies: Record<string, Policy> = {
       { heading: "What are cookies?", body: ["Cookies are small text files stored on your device that help websites function and understand how they are used."] },
       {
         heading: "How we use cookies",
-        bullets: ["Essential cookies — required for the site to work and to remember your cookie choice.", "Analytics cookies (optional) — help us understand how the site is used so we can improve it. These are only set if you accept."],
+        bullets: ["Essential cookies — required for the site to work and to remember your cookie choice.", "A blog cookie — set only if you press Like on a blog post, so the site remembers that this browser liked it. It holds a random number, not who you are, and lasts a year.", "Analytics cookies (optional) — help us understand how the site is used so we can improve it. These are only set if you accept."],
       },
       { heading: "Managing cookies", body: ["When you first visit, you can choose 'Accept all' or 'Essential only'. You can change your mind at any time by clearing your browser storage, and you can control cookies through your browser settings."] },
-      { heading: "Contact", body: [`If you have questions about our use of cookies, email ${brand.email}. ${updated}.`] },
+      { heading: "Contact", body: [`If you have questions about our use of cookies, email ${brand.email}. ${revised}.`] },
     ],
   },
   safeguarding: {

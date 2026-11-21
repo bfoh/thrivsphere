@@ -6,7 +6,7 @@ import { dueReminders, type ReminderKind } from "@/lib/reminders";
 import { bookingConfirmation, reminder1h, reminder24h } from "@/lib/email-templates";
 import { sendEmail } from "@/lib/email";
 import { sweepExpiredHolds } from "@/lib/booking-engine";
-import { publishDuePosts } from "@/lib/blog-publish";
+import { publishDuePosts, purgeHiddenComments } from "@/lib/blog-publish";
 
 /**
  * Scheduled reminder send.
@@ -19,7 +19,8 @@ import { publishDuePosts } from "@/lib/blog-publish";
  * It also releases any time still held for a payment that never completed,
  * in case Stripe's "checkout expired" event did not arrive (IT handover §19),
  * and publishes blog posts scheduled for the past hour, after checking each is
- * still exactly the version a reviewer approved.
+ * still exactly the version a reviewer approved. Blog comments hidden more
+ * than 90 days ago are deleted, with the commenter's email.
  *
  * Protected by a shared secret rather than a user session, since the caller is
  * Vercel Cron. Without it, anyone who found the URL could make the service
@@ -55,6 +56,10 @@ export async function GET(request: Request) {
     console.error("[cron] blog publishing failed", err);
     return { published: 0, refused: 0 };
   });
+  const commentsPurged = await purgeHiddenComments(now).catch((err) => {
+    console.error("[cron] comment purge failed", err);
+    return 0;
+  });
 
   const rows = await db
     .select({
@@ -71,7 +76,7 @@ export async function GET(request: Request) {
     );
 
   if (rows.length === 0) {
-    return Response.json({ checked: 0, sent: 0, failed: 0, released, blog });
+    return Response.json({ checked: 0, sent: 0, failed: 0, released, blog, commentsPurged });
   }
 
   const sentRows = await db
@@ -137,5 +142,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return Response.json({ checked: rows.length, due: due.length, sent, failed, released, blog });
+  return Response.json({ checked: rows.length, due: due.length, sent, failed, released, blog, commentsPurged });
 }

@@ -2,7 +2,8 @@ import crypto from "node:crypto";
 
 /**
  * Authenticated encryption for the few fields that must not sit in the
- * database as plain text — currently session joining links.
+ * database as plain text: session joining links, and the email addresses of
+ * readers who comment on the blog.
  *
  * AES-256-GCM, with a random IV per value and the auth tag stored alongside,
  * so a tampered ciphertext fails to decrypt rather than returning something

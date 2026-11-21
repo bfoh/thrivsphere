@@ -116,6 +116,12 @@ a member who can be removed.
     afterwards needs approving again; a live post stays as approved until the
     new version is published. Scheduled posts go live within the hour.
   - The founder or a reviewer can take a post off the website at any time.
+  - Readers can like posts and leave comments. Comments wait in **Blog →
+    Readers' comments** until any member of staff who writes posts approves
+    them. Ones marked *Possible risk* come first and ThriveSphere's inbox is
+    emailed: read them soon and follow the safeguarding procedure (the
+    reader's email is shown there). Never publish a comment that identifies
+    someone or gives personal or health details.
 - **Prices and service descriptions:** **Services & prices**
   (`/admin/catalogue`). A price change reaches the pricing page, the client's
   *Buy sessions* page and card checkout together. Service wording shows on the

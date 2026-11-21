@@ -1,9 +1,9 @@
 import "server-only";
 
-import { and, asc, desc, eq, inArray, isNotNull, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, isNotNull, or } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { getDb } from "@/db";
-import { blogPostVersions, blogPosts, blogReviews, users } from "@/db/schema";
+import { blogComments, blogLikes, blogPostVersions, blogPosts, blogReviews, users } from "@/db/schema";
 import { readingTime, type BlogContent, type BlogStatus } from "@/lib/blog-rules";
 
 /**
@@ -14,6 +14,7 @@ import { readingTime, type BlogContent, type BlogStatus } from "@/lib/blog-rules
  */
 
 export type PublicPost = BlogContent & {
+  id: string;
   slug: string;
   firstPublishedAt: Date;
   publishedAt: Date;
@@ -93,6 +94,7 @@ export async function getPublishedPost(slug: string): Promise<PublicPost | null>
   const published = row.post.publishedAt ?? row.post.firstPublishedAt ?? row.version.createdAt;
   return {
     ...toContent(row.version),
+    id: row.post.id,
     slug: row.post.slug,
     firstPublishedAt: row.post.firstPublishedAt ?? published,
     publishedAt: published,
@@ -217,4 +219,90 @@ export async function isBlogReviewer(userId: string): Promise<boolean> {
 export async function slugsLike(base: string): Promise<string[]> {
   const rows = await getDb().select({ slug: blogPosts.slug }).from(blogPosts);
   return rows.map((r) => r.slug).filter((s) => s === base || s.startsWith(`${base}-`));
+}
+
+// ---------------------------------------------------------------------------
+// Readers' likes and comments
+
+/** A published post's id from its address, or null: likes and comments are for live posts only. */
+export async function publishedPostId(slug: string): Promise<string | null> {
+  const [row] = await getDb()
+    .select({ id: blogPosts.id })
+    .from(blogPosts)
+    .where(and(eq(blogPosts.slug, slug), isNotNull(blogPosts.publishedVersionId)))
+    .limit(1);
+  return row?.id ?? null;
+}
+
+/** Approved comments, oldest first. Never the email. */
+export async function getApprovedComments(postId: string) {
+  return getDb()
+    .select({ id: blogComments.id, name: blogComments.authorName, body: blogComments.body, createdAt: blogComments.createdAt })
+    .from(blogComments)
+    .where(and(eq(blogComments.postId, postId), eq(blogComments.status, "approved")))
+    .orderBy(asc(blogComments.createdAt))
+    .limit(500);
+}
+
+export async function likeCount(postId: string): Promise<number> {
+  const [row] = await getDb().select({ n: count() }).from(blogLikes).where(eq(blogLikes.postId, postId));
+  return row?.n ?? 0;
+}
+
+/** Comments for moderators: waiting ones (those that need attention first), then recent decisions. */
+export async function getCommentQueue() {
+  const db = getDb();
+  const moderator = alias(users, "moderator");
+  const cols = {
+    id: blogComments.id,
+    postId: blogComments.postId,
+    slug: blogPosts.slug,
+    live: blogPosts.publishedVersionId,
+    title: blogPostVersions.title,
+    name: blogComments.authorName,
+    emailEnc: blogComments.emailEnc,
+    body: blogComments.body,
+    status: blogComments.status,
+    needsAttention: blogComments.needsAttention,
+    flags: blogComments.flags,
+    createdAt: blogComments.createdAt,
+    moderatedAt: blogComments.moderatedAt,
+    moderatorName: moderator.displayName,
+    moderatorEmail: moderator.email,
+  };
+  const base = () =>
+    db
+      .select(cols)
+      .from(blogComments)
+      .innerJoin(blogPosts, eq(blogPosts.id, blogComments.postId))
+      .leftJoin(blogPostVersions, eq(blogPostVersions.id, blogPosts.currentVersionId))
+      .leftJoin(moderator, eq(moderator.id, blogComments.moderatedBy));
+  const [waiting, decided] = await Promise.all([
+    base().where(eq(blogComments.status, "pending")).orderBy(desc(blogComments.needsAttention), asc(blogComments.createdAt)).limit(200),
+    base().where(inArray(blogComments.status, ["approved", "hidden"])).orderBy(desc(blogComments.moderatedAt)).limit(50),
+  ]);
+  return { waiting, decided };
+}
+
+export async function pendingCommentCount(): Promise<{ total: number; urgent: number }> {
+  const rows = await getDb()
+    .select({ needsAttention: blogComments.needsAttention, n: count() })
+    .from(blogComments)
+    .where(eq(blogComments.status, "pending"))
+    .groupBy(blogComments.needsAttention);
+  return {
+    total: rows.reduce((a, r) => a + r.n, 0),
+    urgent: rows.find((r) => r.needsAttention)?.n ?? 0,
+  };
+}
+
+/** Likes and comments on one post, for its editor page. */
+export async function postEngagement(postId: string) {
+  const db = getDb();
+  const [[likes], comments] = await Promise.all([
+    db.select({ n: count() }).from(blogLikes).where(eq(blogLikes.postId, postId)),
+    db.select({ status: blogComments.status, n: count() }).from(blogComments).where(eq(blogComments.postId, postId)).groupBy(blogComments.status),
+  ]);
+  const by = (s: string) => comments.find((c) => c.status === s)?.n ?? 0;
+  return { likes: likes?.n ?? 0, approved: by("approved"), pending: by("pending") };
 }

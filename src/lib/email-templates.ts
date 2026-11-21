@@ -654,6 +654,30 @@ export function blogReviewRequest(o: { postId: string }): Email {
   };
 }
 
+/**
+ * A reader's comment is waiting for approval. Link only: what they wrote, and
+ * who they are, stay in the dashboard. A comment that suggests the writer may
+ * be at risk says so in the subject, so it is opened first.
+ */
+export function blogCommentNotice(o: { needsAttention: boolean }): Email {
+  const href = `${siteUrl()}/admin/blog/comments`;
+  const subject = o.needsAttention ? "A blog comment may need attention soon" : "A blog comment is waiting for approval";
+  const line = o.needsAttention
+    ? "A reader has left a comment that suggests they may be at risk. Please read it soon: it isn't on the website, and the reader's email address is with it if someone needs to follow up."
+    : "A reader has left a comment on a blog post. It isn't on the website until someone approves it.";
+  return {
+    subject,
+    html: shell({
+      preheader: subject,
+      heading: subject,
+      body: `<p style="margin:0 0 14px;">${line}</p><p style="margin:0;">The comment is in the admin dashboard, not in this email.</p>`,
+      cta: { label: "Open the comments", href },
+      showCrisis: false,
+    }),
+    text: textShell([line, "", `Open the comments: ${href}`], { crisis: false, footer: "The comment is in the admin dashboard, not in this email." }),
+  };
+}
+
 /** The author hears what the reviewer decided. The comment stays in the dashboard. */
 export function blogReviewDecision(o: { postId: string; approved: boolean }): Email {
   const href = `${siteUrl()}/admin/blog/${o.postId}`;

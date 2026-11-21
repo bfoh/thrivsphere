@@ -7,7 +7,8 @@ import { BackLink } from "@/components/admin/BackLink";
 import { StatusBadge } from "@/components/admin/blog/StatusBadge";
 import { PostActionButton, PostEditor, ReviewForm, ScheduleForm } from "@/components/admin/blog/BlogForms";
 import { archivePost, cancelSchedule, publishPost, restorePost, submitForReview, unpublishPost, withdrawFromReview } from "@/app/actions/blog";
-import { getPostForEditor, isBlogReviewer, toContent } from "@/lib/queries/blog";
+import { getPostForEditor, isBlogReviewer, postEngagement, toContent } from "@/lib/queries/blog";
+import { commentsLabel, likesLabel } from "@/lib/blog-comment-rules";
 import {
   AUDIENCES,
   LENGTHS,
@@ -53,7 +54,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
 
   const actor = await requireCapability("blog:write", { entity: "blog_posts", entityId: id, action: "view", detail: "opened a blog post" });
-  const [data, reviewer] = await Promise.all([getPostForEditor(id), isBlogReviewer(actor.userId)]);
+  const [data, reviewer, engagement] = await Promise.all([getPostForEditor(id), isBlogReviewer(actor.userId), postEngagement(id)]);
   if (!data) notFound();
 
   const { post, current, published, baseline, versions, reviews, currentReviewed, authorName } = data;
@@ -95,6 +96,17 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
             <a href={`/blog/${post.slug}`} target="_blank" rel="noopener" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
               View on the website
             </a>
+            {" · "}
+            {likesLabel(engagement.likes)} · {commentsLabel(engagement.approved)}
+            {engagement.pending > 0 && (
+              <>
+                {" ("}
+                <Link href="/admin/blog/comments" style={{ color: "#8a6d12", fontWeight: 700 }}>
+                  {engagement.pending} waiting for approval
+                </Link>
+                {")"}
+              </>
+            )}
           </>
         )}
       </p>

@@ -3,12 +3,15 @@ import { notFound } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { ArticleView } from "@/components/blog/ArticleView";
 import { brand } from "@/data/site";
-import { getPublishedPost, type PublicPost } from "@/lib/queries/blog";
+import { Engagement } from "@/components/blog/Engagement";
+import { getApprovedComments, getPublishedPost, type PublicPost } from "@/lib/queries/blog";
 import { isValidSlug } from "@/lib/blog-rules";
 
 /**
  * One article. Only a post's published version is ever read, so a draft or a
  * version still waiting for review returns "not found" to the public.
+ * Approved comments are part of the cached page and refreshed when a comment
+ * is approved or hidden; the like count is read by the browser.
  */
 export const revalidate = 300;
 
@@ -67,6 +70,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const post = await load(slug);
   if (!post) notFound();
+  const comments = await getApprovedComments(post.id);
 
   return (
     <PageShell eyebrow={post.category} title={post.title} watermark="Article">
@@ -82,6 +86,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         firstPublishedAt={post.firstPublishedAt}
         publishedAt={post.publishedAt}
         readTime={post.readTime}
+        engagement={<Engagement slug={post.slug} comments={comments} />}
       />
     </PageShell>
   );

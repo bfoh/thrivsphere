@@ -1,4 +1,5 @@
 import {
+  boolean,
   index,
   integer,
   jsonb,
@@ -6,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  primaryKey,
   uniqueIndex,
   uuid,
   type AnyPgColumn,
@@ -117,4 +119,54 @@ export const blogReviews = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("blog_reviews_post_idx").on(t.postId), index("blog_reviews_version_idx").on(t.versionId)]
+);
+
+/**
+ * Readers' comments. Held until a member of staff approves them, because a
+ * reader may be struggling and a comment can carry a crisis disclosure or
+ * someone's personal details (owner's decision, 21 November 2026).
+ */
+export const blogCommentStatus = pgEnum("blog_comment_status", ["pending", "approved", "hidden"]);
+
+export const blogComments = pgTable(
+  "blog_comments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => blogPosts.id, { onDelete: "cascade" }),
+    /** Shown with the comment. */
+    authorName: text("author_name").notNull(),
+    /** Encrypted. Never shown; staff use it to follow up if they need to. */
+    emailEnc: text("email_enc").notNull(),
+    body: text("body").notNull(),
+    status: blogCommentStatus("status").notNull().default("pending"),
+    /** Something in it suggests the writer may be at risk: shown first, and staff are told. */
+    needsAttention: boolean("needs_attention").notNull().default(false),
+    /** What the automatic check noticed, for the moderator. */
+    flags: text("flags").array().notNull().default([]),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    moderatedBy: uuid("moderated_by").references(() => users.id, { onDelete: "set null" }),
+    moderatedAt: timestamp("moderated_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("blog_comments_post_idx").on(t.postId, t.status),
+    index("blog_comments_queue_idx").on(t.status, t.createdAt),
+  ]
+);
+
+/**
+ * Likes, one per browser per post. The browser holds a random id in a cookie
+ * set only when someone presses Like; only a hash of it is stored here.
+ */
+export const blogLikes = pgTable(
+  "blog_likes",
+  {
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => blogPosts.id, { onDelete: "cascade" }),
+    readerHash: text("reader_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.postId, t.readerHash] })]
 );
