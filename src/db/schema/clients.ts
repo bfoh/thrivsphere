@@ -7,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import { users } from "./identity";
@@ -86,7 +87,9 @@ export const clients = pgTable(
     scheduledDeletionAt: timestamp("scheduled_deletion_at", { withTimezone: true }),
   },
   (t) => [
-    index("clients_user_idx").on(t.userId),
+    // One client record per sign-in (IT handover §19: "a single client
+    // profile"). A double-submitted registration form cannot make two.
+    uniqueIndex("clients_user_unique").on(t.userId),
     index("clients_status_idx").on(t.status),
   ]
 );
@@ -122,6 +125,9 @@ export const consentType = pgEnum("consent_type", [
   "confidentiality_limits",
   "consent_to_support",
   "marketing",
+  // The booking terms and 72-hour cancellation policy, accepted before paying
+  // for a booking (IT handover §15.1, §19). Separate from consent to support.
+  "booking_terms",
 ]);
 
 /**
@@ -194,10 +200,15 @@ export const documents = pgTable(
 );
 
 /**
- * Public enquiries from the website contact form.
+ * Public enquiries: the contact form and callback requests.
  *
  * Separate from `clients` because an enquirer has not consented to anything
- * yet, and most never become clients.
+ * yet, and many never become clients. Every submission is stored, given a
+ * reference, and worked as a queue (IT handover §16.4, §19 Route B).
+ *
+ * `responded`, `converted` and `signposted` predate the handover's statuses
+ * and are kept because Postgres cannot drop an enum value; the queue offers
+ * New, In progress, Awaiting client, Responded and Closed.
  */
 export const enquiryStatus = pgEnum("enquiry_status", [
   "new",
@@ -205,25 +216,85 @@ export const enquiryStatus = pgEnum("enquiry_status", [
   "converted",
   "signposted",
   "closed",
+  "in_progress",
+  "awaiting_client",
+]);
+
+/** The categories of IT handover §16.2, plus a callback request (§19 Route B). */
+export const enquiryCategory = pgEnum("enquiry_category", [
+  "individual",
+  "corporate",
+  "general",
+  "existing_client",
+  "other",
+  "callback",
 ]);
 
 export const enquiries = pgTable(
   "enquiries",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    /** Quoted to the enquirer, e.g. TS-7K2Q9M. Never the database id. */
+    reference: text("reference").notNull().unique(),
+    category: enquiryCategory("category").notNull().default("general"),
     name: text("name").notNull(),
     email: text("email").notNull(),
     phone: text("phone"),
+    country: text("country"),
+    /** How they would like to be contacted: email, phone, either. */
+    preferredContact: text("preferred_contact"),
+    subject: text("subject"),
     serviceInterest: text("service_interest"),
     message: text("message"),
     preferredTimes: text("preferred_times"),
+    /** Callback requests are for adults only and confirm it on the form. */
+    confirmedAdult: boolean("confirmed_adult").notNull().default(false),
+    privacyAcknowledgedAt: timestamp("privacy_acknowledged_at", { withTimezone: true }),
     status: enquiryStatus("status").notNull().default("new"),
+    /** The client record this enquiry belongs to, matched on email. */
+    clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
+    /** Who owns it now. */
+    assignedTo: uuid("assigned_to").references(() => users.id, { onDelete: "set null" }),
     handledBy: uuid("handled_by").references(() => users.id, { onDelete: "set null" }),
     handledAt: timestamp("handled_at", { withTimezone: true }),
     internalNotes: text("internal_notes"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("enquiries_status_idx").on(t.status)]
+  (t) => [
+    index("enquiries_status_idx").on(t.status),
+    index("enquiries_email_idx").on(t.email),
+    index("enquiries_created_idx").on(t.createdAt),
+  ]
+);
+
+export const enquiryEventKind = pgEnum("enquiry_event_kind", [
+  "received",
+  "status",
+  "assigned",
+  "note",
+  "contact",
+  "booking_link",
+  "linked",
+]);
+
+/**
+ * What happened to an enquiry, and who did it: the contact history the
+ * handover asks for (§16.4, §19). Rows are only ever added.
+ */
+export const enquiryEvents = pgTable(
+  "enquiry_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    enquiryId: uuid("enquiry_id")
+      .notNull()
+      .references(() => enquiries.id, { onDelete: "cascade" }),
+    actorId: uuid("actor_id").references(() => users.id, { onDelete: "set null" }),
+    kind: enquiryEventKind("kind").notNull(),
+    detail: text("detail"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("enquiry_events_enquiry_idx").on(t.enquiryId, t.createdAt)]
 );
 
 /**

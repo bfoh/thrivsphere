@@ -2,156 +2,90 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { Icon } from "./icons";
 import { PillButton } from "./PillButton";
 import { submitEnquiry } from "@/app/actions/enquiry";
 import { initialEnquiryState } from "@/lib/enquiry-state";
-import Link from "next/link";
-import { enquiryTopics } from "@/data/site";
-
-const labelStyle: React.CSSProperties = { fontSize: 12.5, fontWeight: 700, color: "var(--navy)" };
-
-const inputStyle: React.CSSProperties = {
-  fontFamily: "inherit",
-  fontSize: 14,
-  padding: "11px 13px",
-  borderRadius: 10,
-  border: "1px solid rgba(31,58,95,0.18)",
-  background: "#fff",
-  color: "var(--ink)",
-  outline: "none",
-  width: "100%",
-  boxSizing: "border-box",
-  maxWidth: "100%",
-};
-
-const errorStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: 12,
-  fontWeight: 600,
-  color: "#b4553f",
-};
+import { CONTACT_CATEGORIES } from "@/lib/enquiry-rules";
+import {
+  ContactMethodField,
+  FormAlert,
+  Honeypot,
+  PrivacyAcknowledgement,
+  Received,
+  SelectField,
+  TextField,
+  errorStyle,
+  inputStyle,
+  labelStyle,
+} from "./EnquiryFields";
 
 /**
- * The real enquiry form, backed by a Server Action.
+ * The general contact form (IT handover §16.2).
  *
- * Deliberately does not ask for health details — an enquiry is just enough to
- * arrange a conversation. Anything sensitive is gathered in the Stage 2 intake
- * flow, behind authentication.
+ * Deliberately does not ask for health details: an enquiry is just enough to
+ * reply. Anything sensitive is gathered later, behind sign-in.
  */
 export function EnquiryForm() {
   const [state, formAction, pending] = useActionState(submitEnquiry, initialEnquiryState);
 
   if (state.status === "ok") {
-    return (
-      <div className="card" style={{ padding: 34, textAlign: "center" }}>
-        <div
-          style={{
-            width: 62,
-            height: 62,
-            margin: "0 auto 14px",
-            borderRadius: "50%",
-            background: "rgba(79,168,168,0.12)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Icon name="check" size={32} stroke="var(--teal-deep)" />
-        </div>
-        <h2 style={{ margin: 0, fontSize: 21, color: "var(--navy)" }}>Message sent</h2>
-        <p style={{ margin: "10px auto 0", maxWidth: 420, fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>
-          {state.message}
-        </p>
-      </div>
-    );
+    return <Received heading="Enquiry received" message={state.message} reference={state.reference} />;
   }
 
   const fe = state.fieldErrors ?? {};
+  const v = state.values ?? {};
 
   return (
-    <form action={formAction} className="card" style={{ padding: 30, display: "flex", flexDirection: "column", gap: 13 }}>
+    <form action={formAction} className="card" noValidate style={{ padding: 30, display: "flex", flexDirection: "column", gap: 13 }}>
       <div>
         <h2 style={{ margin: "0 0 4px", fontSize: 20, color: "var(--navy)" }}>Send us a message</h2>
-        <p style={{ margin: 0, fontSize: 13.5, color: "var(--navy-soft)" }}>
-          Confidential · not monitored for emergencies
-        </p>
+        <p style={{ margin: 0, fontSize: 13.5, color: "var(--navy-soft)" }}>Confidential · not monitored for emergencies</p>
       </div>
 
-      {state.status === "error" && !Object.keys(fe).length && (
-        <p
-          role="alert"
-          style={{
-            margin: 0,
-            padding: "11px 14px",
-            borderRadius: 10,
-            background: "rgba(180,85,63,0.1)",
-            border: "1px solid rgba(180,85,63,0.3)",
-            fontSize: 13.5,
-            lineHeight: 1.5,
-            color: "#8c3f2e",
-          }}
-        >
-          {state.message}
-        </p>
-      )}
+      {state.status === "error" && <FormAlert message={state.message} />}
 
-      <Field label="Your name" name="name" placeholder="First name is fine" error={fe.name} />
-      <Field label="Email" name="email" type="email" placeholder="you@email.com" error={fe.email} />
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        <label htmlFor="service" style={labelStyle}>
-          What would you like support with?
-        </label>
-        <select id="service" name="service" style={inputStyle} defaultValue="">
-          <option value="">Choose a service…</option>
-          {enquiryTopics.map((t) => (
-            <option key={t}>{t}</option>
-          ))}
-        </select>
-        {fe.service && <p style={errorStyle}>{fe.service}</p>}
-      </div>
+      <SelectField
+        label="What is your enquiry about?"
+        name="category"
+        options={CONTACT_CATEGORIES}
+        placeholder="Choose a category…"
+        error={fe.category}
+        defaultValue={v.category}
+      />
+      <TextField label="Full name" name="name" autoComplete="name" error={fe.name} defaultValue={v.name} />
+      <TextField label="Email address" name="email" type="email" autoComplete="email" placeholder="you@email.com" error={fe.email} defaultValue={v.email} />
+      <TextField label="Country" name="country" autoComplete="country-name" error={fe.country} defaultValue={v.country} />
+      <TextField label="Phone number (optional)" name="phone" type="tel" autoComplete="tel" error={fe.phone} defaultValue={v.phone} />
+      <ContactMethodField error={fe.preferredContact} defaultValue={v.preferredContact} />
+      <TextField label="Subject" name="subject" error={fe.subject} defaultValue={v.subject} />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <label htmlFor="message" style={labelStyle}>
           Your message
         </label>
+        <p id="message-warning" style={{ margin: 0, fontSize: 12.5, lineHeight: 1.5, color: "#8c3f2e", fontWeight: 600 }}>
+          Please do not include detailed mental health histories, highly sensitive information or urgent
+          safety concerns in this general enquiry form.
+        </p>
         <textarea
           id="message"
           name="message"
           rows={4}
-          style={{ ...inputStyle, resize: "vertical" }}
-          placeholder="Share only what you feel comfortable with — please don't include sensitive health details here."
+          maxLength={3000}
+          defaultValue={v.message}
+          aria-describedby={fe.message ? "message-warning message-error" : "message-warning"}
+          aria-invalid={fe.message ? true : undefined}
+          style={{ ...inputStyle, resize: "vertical", borderColor: fe.message ? "#c86b52" : "rgba(31,58,95,0.18)" }}
         />
-        {fe.message && <p style={errorStyle}>{fe.message}</p>}
+        {fe.message && (
+          <p id="message-error" style={errorStyle}>
+            {fe.message}
+          </p>
+        )}
       </div>
 
-      {/* honeypot — hidden from people, tempting to bots */}
-      <div aria-hidden style={{ position: "absolute", left: "-9999px" }}>
-        <label htmlFor="company">Company</label>
-        <input id="company" name="company" type="text" tabIndex={-1} autoComplete="off" />
-      </div>
-
-      <div>
-        <label
-          htmlFor="consent"
-          style={{ display: "flex", gap: 9, fontSize: 12.5, color: "var(--navy-soft)", alignItems: "flex-start" }}
-        >
-          <input id="consent" name="consent" type="checkbox" style={{ marginTop: 3 }} />
-          <span>
-            I agree to ThriveSphere handling my details in line with its{" "}
-            <Link href="/privacy" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
-              Privacy
-            </Link>{" "}
-            &amp;{" "}
-            <Link href="/confidentiality" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
-              Confidentiality
-            </Link>{" "}
-            policies (UK GDPR).
-          </span>
-        </label>
-        {fe.consent && <p style={{ ...errorStyle, marginTop: 5 }}>{fe.consent}</p>}
-      </div>
+      <Honeypot />
+      <PrivacyAcknowledgement error={fe.privacy} />
 
       <div className="cta-stack" style={{ display: "flex" }}>
         <PillButton variant="gold" size="lg" type="submit" disabled={pending} icon={pending ? undefined : "arrow"}>
@@ -160,39 +94,8 @@ export function EnquiryForm() {
       </div>
 
       <p style={{ margin: 0, fontSize: 12, color: "var(--navy-soft)", textAlign: "center" }}>
-        🔒 This is an enquiry form, not a booking. We&apos;ll confirm everything with you by reply.
+        🔒 This is an enquiry form, not a booking.
       </p>
     </form>
-  );
-}
-
-function Field({
-  label,
-  name,
-  type = "text",
-  placeholder,
-  error,
-}: {
-  label: string;
-  name: string;
-  type?: string;
-  placeholder?: string;
-  error?: string;
-}) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <label htmlFor={name} style={labelStyle}>
-        {label}
-      </label>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        aria-invalid={error ? true : undefined}
-        style={{ ...inputStyle, borderColor: error ? "#c86b52" : "rgba(31,58,95,0.18)" }}
-      />
-      {error && <p style={errorStyle}>{error}</p>}
-    </div>
   );
 }

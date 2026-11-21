@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { requireCapability } from "@/lib/guard";
+import { can } from "@/lib/authz";
 import { getDb } from "@/db";
 import { clients, enquiries, appointments, safeguardingConcerns } from "@/db/schema";
 import { count, eq } from "drizzle-orm";
@@ -39,7 +40,8 @@ export default async function AdminPage() {
 
   const tiles: { label: string; value: number; href?: string }[] = [
     { label: "Clients", value: clientCount.n, href: "/admin/clients" },
-    { label: "New enquiries", value: openEnquiries.n },
+    // Linked only for those who can work the queue.
+    { label: "New enquiries", value: openEnquiries.n, href: can(actor, "enquiry:manage") ? "/admin/enquiries" : undefined },
     { label: "Upcoming appointments", value: upcoming.n, href: "/admin/appointments" },
     { label: "Open safeguarding concerns", value: openConcerns.n, href: "/admin/safeguarding" },
     { label: "Worksheets to review", value: resourceWork.worksheetsToReview, href: "/admin/resources" },

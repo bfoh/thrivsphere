@@ -28,6 +28,8 @@ export const ADMIN_NAV: NavItem[] = [
   // Delivering the service.
   { label: "Dashboard", href: "/admin", capability: "client:read:any", group: "service" },
   { label: "Clients", href: "/admin/clients", capability: "client:read:any", group: "service" },
+  // Website enquiries and callback requests (IT handover §16.4, §19).
+  { label: "Enquiries", href: "/admin/enquiries", capability: "enquiry:manage", group: "service" },
   { label: "Appointments", href: "/admin/appointments", capability: "appointment:manage:any", group: "service" },
   { label: "Availability", href: "/admin/availability", capability: "availability:manage", group: "service" },
   { label: "Safeguarding", href: "/admin/safeguarding", capability: "safeguarding:read", group: "service" },

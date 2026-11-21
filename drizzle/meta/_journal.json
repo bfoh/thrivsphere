@@ -71,6 +71,13 @@
       "when": 1793982907903,
       "tag": "0009_resources",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795251073651,
+      "tag": "0010_dual_booking",
+      "breakpoints": true
     }
   ]
 }

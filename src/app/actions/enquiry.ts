@@ -1,12 +1,16 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { headers } from "next/headers";
-import { brand, enquiryTopics } from "@/data/site";
+import { sql } from "drizzle-orm";
+import { getDb } from "@/db";
+import { clients, enquiries, enquiryEvents } from "@/db/schema";
+import { brand } from "@/data/site";
 import type { EnquiryState } from "@/lib/enquiry-state";
 import { sendEmail } from "@/lib/email";
-import { enquiryNotification } from "@/lib/email-templates";
-
-const SERVICES = enquiryTopics;
+import { callbackAcknowledgement, enquiryAcknowledgement, enquiryStaffNotice } from "@/lib/email-templates";
+import { makeReference, parseEnquiry, type EnquiryForm } from "@/lib/enquiry-rules";
+import { recordAudit } from "@/lib/audit";
 
 /**
  * Very small in-memory rate limit.
@@ -32,36 +36,46 @@ function str(formData: FormData, name: string) {
   return typeof v === "string" ? v.trim() : "";
 }
 
-export async function submitEnquiry(
-  _prev: EnquiryState,
-  formData: FormData
-): Promise<EnquiryState> {
+/** The general contact form (IT handover §16.2). */
+export async function submitEnquiry(_prev: EnquiryState, formData: FormData): Promise<EnquiryState> {
+  return receive("contact", formData);
+}
+
+/** "Request a Callback" (IT handover §19, Route B). */
+export async function requestCallback(_prev: EnquiryState, formData: FormData): Promise<EnquiryState> {
+  return receive("callback", formData);
+}
+
+/** Returned to the form with its errors. Checkboxes are left unticked. */
+const TYPED_FIELDS = ["category", "name", "email", "country", "phone", "preferredContact", "subject", "message", "preferredTimes"];
+
+const CONFIRMATION: Record<EnquiryForm, string> = {
+  // §16.5, word for word.
+  contact:
+    "Thank you for contacting ThriveSphere Wellbeing. Your enquiry has been received. Please keep your reference number for future correspondence. This contact form is not monitored for emergencies.",
+  callback:
+    "Thank you — your callback request has been received, and ThriveSphere will be in touch to arrange your Initial Wellbeing Consultation. Please keep your reference number for future correspondence. This form is not monitored for emergencies.",
+};
+
+/**
+ * Store an enquiry, then acknowledge it.
+ *
+ * Stored first (§16.4): the queue in the admin dashboard is the record, so an
+ * enquiry is never lost because an email failed. The person who wrote gets an
+ * acknowledgement with their reference; ThriveSphere gets a notice with a
+ * link to the record and none of its content. A failed email is noted on the
+ * record and in the activity log, where staff will see it.
+ */
+async function receive(form: EnquiryForm, formData: FormData): Promise<EnquiryState> {
   // Honeypot — real people leave this hidden field empty.
-  if (str(formData, "company")) {
-    return { status: "ok", message: "Thank you — your message is on its way." };
-  }
+  if (str(formData, "company")) return { status: "ok", message: CONFIRMATION[form] };
 
-  const name = str(formData, "name");
-  const email = str(formData, "email");
-  const service = str(formData, "service");
-  const message = str(formData, "message");
-  const phone = str(formData, "phone");
-  const preferred = str(formData, "preferred");
-  const consent = formData.get("consent") === "on";
-
-  const fieldErrors: Record<string, string> = {};
-  if (!name || name.length > 100) fieldErrors.name = "Please tell us what to call you.";
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 200) {
-    fieldErrors.email = "Please enter an email address we can reply to.";
-  }
-  if (service && !SERVICES.includes(service)) fieldErrors.service = "Please choose from the list.";
-  if (message.length > 5000) fieldErrors.message = "Please keep this under 5000 characters.";
-  if (phone.length > 40) fieldErrors.phone = "Please enter a valid phone number.";
-  if (preferred.length > 200) fieldErrors.preferred = "Please keep this short.";
-  if (!consent) fieldErrors.consent = "We need your agreement before we can reply.";
-
-  if (Object.keys(fieldErrors).length) {
-    return { status: "error", message: "Please check the highlighted fields.", fieldErrors };
+  const parsed = parseEnquiry(form, (n) => str(formData, n), (n) => formData.get(n) === "on");
+  const typed = Object.fromEntries(
+    TYPED_FIELDS.map((n) => [n, str(formData, n).slice(0, 3000)])
+  );
+  if (!parsed.ok) {
+    return { status: "error", message: "Please check the highlighted fields.", fieldErrors: parsed.fieldErrors, values: typed };
   }
 
   const hdrs = await headers();
@@ -70,38 +84,90 @@ export async function submitEnquiry(
     return {
       status: "error",
       message: `Too many messages from this connection. Please try again shortly, or email ${brand.email}.`,
+      values: typed,
     };
   }
 
-  const notification = enquiryNotification({
-    name,
-    email,
-    service: service || undefined,
-    phone: phone || undefined,
-    preferredTimes: preferred || undefined,
-    message: message || undefined,
-  });
+  const v = parsed.value;
+  const db = getDb();
+  const unsent = `We couldn't send your message just now. Please try again, or email us directly at ${brand.email}.`;
+  const failed: EnquiryState = { status: "error", message: unsent, values: typed };
 
-  const result = await sendEmail({
-    to: process.env.ENQUIRY_TO_EMAIL ?? brand.email,
-    replyTo: email,
-    subject: notification.subject,
-    text: notification.text,
-    html: notification.html,
-  });
+  let row: { id: string; reference: string } | undefined;
+  try {
+    // One client profile (§19): an enquiry from someone already registered
+    // joins their record. Matched on the address their account verified.
+    const [client] = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(sql`lower(${clients.email}) = ${v.email}`)
+      .limit(1);
 
-  // Never pretend an enquiry was sent. If it did not go, say so and give the
-  // person a route that works rather than losing their message silently.
-  if (!result.ok) {
-    console.error("[enquiry] not sent:", result.reason);
-    return {
-      status: "error",
-      message: `We couldn't send your message just now. Please email us directly at ${brand.email} and we'll reply as soon as we can.`,
-    };
+    // A clash between two random references is very unlikely; try again if so.
+    for (let attempt = 0; attempt < 3 && !row; attempt++) {
+      [row] = await db
+        .insert(enquiries)
+        .values({
+          reference: makeReference(randomBytes(6)),
+          category: v.category,
+          name: v.name,
+          email: v.email,
+          phone: v.phone,
+          country: v.country,
+          preferredContact: v.preferredContact,
+          subject: v.subject,
+          message: v.message,
+          preferredTimes: v.preferredTimes,
+          confirmedAdult: v.confirmedAdult,
+          privacyAcknowledgedAt: new Date(),
+          clientId: client?.id ?? null,
+        })
+        .onConflictDoNothing({ target: enquiries.reference })
+        .returning({ id: enquiries.id, reference: enquiries.reference });
+    }
+    if (!row) return failed;
+
+    await db.insert(enquiryEvents).values({
+      enquiryId: row.id,
+      kind: "received",
+      detail: `${form === "callback" ? "Callback request" : "Enquiry"} from the website${client ? "; matched to an existing client by email" : ""}`,
+    });
+  } catch (err) {
+    console.error("[enquiry] not stored", err);
+    return failed;
   }
 
-  return {
-    status: "ok",
-    message: "Thank you — your message is on its way and we'll reply privately. This form is not monitored for emergencies.",
-  };
+  const ack = form === "callback" ? callbackAcknowledgement(row.reference) : enquiryAcknowledgement(row.reference);
+  const notice = enquiryStaffNotice({ id: row.id, reference: row.reference, category: v.category });
+  const [ackSent, noticeSent] = await Promise.all([
+    sendEmail({ to: v.email, subject: ack.subject, text: ack.text, html: ack.html }),
+    sendEmail({
+      to: process.env.ENQUIRY_TO_EMAIL ?? brand.email,
+      subject: notice.subject,
+      text: notice.text,
+      html: notice.html,
+    }),
+  ]);
+
+  const failures = [
+    ...(ackSent.ok ? [] : ["the acknowledgement to the enquirer"]),
+    ...(noticeSent.ok ? [] : ["the notice to ThriveSphere"]),
+  ];
+  if (failures.length) {
+    console.error("[enquiry] email not sent:", failures.join(", "), row.reference);
+    await db.insert(enquiryEvents).values({
+      enquiryId: row.id,
+      kind: "note",
+      detail: `Email not sent: ${failures.join(" and ")}.`,
+    });
+    await recordAudit({
+      actorId: null,
+      action: "update",
+      entity: "enquiries",
+      entityId: row.id,
+      detail: `enquiry ${row.reference}: email not sent (${failures.join(", ")})`,
+    });
+  }
+
+  return { status: "ok", message: CONFIRMATION[form], reference: row.reference };
 }

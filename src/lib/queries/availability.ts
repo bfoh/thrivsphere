@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, gte, inArray, lte, ne } from "drizzle-orm";
+import { and, eq, gte, inArray, lte, ne, or } from "drizzle-orm";
 import { getDb } from "@/db";
 import {
   appointments,
@@ -86,7 +86,7 @@ export async function getPooledSlots({
     Promise.all(
       practitioners.map(async (p) => ({
         practitionerId: p.id,
-        slots: await getBookableSlots({ practitionerId: p.id, durationMinutes: SESSION_MINUTES, days, now }),
+        slots: await getBookableSlots({ practitionerId: p.id, durationMinutes: SESSION_MINUTES, days, now, forClientId: clientId }),
       }))
     ),
     db
@@ -123,8 +123,13 @@ export async function getAvailability(practitionerId: string) {
 /**
  * Bookable slots for a practitioner.
  *
- * Only `scheduled` appointments are treated as busy — a cancelled session must
- * release its time, and a completed one is in the past anyway.
+ * Booked sessions are busy, and so are times someone is paying for right now
+ * (`pending_payment`), or two people could pay for one session. A cancelled
+ * session releases its time, and a completed one is in the past anyway.
+ *
+ * `forClientId` leaves that client's own unpaid holds out of the busy times:
+ * a client who went back from Stripe can choose the same time again, and
+ * their old hold is released before the new one is placed.
  */
 export async function getBookableSlots({
   practitionerId,
@@ -132,12 +137,14 @@ export async function getBookableSlots({
   days = 28,
   from,
   now = new Date(),
+  forClientId,
 }: {
   practitionerId: string;
   durationMinutes?: number;
   days?: number;
   from?: string;
   now?: Date;
+  forClientId?: string;
 }): Promise<Slot[]> {
   const db = getDb();
   const fromDate = from ?? new Date().toISOString().slice(0, 10);
@@ -151,7 +158,13 @@ export async function getBookableSlots({
     .where(
       and(
         eq(appointments.practitionerId, practitionerId),
-        eq(appointments.status, "scheduled"),
+        or(
+          eq(appointments.status, "scheduled"),
+          and(
+            eq(appointments.status, "pending_payment"),
+            forClientId ? ne(appointments.clientId, forClientId) : undefined
+          )
+        ),
         gte(appointments.startsAt, new Date(`${fromDate}T00:00:00Z`)),
         lte(appointments.startsAt, new Date(`${toDate}T23:59:59Z`))
       )

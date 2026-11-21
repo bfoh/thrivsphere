@@ -60,7 +60,7 @@ export function AccountNavLink({ className }: { className?: string }) {
         className={`pill pill-gold ${className ?? ""}`}
         style={{ padding: "9px 18px", fontSize: 13, whiteSpace: "nowrap" }}
       >
-        {bookCta.label}
+        {bookCta.short}
         <Icon name="arrow" size={16} />
       </Link>
     </span>

@@ -10,6 +10,15 @@ export type EnquiryState = {
   message: string;
   /** Field-level validation messages, keyed by input name. */
   fieldErrors?: Record<string, string>;
+  /** The enquiry's reference, shown on the confirmation (handover §16.4). */
+  reference?: string;
+  /** What was typed, so a form returned with errors is not emptied. */
+  values?: Record<string, string>;
 };
 
 export const initialEnquiryState: EnquiryState = { status: "idle", message: "" };
+
+/** Result of a staff action on an enquiry in the admin dashboard. */
+export type EnquiryAdminState = { status: "idle" | "ok" | "error"; message: string };
+
+export const initialEnquiryAdminState: EnquiryAdminState = { status: "idle", message: "" };

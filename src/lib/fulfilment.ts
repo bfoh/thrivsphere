@@ -62,6 +62,21 @@ export function parseCheckoutMetadata(meta: CheckoutMetadata): ParseResult {
   };
 }
 
+/**
+ * The time a booking checkout was for (IT handover §19, Route A).
+ *
+ * Recorded on the checkout as well as held in the diary, so that if the hold
+ * was released before payment arrived, the webhook can still try to book the
+ * same time. Null for an ordinary purchase of sessions.
+ */
+export function parseBookingMetadata(meta: Record<string, string | undefined>): { startsAt: Date; practitionerId: string | null } | null {
+  const raw = meta.bookingStartsAt?.trim();
+  if (!raw) return null;
+  const startsAt = new Date(raw);
+  if (Number.isNaN(startsAt.getTime())) return null;
+  return { startsAt, practitionerId: meta.bookingPractitionerId?.trim() || null };
+}
+
 /** When a package bought now stops being usable. Null means no expiry. */
 export function packageExpiry(validityDays: number | null, from: Date = new Date()): Date | null {
   if (validityDays == null) return null;

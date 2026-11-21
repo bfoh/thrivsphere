@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { requirePortalClient } from "@/lib/portal-guard";
 import { requireClientAccess } from "@/lib/guard";
 import { getDb } from "@/db";
@@ -69,7 +69,8 @@ export default async function AppointmentsPage() {
       })
       .from(appointments)
       .leftJoin(users, eq(users.id, appointments.practitionerId))
-      .where(eq(appointments.clientId, clientId)),
+      // A time still being paid for is not an appointment yet.
+      .where(and(eq(appointments.clientId, clientId), ne(appointments.status, "pending_payment"))),
     db.select().from(packages).where(eq(packages.clientId, clientId)),
   ]);
 

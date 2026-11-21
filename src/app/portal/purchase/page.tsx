@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { requirePortalClient } from "@/lib/portal-guard";
 import { getActivePlans } from "@/lib/queries/catalogue";
 import { REVIEW_PLAN_SLUG } from "@/lib/allocation";
-import { canBuyReview } from "@/lib/booking-engine";
 import { PlanButton } from "@/components/portal/PlanButton";
 import { Icon } from "@/components/icons";
 
@@ -12,11 +11,11 @@ const money = (pence: number, currency: string) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency, minimumFractionDigits: 0 }).format(pence / 100);
 
 export default async function PurchasePage() {
-  const { clientId } = await requirePortalClient();
+  await requirePortalClient();
 
-  const [all, reviewOnSale] = await Promise.all([getActivePlans(), canBuyReview(clientId)]);
-  // The review is bought once, before the first appointment.
-  const plans = reviewOnSale ? all : all.filter((p) => p.slug !== REVIEW_PLAN_SLUG);
+  // The initial consultation is paid for as it is booked (IT handover §19),
+  // so it is not sold on its own here.
+  const plans = (await getActivePlans()).filter((p) => p.slug !== REVIEW_PLAN_SLUG);
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto", padding: "40px 24px 72px" }}>

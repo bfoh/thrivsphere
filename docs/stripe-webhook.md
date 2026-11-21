@@ -14,13 +14,31 @@ never acted on.
 
 | Event | What the website does |
 |---|---|
-| `checkout.session.completed` | Credits the sessions bought and emails the receipt |
+| `checkout.session.completed` | Credits the sessions bought and emails the receipt. For a consultation paid while booking, also confirms the time that was held |
 | `checkout.session.async_payment_succeeded` | The same, for a payment method that confirms later |
-| `checkout.session.async_payment_failed` | Marks the order failed; nothing was credited |
-| `checkout.session.expired` | Marks an abandoned order cancelled |
+| `checkout.session.async_payment_failed` | Marks the order failed and releases any held time; nothing was credited |
+| `checkout.session.expired` | Marks an abandoned order cancelled and releases any held time |
 | `charge.refunded` | Removes the sessions the refund paid back, and emails the owner |
 | `charge.dispute.created` | Puts the sessions on hold, and emails the owner the date evidence is due |
 | `charge.dispute.closed` | Won: the sessions come back. Lost: they stay removed |
+
+## Paying while booking (IT handover §19)
+
+The Initial Wellbeing Consultation is paid for as it is booked. When the
+client presses *Pay securely*, the website holds the time they chose (status
+*pending payment*), so nobody else can take it, and opens a Checkout page that
+expires after 31 minutes. Then:
+
+- **Paid:** the hold becomes the booking, and the client gets the booking
+  confirmation and the receipt. Stripe may send the event more than once; the
+  second time changes nothing.
+- **Not paid:** Stripe's *expired* event releases the time. The hourly
+  reminder job also releases any hold more than 15 minutes past its checkout,
+  in case that event never arrives.
+- **Paid, but the time was lost** (a very late payment after the hold was
+  released and someone else booked it): the client keeps the paid
+  consultation as credit, is asked by email to choose another time, and the
+  owner is emailed.
 
 Owner emails go to `ENQUIRY_TO_EMAIL`. Like the diary notices they carry no
 client details, only a link to the client's record.

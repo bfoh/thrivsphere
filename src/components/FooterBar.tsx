@@ -4,7 +4,7 @@ import * as React from "react";
 import { PillButton } from "./PillButton";
 import { Icon, Logo } from "./icons";
 import { WhatsAppLink } from "./WhatsAppLink";
-import { bookCta, brand, footerPolicyLinks, legal } from "@/data/site";
+import { bookCta, brand, callbackCta, footerPolicyLinks, legal } from "@/data/site";
 import Link from "next/link";
 
 const footerLink: React.CSSProperties = {
@@ -55,7 +55,7 @@ export function FooterBar({ hint }: { hint: string }) {
         </span>
         <span style={{ width: 1, height: 22, background: "rgba(255,255,255,0.2)" }} className="footer-div" />
         <PillButton variant="gold" size="sm" href={bookCta.href} icon="arrow">
-          {bookCta.label}
+          {bookCta.short}
         </PillButton>
       </div>
     </div>
@@ -98,7 +98,8 @@ export function SiteFooter() {
             { l: "Our Services", h: "/services" },
             { l: "How It Works", h: "/how-it-works" },
             { l: "Pricing and Packages", h: "/pricing" },
-            { l: "Book an Appointment", h: "/book" },
+            { l: "Book Initial Wellbeing Consultation", h: bookCta.href },
+            { l: callbackCta.label, h: callbackCta.href },
             { l: "FAQ", h: "/faq" },
             { l: "Contact Us", h: "/contact" },
             { l: "Resource Centre", h: "/resources" },

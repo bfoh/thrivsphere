@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { and, desc, eq, gte, lt, or, ne, type SQL } from "drizzle-orm";
+import { and, desc, eq, gte, lt, ne, or, type SQL } from "drizzle-orm";
 import { getDb } from "@/db";
 import { appointments, clients } from "@/db/schema";
 import { requireCapability } from "@/lib/guard";
@@ -58,7 +58,15 @@ export default async function AppointmentsPage({
       .select(base)
       .from(appointments)
       .leftJoin(clients, eq(clients.id, appointments.clientId))
-      .where(scope(or(ne(appointments.status, "scheduled"), lt(appointments.startsAt, cutoff))))
+      // A time still being paid for is neither booked nor closed.
+      .where(
+        scope(
+          and(
+            ne(appointments.status, "pending_payment"),
+            or(ne(appointments.status, "scheduled"), lt(appointments.startsAt, cutoff))
+          )
+        )
+      )
       .orderBy(desc(appointments.startsAt))
       .limit(100),
   ]);

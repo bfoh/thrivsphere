@@ -57,10 +57,28 @@ a member who can be removed.
   guide, teaching presentation, client learning guide and activity worksheet,
   searchable, with print-ready PDFs. To add or change a material, see
   `docs/library.md`.
+- **Enquiries and callbacks:** **Enquiries** (`/admin/enquiries`, founder and
+  admins). Every message from the contact form and every callback request
+  from the Book page is saved there with a reference such as `TS-7K2QXM`.
+  The enquirer gets an acknowledgement quoting it; the email to
+  `ENQUIRY_TO_EMAIL` carries only the reference and a link, never the
+  message. On each one you can set the status (New, In progress, Awaiting
+  client, Responded, Closed), assign it, add internal notes, log a call and
+  its outcome, and *Send booking link*: an email inviting them to book and pay
+  for their Initial Wellbeing Consultation, with a practitioner preselected if
+  you choose one. When the person registers with the same email address the
+  enquiry joins their client record.
+- **Booking the first appointment:** clients choose a practitioner (or *First
+  available*) and a time, accept the booking terms and the 72-hour notice, and
+  pay at Stripe while the time is held (`docs/stripe-webhook.md`). The
+  consultation is no longer sold on its own under *Buy sessions*. Later
+  sessions are bought there and booked from credit as before.
 - **Prices and service descriptions:** **Services & prices**
   (`/admin/catalogue`). A price change reaches the pricing page, the client's
   *Buy sessions* page and card checkout together. Service wording shows on the
   homepage and *Our Services*. Every change is recorded in **Activity**.
+  The *Book Initial Wellbeing Consultation – £30* buttons are written in
+  `src/data/site.ts` (`bookCta`); change them there if that price changes.
 
 ## Environment variables
 
@@ -126,4 +144,8 @@ the pages, so they always need a redeploy.
       refund it. The owner should get a "payment was refunded" email, and the
       session should leave the account.
 - [ ] Once the number exists, set `NEXT_PUBLIC_WHATSAPP_NUMBER`.
-- [ ] The owner decides on `BOOKING_REQUIRES_PAYMENT`.
+- [x] The owner decides on `BOOKING_REQUIRES_PAYMENT`: settled by the IT
+      handover §19. The consultation is always paid as it is booked; the
+      setting now applies only to later sessions.
+- [x] Apply migration `0010_dual_booking` (payment holds, the enquiry queue,
+      one client record per sign-in). Applied 21 November 2026.

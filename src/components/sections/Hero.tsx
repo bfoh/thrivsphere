@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Section } from "../Section";
 import { PillButton } from "../PillButton";
 import { Icon } from "../icons";
-import { brand, homeIntro } from "@/data/site";
+import { bookCta, brand, callbackCta, homeIntro } from "@/data/site";
 
 export function Hero() {
   return (
@@ -67,11 +67,11 @@ export function Hero() {
             {homeIntro.paragraphs[0]}
           </p>
           <div className="cta-stack" style={{ display: "flex", gap: 14, marginTop: 30, flexWrap: "wrap" }}>
-            <PillButton variant="gold" size="lg" href="/book" icon="arrow">
-              Book an Appointment
+            <PillButton variant="gold" size="lg" href={bookCta.href} icon="arrow">
+              {bookCta.label}
             </PillButton>
-            <PillButton variant="ghost" size="lg" href="/services">
-              Our Services
+            <PillButton variant="ghost" size="lg" href={callbackCta.href}>
+              {callbackCta.label}
             </PillButton>
           </div>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginTop: 24, color: "var(--teal-deep)", fontSize: 13.5, fontWeight: 600, maxWidth: 540, lineHeight: 1.5 }}>

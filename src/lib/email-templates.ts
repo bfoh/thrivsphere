@@ -421,15 +421,29 @@ export function worksheetSubmitted(o: { clientId: string; assignmentId: string }
   };
 }
 
-export function paymentReceipt(planName: string, amountPence: number, sessions: number): Email {
+export function paymentReceipt(
+  planName: string,
+  amountPence: number,
+  sessions: number,
+  opts: { forBooking?: boolean } = {}
+): Email {
   const amount = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(
     amountPence / 100
   );
   const s = sessions === 1 ? "1 session" : `${sessions} sessions`;
+  // Paid while booking (§19): the session is already booked, so the receipt
+  // points to the appointment rather than asking them to book.
+  const what = opts.forBooking ? "For the appointment you have booked" : `${s} added to your account`;
+  const next = opts.forBooking
+    ? "Your appointment confirmation is sent separately, and the appointment is in your account."
+    : "You can book whenever you're ready.";
+  const cta = opts.forBooking
+    ? { label: "See my appointments", href: `${siteUrl()}/portal/appointments` }
+    : { label: "Book a session", href: `${siteUrl()}/portal/book` };
   return {
     subject: "Payment received",
     html: shell({
-      preheader: "Your sessions are ready to book.",
+      preheader: opts.forBooking ? "Your payment is confirmed." : "Your sessions are ready to book.",
       heading: "Thank you — payment received",
       body: `
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
@@ -438,12 +452,12 @@ export function paymentReceipt(planName: string, amountPence: number, sessions: 
             <td style="padding:16px 20px;font-family:Arial,Helvetica,sans-serif;">
               <p style="margin:0 0 6px;font-size:13px;color:${MUTED};">${planName}</p>
               <p style="margin:0;font-size:22px;font-weight:bold;color:${NAVY};">${amount}</p>
-              <p style="margin:6px 0 0;font-size:13.5px;color:${INK};">${s} added to your account</p>
+              <p style="margin:6px 0 0;font-size:13.5px;color:${INK};">${what}</p>
             </td>
           </tr>
         </table>
-        <p style="margin:0;">You can book whenever you're ready.</p>`,
-      cta: { label: "Book a session", href: `${siteUrl()}/portal/book` },
+        <p style="margin:0;">${next}</p>`,
+      cta,
       footerNote: "Keep this email as your receipt.",
     }),
     text: textShell(
@@ -451,9 +465,9 @@ export function paymentReceipt(planName: string, amountPence: number, sessions: 
         "Thank you — your payment has been received.",
         "",
         `${planName}: ${amount}`,
-        `${s} added to your account.`,
+        `${what}.`,
         "",
-        `Book whenever you're ready: ${siteUrl()}/portal/book`,
+        opts.forBooking ? `${next} ${cta.href}` : `Book whenever you're ready: ${cta.href}`,
       ],
       { footer: "Keep this email as your receipt." }
     ),
@@ -522,67 +536,144 @@ export function paymentAlert(o: { subject: string; lines: string[]; clientId: st
 }
 
 /**
- * Internal enquiry notification.
+ * Acknowledgement to someone who sent an enquiry (IT handover §16.5).
  *
- * Goes to ThriveSphere, not a client, so it carries the enquiry details and
- * drops the crisis block — staff do not need signposting in their own inbox.
+ * The subject and body are the handover's wording. It repeats nothing they
+ * wrote, so a forwarded or shared inbox shows only that they got in touch.
  */
-export function enquiryNotification(fields: {
-  name: string;
-  email: string;
-  service?: string;
-  phone?: string;
-  preferredTimes?: string;
-  message?: string;
-}): Email {
-  const row = (label: string, value?: string) =>
-    value
-      ? `<tr>
-           <td style="padding:7px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${MUTED};width:135px;vertical-align:top;">${label}</td>
-           <td style="padding:7px 0;font-family:Arial,Helvetica,sans-serif;font-size:14.5px;color:${INK};">${escapeHtml(value)}</td>
-         </tr>`
-      : "";
-
+export function enquiryAcknowledgement(reference: string): Email {
+  const ref = escapeHtml(reference);
   return {
-    subject: `${fields.preferredTimes || fields.phone ? "Booking request" : "Website enquiry"} — ${fields.name}`,
+    subject: `ThriveSphere Wellbeing — enquiry received ${reference}`,
     html: shell({
-      preheader: "A new enquiry from the website.",
-      heading: "New enquiry",
+      preheader: "We have received your message.",
+      heading: "Enquiry received",
       body: `
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-          ${row("Name", fields.name)}
-          ${row("Email", fields.email)}
-          ${row("Phone", fields.phone)}
-          ${row("Service", fields.service)}
-          ${row("Preferred times", fields.preferredTimes)}
-        </table>
-        ${
-          fields.message
-            ? `<p style="margin:18px 0 6px;font-size:13px;color:${MUTED};">Message</p>
-               <p style="margin:0;padding:14px 16px;background:${GROUND};border-radius:8px;
-                         white-space:pre-wrap;">${escapeHtml(fields.message)}</p>`
-            : ""
-        }`,
+        <p style="margin:0 0 14px;">Thank you for your enquiry. We have received your message and will respond through our approved contact channels.</p>
+        <p style="margin:0 0 14px;">Your reference is <strong style="color:${NAVY};">${ref}</strong>. Please keep it for future correspondence.</p>
+        <p style="margin:0;">Please do not send sensitive wellbeing information by reply to this general enquiry email. ThriveSphere is not an emergency service.</p>`,
+    }),
+    text: textShell([
+      "Thank you for your enquiry. We have received your message and will respond through our approved contact channels.",
+      "",
+      `Your reference is ${reference}. Please keep it for future correspondence.`,
+      "",
+      "Please do not send sensitive wellbeing information by reply to this general enquiry email. ThriveSphere is not an emergency service.",
+    ]),
+  };
+}
+
+/**
+ * Acknowledgement of a callback request (IT handover §19, Route B): sent at
+ * once, saying ThriveSphere will be in touch. It promises no response time and
+ * implies no free assessment.
+ */
+export function callbackAcknowledgement(reference: string): Email {
+  const ref = escapeHtml(reference);
+  return {
+    subject: `ThriveSphere Wellbeing — callback request received ${reference}`,
+    html: shell({
+      preheader: "We have received your callback request.",
+      heading: "Callback request received",
+      body: `
+        <p style="margin:0 0 14px;">Thank you for your request. ThriveSphere will be in touch using the contact method you chose, to arrange your Initial Wellbeing Consultation.</p>
+        <p style="margin:0 0 14px;">Your reference is <strong style="color:${NAVY};">${ref}</strong>. Please keep it for future correspondence.</p>
+        <p style="margin:0;">Please do not send sensitive wellbeing information by reply to this email. ThriveSphere is not an emergency service.</p>`,
+    }),
+    text: textShell([
+      "Thank you for your request. ThriveSphere will be in touch using the contact method you chose, to arrange your Initial Wellbeing Consultation.",
+      "",
+      `Your reference is ${reference}. Please keep it for future correspondence.`,
+      "",
+      "Please do not send sensitive wellbeing information by reply to this email. ThriveSphere is not an emergency service.",
+    ]),
+  };
+}
+
+/**
+ * Tells ThriveSphere a new enquiry is waiting (IT handover §16.4).
+ *
+ * A link to the protected record and nothing else: no name, no email address,
+ * no message. The inbox it goes to may be read on a shared phone or by an
+ * email provider; the record itself is behind sign-in and every view of it is
+ * logged.
+ */
+export function enquiryStaffNotice(o: { id: string; reference: string; category: string }): Email {
+  const href = `${siteUrl()}/admin/enquiries/${o.id}`;
+  const kind = o.category === "callback" ? "callback request" : "enquiry";
+  return {
+    subject: `New website ${kind} ${o.reference}`,
+    html: shell({
+      preheader: `A new ${kind} is in the queue.`,
+      heading: `New ${kind}`,
+      body: `
+        <p style="margin:0 0 14px;">A new ${kind}, reference <strong style="color:${NAVY};">${escapeHtml(o.reference)}</strong>, is waiting in the Enquiries queue.</p>
+        <p style="margin:0;">Its details are in the admin dashboard, not in this email.</p>`,
+      cta: { label: "Open the enquiry", href },
       showCrisis: false,
-      // Escaped: every field here is written by a stranger, and the footer
-      // is interpolated into HTML just like the table rows above.
-      footerNote: `Reply directly to this email to reach ${escapeHtml(fields.name)}.`,
     }),
     text: textShell(
-      [
-        "New enquiry from the website.",
-        "",
-        `Name: ${fields.name}`,
-        `Email: ${fields.email}`,
-        `Phone: ${fields.phone || "Not given"}`,
-        `Service: ${fields.service || "Not specified"}`,
-        `Preferred times: ${fields.preferredTimes || "Not given"}`,
-        "",
-        "Message:",
-        fields.message || "(no message)",
-      ],
-      { crisis: false, footer: `Reply directly to this email to reach ${fields.name}.` }
+      [`A new ${kind}, reference ${o.reference}, is waiting in the Enquiries queue.`, "", `Open it: ${href}`],
+      { crisis: false, footer: "Its details are in the admin dashboard, not in this email." }
     ),
+  };
+}
+
+/**
+ * The booking and payment link staff send after a callback (§19, Route B).
+ *
+ * The client books and pays the same way as everyone else, so the price, the
+ * length and the 72-hour notice are stated here as on the booking page.
+ */
+export function bookingLinkEmail(o: { price: string; practitionerId?: string | null; practitionerName?: string | null }): Email {
+  const href = `${siteUrl()}/portal/book${o.practitionerId ? `?with=${encodeURIComponent(o.practitionerId)}` : ""}`;
+  const withWhom = o.practitionerName ? ` with ${o.practitionerName}` : "";
+  const intro = `You can now book your Initial Wellbeing Consultation${withWhom}: 50 minutes, online, ${o.price}.`;
+  return {
+    subject: "Book your Initial Wellbeing Consultation",
+    html: shell({
+      preheader: "Your booking link.",
+      heading: "Book your consultation",
+      body: `
+        <p style="margin:0 0 14px;">Thank you for speaking with us. ${escapeHtml(intro)}</p>
+        <p style="margin:0 0 14px;">Sign in, or create your ThriveSphere account, then choose a time${escapeHtml(withWhom)} and pay securely by card. Card payments are handled by Stripe; your card details never reach ThriveSphere.</p>
+        <p style="margin:0;">To cancel or move an appointment free of charge, please give at least ${NOTICE_PERIOD}' notice.</p>`,
+      cta: { label: "Book and pay securely", href },
+    }),
+    text: textShell([
+      `Thank you for speaking with us. ${intro}`,
+      "",
+      `Sign in, or create your ThriveSphere account, then choose a time${withWhom} and pay securely by card:`,
+      href,
+      "",
+      "Card payments are handled by Stripe; your card details never reach ThriveSphere.",
+      `To cancel or move an appointment free of charge, please give at least ${NOTICE_PERIOD}' notice.`,
+    ]),
+  };
+}
+
+/**
+ * Payment arrived but the time it was for had gone: the hold was released
+ * before Stripe confirmed, and someone else took it. Rare, but the client has
+ * paid, so they are told plainly and keep the consultation to book again.
+ */
+export function paidTimeUnavailable(): Email {
+  return {
+    subject: "Please choose a new time for your consultation",
+    html: shell({
+      preheader: "Your payment was received.",
+      heading: "Please choose a new time",
+      body: `
+        <p style="margin:0 0 14px;">Thank you — your payment was received. Unfortunately the time you chose was no longer available by the time it arrived.</p>
+        <p style="margin:0;">Your Initial Wellbeing Consultation is paid for. Please sign in and choose another time; nothing more will be charged.</p>`,
+      cta: { label: "Choose a time", href: `${siteUrl()}/portal/book` },
+    }),
+    text: textShell([
+      "Thank you — your payment was received. Unfortunately the time you chose was no longer available by the time it arrived.",
+      "",
+      "Your Initial Wellbeing Consultation is paid for. Please sign in and choose another time; nothing more will be charged:",
+      `${siteUrl()}/portal/book`,
+    ]),
   };
 }
 

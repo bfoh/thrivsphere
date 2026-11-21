@@ -8,7 +8,7 @@ import { FancyHeadline } from "../FancyHeadline";
 import { EnquiryForm } from "../EnquiryForm";
 import { NotCrisisNotice } from "../NotCrisisNotice";
 import { WhatsAppLink } from "../WhatsAppLink";
-import { brand, impact } from "@/data/site";
+import { bookCta, brand, callbackCta, impact } from "@/data/site";
 
 const GOLD = "#bd951f";
 const TEAL = "#3d8a8a";
@@ -57,14 +57,19 @@ export function Support() {
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="card" style={{ padding: 24 }}>
             <h3 style={{ margin: "0 0 8px", fontSize: 18, color: "var(--navy)", display: "flex", alignItems: "center", gap: 8 }}>
-              <Icon name="heart" size={20} stroke="var(--gold)" /> Book an Appointment
+              <Icon name="heart" size={20} stroke="var(--gold)" /> Book Initial Wellbeing Consultation
             </h3>
             <p style={{ margin: "0 0 14px", fontSize: 14, lineHeight: 1.55, color: "var(--ink)" }}>
-              {brand.availabilityLine} Create an account to choose a time online.
+              {brand.availabilityLine} Book and pay online, or request a callback and we&apos;ll arrange it with you.
             </p>
-            <PillButton variant="gold" size="sm" href="/book" icon="arrow">
-              Book an Appointment
-            </PillButton>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <PillButton variant="gold" size="sm" href={bookCta.href} icon="arrow">
+                {bookCta.label}
+              </PillButton>
+              <PillButton variant="ghost" size="sm" href={callbackCta.href}>
+                {callbackCta.label}
+              </PillButton>
+            </div>
           </div>
 
           <WhatsAppLink heading="h3" />

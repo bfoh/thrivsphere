@@ -156,7 +156,7 @@ export function appointmentKinds(
 ): Map<string, string> {
   const kinds = new Map<string, string>();
   const live = appointments
-    .filter((a) => a.status !== "cancelled_by_client" && a.status !== "cancelled_by_service")
+    .filter((a) => a.status !== "cancelled_by_client" && a.status !== "cancelled_by_service" && a.status !== "pending_payment")
     .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
   for (const a of appointments) kinds.set(a.id, SUPPORT_SESSION);
   if (live[0]) kinds.set(live[0].id, INITIAL_REVIEW);
@@ -221,4 +221,31 @@ export function isOverlapViolation(err: unknown): boolean {
   const code = (e: unknown) => (e && typeof e === "object" && "code" in e ? (e as { code: unknown }).code : undefined);
   const cause = err && typeof err === "object" && "cause" in err ? (err as { cause: unknown }).cause : undefined;
   return code(err) === "23P01" || code(cause) === "23P01";
+}
+
+/**
+ * Paying for a booking while making it (IT handover §19, Route A).
+ *
+ * Stripe keeps a checkout open for at least 30 minutes; one more covers the
+ * time the request takes to reach it. The chosen time stays held a little
+ * longer than the checkout, so a payment completed in its last seconds still
+ * finds its appointment waiting.
+ */
+export const CHECKOUT_MINUTES = 31;
+export const HOLD_GRACE_MINUTES = 15;
+
+export function holdTimes(now: Date): { checkoutExpiresAt: Date; holdExpiresAt: Date } {
+  const checkoutExpiresAt = new Date(now.getTime() + CHECKOUT_MINUTES * 60_000);
+  return { checkoutExpiresAt, holdExpiresAt: new Date(checkoutExpiresAt.getTime() + HOLD_GRACE_MINUTES * 60_000) };
+}
+
+/**
+ * How a booking is paid for.
+ *
+ * The initial consultation is paid at Stripe as it is booked (§19), unless the
+ * client already holds credit that pays for it, bought before that rule. Later
+ * sessions are paid from credit, as before.
+ */
+export function bookingRoute(booking: BookingKind, creditForThisBooking: number): "checkout" | "credit" {
+  return booking === "review" && creditForThisBooking === 0 ? "checkout" : "credit";
 }

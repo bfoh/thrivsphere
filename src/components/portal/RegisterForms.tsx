@@ -172,7 +172,8 @@ export function IntakeForm() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <label htmlFor="presentingConcern" style={label}>
-          What brings you to ThriveSphere?
+          What brings you to ThriveSphere?{" "}
+          <span style={{ fontWeight: 500, color: "var(--navy-soft)" }}>(optional — you can talk about it in your consultation instead)</span>
         </label>
         <textarea
           id="presentingConcern"
@@ -281,9 +282,10 @@ const CONSENT_ITEMS = [
   },
   {
     name: "consent_to_support",
-    title: "Consent to support",
+    title: "Client Consent Policy",
     href: "/consent",
-    text: "I understand ThriveSphere is a non-clinical wellbeing service — not therapy, diagnosis, treatment, or a crisis service — and I consent to receiving support on that basis.",
+    // The participation acknowledgement, word for word (IT handover §15.1).
+    text: "I have read and understood the ThriveSphere Wellbeing service information and Client Consent Policy. I understand that sessions are interactive, educational and non-clinical, and I agree to participate.",
   },
 ];
 

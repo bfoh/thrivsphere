@@ -1,13 +1,16 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
+  CHECKOUT_MINUTES,
   INITIAL_REVIEW,
   NOTICE_HOURS,
   NOTICE_PERIOD,
   SUPPORT_SESSION,
   appointmentKinds,
+  bookingRoute,
   canReschedule,
   cancellationOutcome,
+  holdTimes,
   isOverlapViolation,
   noticeDeadline,
   poolSlots,
@@ -168,6 +171,30 @@ describe("appointmentKinds", () => {
     ]);
     assert.equal(kinds.get("rebooked"), INITIAL_REVIEW);
     assert.equal(kinds.get("cancelled"), SUPPORT_SESSION);
+  });
+
+  it("does not treat a time still being paid for as the review", () => {
+    const kinds = appointmentKinds([
+      { id: "held", startsAt: at("2026-11-05T18:00:00Z"), status: "pending_payment" },
+      { id: "booked", startsAt: at("2026-11-12T18:00:00Z"), status: "scheduled" },
+    ]);
+    assert.equal(kinds.get("booked"), INITIAL_REVIEW);
+  });
+});
+
+describe("paying while booking (handover §19 Route A)", () => {
+  it("sends the initial consultation to Stripe unless credit already pays for it", () => {
+    assert.equal(bookingRoute("review", 0), "checkout");
+    assert.equal(bookingRoute("review", 1), "credit");
+    assert.equal(bookingRoute("session", 0), "credit");
+  });
+
+  it("keeps the checkout open for Stripe's 30-minute minimum, and the time a little longer", () => {
+    const now = at("2026-11-21T10:00:00Z");
+    const { checkoutExpiresAt, holdExpiresAt } = holdTimes(now);
+    assert.ok(checkoutExpiresAt.getTime() - now.getTime() >= 30 * 60_000);
+    assert.equal(CHECKOUT_MINUTES, 31);
+    assert.ok(holdExpiresAt > checkoutExpiresAt, "a late payment must still find its time");
   });
 });
 

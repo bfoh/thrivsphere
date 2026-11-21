@@ -26,6 +26,7 @@ import {
   reserveSession,
 } from "@/lib/booking-engine";
 import { appointmentCancelled, bookingConfirmation } from "@/lib/email-templates";
+import { getOnboardingState } from "@/lib/onboarding";
 import type { BookingState } from "@/lib/booking-state";
 
 function str(fd: FormData, name: string) {
@@ -53,13 +54,17 @@ function revalidateDiaries() {
 }
 
 /**
- * Book a session.
+ * Book a session from credit the client already holds.
  *
- * The client picks a time; the service picks who takes it (see
- * `placeBooking`). A session is taken from the client's package first and
- * given back if the booking cannot be placed. The database's no-overlap rule
- * is the final word on double booking, so a race between two clients ends in
- * a refusal rather than two people in one session.
+ * The client picks a time, and a practitioner or "first available"; with
+ * first available the service picks who takes it (see `placeBooking`). A
+ * session is taken from the client's package first and given back if the
+ * booking cannot be placed. The database's no-overlap rule is the final word
+ * on double booking, so a race between two clients ends in a refusal rather
+ * than two people in one session.
+ *
+ * The initial consultation is paid as it is booked (`startBookingCheckout`),
+ * so it can only be booked here with credit bought for it earlier.
  */
 export async function bookAppointment(
   _prev: BookingState,
@@ -67,28 +72,34 @@ export async function bookAppointment(
 ): Promise<BookingState> {
   const actor = await getCurrentActor();
   if (!actor) return { status: "error", message: "Please sign in to book." };
-  if (!actor.clientId) return { status: "error", message: "Please finish registering first." };
-  const clientId = actor.clientId;
+  // Registration finished, including the 18+ gate and every consent: the page
+  // checks this too, but a form can be posted without the page.
+  const onboarding = await getOnboardingState(actor.userId);
+  if (onboarding.step !== "complete" || !onboarding.clientId) {
+    return { status: "error", message: "Please finish registering first." };
+  }
+  const clientId = onboarding.clientId;
 
   const startsAt = new Date(str(formData, "startsAt"));
   if (Number.isNaN(startsAt.getTime())) {
     return { status: "error", message: "That appointment time wasn't valid." };
   }
+  const practitionerId = str(formData, "practitionerId") || null;
 
   const now = new Date();
   const booking = await nextBookingKind(clientId);
   const packageId = await reserveSession(clientId, booking, now);
-  if (!packageId && bookingRequiresPayment()) {
+  if (!packageId && booking === "review") {
     return {
       status: "error",
-      message:
-        booking === "review"
-          ? `Please buy your ${INITIAL_REVIEW} before booking — you can do that under Buy sessions.`
-          : "Please buy a session before booking — you can do that under Buy sessions.",
+      message: `Your ${INITIAL_REVIEW} is paid for as you book it. Please choose a time again and pay securely.`,
     };
   }
+  if (!packageId && bookingRequiresPayment()) {
+    return { status: "error", message: "Please buy a session before booking — you can do that under Buy sessions." };
+  }
 
-  const placed = await placeBooking({ clientId, startsAt, packageId, now });
+  const placed = await placeBooking({ clientId, startsAt, packageId, onlyPractitionerId: practitionerId, now });
   if (!placed.ok) {
     if (packageId) await releaseSession(packageId);
     return { status: "error", message: placed.message };

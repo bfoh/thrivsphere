@@ -65,6 +65,7 @@ async function stripeRequest<T>(
 export type CheckoutSession = {
   id: string;
   url: string | null;
+  status?: "open" | "complete" | "expired";
   payment_status?: string;
   amount_total?: number;
   currency?: string;
@@ -82,6 +83,8 @@ export async function createCheckoutSession(params: {
   customerEmail?: string;
   metadata: Record<string, string>;
   idempotencyKey: string;
+  /** When Stripe stops accepting payment. At least 30 minutes ahead. */
+  expiresAt?: Date;
 }): Promise<CheckoutSession> {
   return stripeRequest<CheckoutSession>("/checkout/sessions", {
     method: "POST",
@@ -112,7 +115,19 @@ export async function createCheckoutSession(params: {
       ],
       metadata: params.metadata,
       payment_intent_data: { metadata: params.metadata },
+      expires_at: params.expiresAt ? Math.floor(params.expiresAt.getTime() / 1000) : undefined,
     },
+  });
+}
+
+/**
+ * Close a checkout that is still open, so it can no longer be paid. Used when
+ * a client goes back and picks another time: the old time is released, and
+ * paying the old checkout afterwards must not be possible.
+ */
+export async function expireCheckoutSession(id: string): Promise<CheckoutSession> {
+  return stripeRequest<CheckoutSession>(`/checkout/sessions/${encodeURIComponent(id)}/expire`, {
+    method: "POST",
   });
 }
 

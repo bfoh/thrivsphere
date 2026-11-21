@@ -1,12 +1,22 @@
 import "server-only";
 
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, notInArray, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { appointments, clients, orders, packages } from "@/db/schema";
 import { brand } from "@/data/site";
 import { recordAudit } from "./audit";
 import { sendEmail } from "./email";
-import { paymentAlert, paymentReceipt } from "./email-templates";
+import { bookingConfirmation, paidTimeUnavailable, paymentAlert, paymentReceipt } from "./email-templates";
+import {
+  confirmHold,
+  holdAlreadyConfirmed,
+  notifyClient,
+  notifyPractitioner,
+  placeBooking,
+  releaseHold,
+  type ConfirmedHold,
+} from "./booking-engine";
+import { formatAppointment } from "./slot-groups";
 import { displayPrice } from "./money";
 import { retrieveCheckoutSession } from "./stripe";
 import {
@@ -15,6 +25,7 @@ import {
   disputeKeepsHold,
   packageExpiry,
   packageStatusFor,
+  parseBookingMetadata,
   parseCheckoutMetadata,
   shouldFulfil,
 } from "./fulfilment";
@@ -55,24 +66,24 @@ export type DisputeObject = {
 const sessionsText = (n: number) => (n === 1 ? "1 session" : `${n} sessions`);
 
 /**
- * Credit the sessions a client has paid for.
+ * Credit the sessions a client has paid for, and confirm the booking the
+ * payment was for, if it was made while booking (IT handover §19, Route A).
  *
  * Fulfilment happens here rather than on the success redirect, because a
  * client may close the browser the moment they pay. The redirect is only a
  * confirmation screen; this is what actually grants the sessions.
+ *
+ * Stripe delivers events at least once and may retry after a failure part
+ * way through, so every step is safe to repeat: the order is claimed with a
+ * conditional update, the package is unique per order, and the hold is
+ * confirmed only while it is still a hold. A repeat finishes whatever an
+ * earlier attempt left undone and changes nothing else. Emails go out only
+ * from the step that actually made the change.
  */
 export async function fulfilCheckout(eventId: string, eventType: string, session: CheckoutObject): Promise<Response> {
   const db = getDb();
 
-  // Stripe retries until it gets a 2xx, so a replay must be a no-op rather
-  // than a second package.
-  const [alreadySeen] = await db
-    .select({ id: orders.id })
-    .from(orders)
-    .where(eq(orders.processedEventId, eventId))
-    .limit(1);
-
-  if (!shouldFulfil({ eventType, paymentStatus: session.payment_status, alreadyProcessed: !!alreadySeen })) {
+  if (!shouldFulfil({ eventType, paymentStatus: session.payment_status, alreadyProcessed: false })) {
     // Acknowledged deliberately: retrying an event we will never act on only
     // produces noise in Stripe's dashboard.
     return new Response("Ignored", { status: 200 });
@@ -89,10 +100,8 @@ export async function fulfilCheckout(eventId: string, eventType: string, session
 
   const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
   if (!order) return new Response("Unknown order", { status: 400 });
-  // Paid once already, or refunded before this arrived: either way, no sessions.
-  if (order.status === "paid" || order.status === "refunded") {
-    return new Response("Already settled", { status: 200 });
-  }
+  // Refunded before this arrived: no sessions.
+  if (order.status === "refunded") return new Response("Already settled", { status: 200 });
 
   // Checkout is created from our own catalogue, so this should always agree —
   // verifying it is what stops a stale or tampered session granting six
@@ -110,45 +119,69 @@ export async function fulfilCheckout(eventId: string, eventType: string, session
     return new Response("Amount mismatch", { status: 400 });
   }
 
-  await db
-    .update(orders)
-    .set({
-      status: "paid",
-      paidAt: new Date(),
-      paymentIntentId: session.payment_intent ?? null,
-      processedEventId: eventId,
+  if (order.status !== "paid") {
+    await db
+      .update(orders)
+      .set({
+        status: "paid",
+        paidAt: new Date(),
+        paymentIntentId: session.payment_intent ?? null,
+        processedEventId: eventId,
+      })
+      .where(and(eq(orders.id, orderId), notInArray(orders.status, ["paid", "refunded"])));
+  }
+
+  const [created] = await db
+    .insert(packages)
+    .values({
+      clientId: order.clientId,
+      orderId: order.id,
+      sessionsTotal: parsed.value.sessions,
+      sessionsUsed: 0,
+      status: "active",
+      expiresAt: packageExpiry(parsed.value.validityDays),
     })
-    .where(eq(orders.id, orderId));
+    .onConflictDoNothing({ target: packages.orderId })
+    .returning();
+  const pkg = created ?? (await db.select().from(packages).where(eq(packages.orderId, orderId)).limit(1))[0];
+  if (!pkg) return new Response("Package not recorded", { status: 500 });
 
-  await db.insert(packages).values({
-    clientId: order.clientId,
-    orderId: order.id,
-    sessionsTotal: parsed.value.sessions,
-    sessionsUsed: 0,
-    status: "active",
-    expiresAt: packageExpiry(parsed.value.validityDays),
-  });
+  if (created) {
+    await recordAudit({
+      actorId: null,
+      action: "update",
+      entity: "orders",
+      entityId: orderId,
+      subjectClientId: order.clientId,
+      detail: `payment settled: ${parsed.value.planName}, ${parsed.value.sessions} session(s)`,
+    });
+  }
 
-  await recordAudit({
-    actorId: null,
-    action: "update",
-    entity: "orders",
-    entityId: orderId,
-    subjectClientId: order.clientId,
-    detail: `payment settled: ${parsed.value.planName}, ${parsed.value.sessions} session(s)`,
-  });
+  // The booking this payment was for, if any.
+  const booking = parseBookingMetadata(session.metadata ?? {});
+  let booked: ConfirmedHold | null = null;
+  let timeLost = false;
+  if (booking) {
+    booked = await confirmHold(orderId, pkg.id);
+    if (!booked && created && !(await holdAlreadyConfirmed(orderId))) {
+      // The hold was released before payment arrived. Book the same time if
+      // it is still free; otherwise the client keeps the paid consultation.
+      booked = await rebookPaidTime(order.clientId, orderId, pkg.id, booking);
+      timeLost = !booked;
+    }
+  }
 
   /*
-   * Receipt.
+   * Receipt and confirmation.
    *
    * Sent after the sessions are credited, and deliberately after the point of
    * no return: if the mail fails, the client has still been given what they
-   * paid for. Returning anything but a 2xx here would make Stripe retry the
-   * whole event, and the replay guard would then refuse to fulfil it again —
-   * so a failed receipt must never fail the request.
+   * paid for. A failed email must never fail the request, or Stripe would
+   * retry an event that has already done its work.
    *
    * Receipts are not subject to the reminder opt-out. Someone who has paid is
-   * entitled to a record of it.
+   * entitled to a record of it. The booking confirmation is, like every
+   * appointment email.
    */
   try {
     const [client] = await db
@@ -157,36 +190,97 @@ export async function fulfilCheckout(eventId: string, eventType: string, session
       .where(eq(clients.id, order.clientId))
       .limit(1);
 
-    if (client?.email) {
-      const receipt = paymentReceipt(parsed.value.planName, order.amountPence, parsed.value.sessions);
-      const sent = await sendEmail({
-        to: client.email,
-        subject: receipt.subject,
-        text: receipt.text,
-        html: receipt.html,
+    if (created && client?.email) {
+      const receipt = paymentReceipt(parsed.value.planName, order.amountPence, parsed.value.sessions, {
+        forBooking: !!booking && !timeLost,
       });
+      const sent = await sendEmail({ to: client.email, subject: receipt.subject, text: receipt.text, html: receipt.html });
       if (!sent.ok) console.error("[stripe] receipt not sent:", sent.reason, orderId);
     }
+
+    if (booked) {
+      await recordAudit({
+        actorId: null,
+        action: "create",
+        entity: "appointments",
+        entityId: booked.appointmentId,
+        subjectClientId: order.clientId,
+        detail: `booked and paid ${booked.startsAt.toISOString()}`,
+      });
+      await Promise.all([
+        notifyClient(booked.appointmentId, order.clientId, bookingConfirmation(booked.startsAt), "booking_confirmation"),
+        notifyPractitioner(booked.practitionerId, "booked", booked.startsAt),
+      ]);
+    }
+
+    if (timeLost && booking) {
+      if (client?.email) {
+        const notice = paidTimeUnavailable();
+        const sent = await sendEmail({ to: client.email, subject: notice.subject, text: notice.text, html: notice.html });
+        if (!sent.ok) console.error("[stripe] time-lost notice not sent:", sent.reason, orderId);
+      }
+      await alertOwner(
+        "A paid consultation needs a new time",
+        [
+          `A client paid for their Initial Wellbeing Consultation for ${formatAppointment(booking.startsAt)}, but that time was taken before the payment arrived.`,
+          "They have been asked to choose another time. The consultation is paid for and in their account.",
+        ],
+        order.clientId
+      );
+    }
   } catch (err) {
-    console.error("[stripe] receipt failed", orderId, err);
+    console.error("[stripe] fulfilment emails failed", orderId, err);
   }
 
   return new Response("Fulfilled", { status: 200 });
 }
 
+/** Book the time a payment was for when its hold had already been released. */
+async function rebookPaidTime(
+  clientId: string,
+  orderId: string,
+  packageId: string,
+  booking: { startsAt: Date; practitionerId: string | null }
+): Promise<ConfirmedHold | null> {
+  const placed = await placeBooking({ clientId, startsAt: booking.startsAt, packageId, preferPractitionerId: booking.practitionerId });
+  if (!placed.ok) return null;
+  const db = getDb();
+  await db.batch([
+    db.update(appointments).set({ orderId }).where(eq(appointments.id, placed.appointmentId)),
+    db
+      .update(packages)
+      .set({
+        sessionsUsed: sql`${packages.sessionsUsed} + 1`,
+        status: sql`case when ${packages.sessionsUsed} + 1 >= ${packages.sessionsTotal} then 'exhausted'::package_status else ${packages.status} end`,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(packages.id, packageId), sql`${packages.sessionsUsed} < ${packages.sessionsTotal}`)),
+  ]);
+  return { appointmentId: placed.appointmentId, practitionerId: placed.practitionerId, startsAt: booking.startsAt };
+}
+
 /**
  * Close a checkout that will never be paid: one left until Stripe expired it,
  * or a delayed payment that failed. Nothing was credited, so there is nothing
- * to take back; this keeps the order from sitting at "pending" for ever.
+ * to take back; this keeps the order from sitting at "pending" for ever, and
+ * releases any time held for it so someone else can book it.
  */
 export async function closeCheckout(session: CheckoutObject, status: "failed" | "cancelled"): Promise<Response> {
   if (!session.id) return new Response("Missing session", { status: 400 });
+  const db = getDb();
 
-  const [closed] = await getDb()
+  const [closed] = await db
     .update(orders)
     .set({ status })
     .where(and(eq(orders.checkoutSessionId, session.id), eq(orders.status, "pending")))
     .returning({ id: orders.id, clientId: orders.clientId });
+
+  // Also when the order was already closed, e.g. by the client choosing
+  // another time: releasing a hold twice is harmless.
+  const [order] = closed
+    ? [closed]
+    : await db.select({ id: orders.id, status: orders.status }).from(orders).where(eq(orders.checkoutSessionId, session.id)).limit(1);
+  const released = order && !("status" in order && order.status === "paid") ? await releaseHold(order.id) : 0;
 
   if (closed && status === "failed") {
     await recordAudit({
@@ -198,7 +292,7 @@ export async function closeCheckout(session: CheckoutObject, status: "failed" | 
       detail: "delayed payment failed",
     });
   }
-  return new Response(closed ? "Closed" : "Ignored", { status: 200 });
+  return new Response(closed || released ? "Closed" : "Ignored", { status: 200 });
 }
 
 /**

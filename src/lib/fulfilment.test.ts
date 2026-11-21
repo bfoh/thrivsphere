@@ -6,6 +6,7 @@ import {
   disputeKeepsHold,
   packageExpiry,
   packageStatusFor,
+  parseBookingMetadata,
   parseCheckoutMetadata,
   shouldFulfil,
 } from "./fulfilment";
@@ -156,5 +157,22 @@ describe("disputeKeepsHold", () => {
     assert.equal(disputeKeepsHold("lost"), true);
     assert.equal(disputeKeepsHold("won"), false);
     assert.equal(disputeKeepsHold("warning_closed"), false);
+  });
+});
+
+describe("parseBookingMetadata", () => {
+  it("reads the time and practitioner a booking checkout was for", () => {
+    const parsed = parseBookingMetadata({ bookingStartsAt: "2026-12-01T18:00:00.000Z", bookingPractitionerId: "p1" });
+    assert.equal(parsed?.startsAt.toISOString(), "2026-12-01T18:00:00.000Z");
+    assert.equal(parsed?.practitionerId, "p1");
+  });
+
+  it("is null for an ordinary purchase, or a time it cannot read", () => {
+    assert.equal(parseBookingMetadata({ planSlug: "package-4" }), null);
+    assert.equal(parseBookingMetadata({ bookingStartsAt: "soon" }), null);
+  });
+
+  it("treats a missing practitioner as first available", () => {
+    assert.equal(parseBookingMetadata({ bookingStartsAt: "2026-12-01T18:00:00Z", bookingPractitionerId: "" })?.practitionerId, null);
   });
 });

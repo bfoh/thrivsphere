@@ -1,5 +1,5 @@
-/** A day of bookable times, ready to render. */
-export type SlotGroup = { date: string; label: string; slots: { iso: string; time: string }[] };
+/** A day of bookable times, ready to render, with who is free at each. */
+export type SlotGroup = { date: string; label: string; slots: { iso: string; time: string; practitionerIds?: string[] }[] };
 
 const LDN = "Europe/London";
 
@@ -9,7 +9,7 @@ const LDN = "Europe/London";
  * Grouped by the London date rather than the UTC one, so a late-evening time
  * never appears under the following day.
  */
-export function groupSlotsByDay(slots: { startsAt: Date }[]): SlotGroup[] {
+export function groupSlotsByDay(slots: { startsAt: Date; practitionerIds?: string[] }[]): SlotGroup[] {
   const groups = new Map<string, SlotGroup>();
   for (const s of slots) {
     const date = new Intl.DateTimeFormat("en-CA", { timeZone: LDN }).format(s.startsAt);
@@ -25,6 +25,7 @@ export function groupSlotsByDay(slots: { startsAt: Date }[]): SlotGroup[] {
     group.slots.push({
       iso: s.startsAt.toISOString(),
       time: s.startsAt.toLocaleTimeString("en-GB", { timeZone: LDN, hour: "2-digit", minute: "2-digit" }),
+      ...(s.practitionerIds ? { practitionerIds: s.practitionerIds } : {}),
     });
   }
   return [...groups.values()];

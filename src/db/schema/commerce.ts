@@ -7,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import { clients } from "./clients";
@@ -168,5 +169,8 @@ export const packages = pgTable(
   (t) => [
     index("packages_client_idx").on(t.clientId),
     index("packages_status_idx").on(t.status),
+    // One package per payment. A webhook delivered twice, or retried after a
+    // crash, can then never credit the same payment twice.
+    uniqueIndex("packages_order_unique").on(t.orderId),
   ]
 );

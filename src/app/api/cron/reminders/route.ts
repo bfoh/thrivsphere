@@ -5,6 +5,7 @@ import { appointments, clients, remindersSent } from "@/db/schema";
 import { dueReminders, type ReminderKind } from "@/lib/reminders";
 import { bookingConfirmation, reminder1h, reminder24h } from "@/lib/email-templates";
 import { sendEmail } from "@/lib/email";
+import { sweepExpiredHolds } from "@/lib/booking-engine";
 
 /**
  * Scheduled reminder send.
@@ -13,6 +14,9 @@ import { sendEmail } from "@/lib/email";
  * are due, sends them, and records what was sent so the next run cannot
  * repeat itself. Booking confirmations normally go out the moment a session is
  * booked; this picks up any that failed, however far ahead the session is.
+ *
+ * It also releases any time still held for a payment that never completed,
+ * in case Stripe's "checkout expired" event did not arrive (IT handover §19).
  *
  * Protected by a shared secret rather than a user session, since the caller is
  * Vercel Cron. Without it, anyone who found the URL could make the service
@@ -40,6 +44,10 @@ export async function GET(request: Request) {
 
   const db = getDb();
   const now = new Date();
+  const released = await sweepExpiredHolds(now).catch((err) => {
+    console.error("[cron] hold sweep failed", err);
+    return 0;
+  });
 
   const rows = await db
     .select({
@@ -56,7 +64,7 @@ export async function GET(request: Request) {
     );
 
   if (rows.length === 0) {
-    return Response.json({ checked: 0, sent: 0, failed: 0 });
+    return Response.json({ checked: 0, sent: 0, failed: 0, released });
   }
 
   const sentRows = await db
@@ -122,5 +130,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return Response.json({ checked: rows.length, due: due.length, sent, failed });
+  return Response.json({ checked: rows.length, due: due.length, sent, failed, released });
 }

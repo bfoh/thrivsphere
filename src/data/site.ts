@@ -47,8 +47,21 @@ export const nav: NavItem[] = [
   { label: "Contact Us", href: "/contact" },
 ];
 
-/** The call to action beside the nav, and on every "book" button. */
-export const bookCta: NavItem = { label: "Book an Appointment", href: "/book" };
+/**
+ * The main call to action (IT handover §19): "Book Initial Wellbeing
+ * Consultation – £30", with "Request a Callback" as a visible alternative.
+ *
+ * The £30 is written into the wording the owner approved. If the price of the
+ * initial consultation changes in Services & prices, change it here too.
+ * `short` is for the header, where the full wording does not fit.
+ */
+export const bookCta: NavItem & { short: string } = {
+  label: "Book Initial Wellbeing Consultation – £30",
+  short: "Book Consultation – £30",
+  href: "/book",
+};
+
+export const callbackCta: NavItem = { label: "Request a Callback", href: "/book#callback" };
 
 /**
  * Scope of practice — what ThriveSphere is and is not.
@@ -236,9 +249,6 @@ export const services: Service[] = [
     note: "The service does not include formal occupational health medical assessments or fitness-for-work reports.",
   },
 ];
-
-/** The topics offered on the enquiry and booking-request forms. */
-export const enquiryTopics = [...services.map((s) => s.title), "Not sure yet"];
 
 /** How our service works (checklist §5). */
 export const howItWorks = {

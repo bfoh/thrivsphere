@@ -4,7 +4,11 @@ import {
   appointmentCancelled,
   appointmentMoved,
   bookingConfirmation,
-  enquiryNotification,
+  bookingLinkEmail,
+  callbackAcknowledgement,
+  enquiryAcknowledgement,
+  enquiryStaffNotice,
+  paidTimeUnavailable,
   paymentAlert,
   paymentReceipt,
   reminder1h,
@@ -33,12 +37,20 @@ const brandedEmails = () => [
   secureMessageNotice(),
   worksheetAssigned(),
   paymentReceipt("4 Sessions", 10000, 4),
+  paymentReceipt("Initial Wellbeing Needs Review", 3000, 1, { forBooking: true }),
   appointmentCancelled(when, { by: "client", late: true }),
   appointmentCancelled(when, { by: "service" }),
   appointmentMoved(when),
+  enquiryAcknowledgement("TS-234567"),
+  callbackAcknowledgement("TS-234567"),
+  bookingLinkEmail({ price: "£30" }),
+  paidTimeUnavailable(),
 ];
 
-const clientEmails = brandedEmails;
+// Emails to someone with an account. An enquirer has none, so the
+// acknowledgements carry the crisis signposting but no portal link.
+const clientEmails = () =>
+  brandedEmails().filter((e) => !/received TS-/.test(e.subject));
 
 describe("every client email", () => {
   it("always has both an HTML and a plain-text version", () => {
@@ -185,37 +197,46 @@ describe("paymentAlert", () => {
   });
 });
 
-describe("enquiryNotification", () => {
-  const fields = { name: "Sam", email: "sam@example.com", message: "I'd like to talk to someone." };
+describe("paymentReceipt", () => {
+  it("does not ask someone who paid while booking to book again", () => {
+    const e = paymentReceipt("Initial Wellbeing Needs Review", 3000, 1, { forBooking: true });
+    assert.match(e.text, /For the appointment you have booked/);
+    assert.doesNotMatch(e.text, /Book whenever/);
+    assert.match(paymentReceipt("Single", 3500, 1).text, /1 session added to your account/);
+  });
+});
 
-  it("is for staff, so it drops the crisis block", () => {
-    // Staff do not need signposting in their own inbox.
-    const e = enquiryNotification(fields);
-    assert.ok(!/not an emergency or crisis service/i.test(e.html));
+describe("enquiry emails (handover §16.4, §16.5)", () => {
+  it("acknowledge with the handover's subject and the reference", () => {
+    const e = enquiryAcknowledgement("TS-234567");
+    assert.equal(e.subject, "ThriveSphere Wellbeing — enquiry received TS-234567");
+    assert.match(e.text, /will respond through our approved contact channels/);
+    assert.match(e.text, /ThriveSphere is not an emergency service/);
   });
 
-  it("escapes enquiry text, which is written by the public", () => {
-    const e = enquiryNotification({ ...fields, message: '<script>alert("x")</script>' });
-    assert.ok(!e.html.includes("<script>"), "unescaped HTML from a stranger");
-    assert.match(e.html, /&lt;script&gt;/);
+  it("promise no response time", () => {
+    for (const e of [enquiryAcknowledgement("TS-234567"), callbackAcknowledgement("TS-234567")]) {
+      assert.doesNotMatch(e.text, /working day|within \d|hours? of|24 hours|48 hours/i, e.subject);
+    }
   });
 
-  it("escapes a crafted name in the body", () => {
-    const e = enquiryNotification({ ...fields, name: '<img src=x onerror=1>' });
-    assert.ok(!e.html.includes("<img src=x"), "unescaped name");
+  it("tell staff only that an enquiry is waiting, with a link to its record", () => {
+    const e = enquiryStaffNotice({ id: "e-1", reference: "TS-234567", category: "callback" });
+    assert.match(e.subject, /callback request TS-234567/);
+    assert.match(e.text, /https:\/\/thrivsphere\.org\/admin\/enquiries\/e-1/);
+    assert.ok(!/not an emergency or crisis service/i.test(e.html), "staff do not need signposting");
   });
 
-  it("labels a booking request differently from a general enquiry", () => {
-    assert.match(enquiryNotification(fields).subject, /Website enquiry/);
-    assert.match(
-      enquiryNotification({ ...fields, preferredTimes: "Weekday evenings" }).subject,
-      /Booking request/
-    );
+  it("send the booking link to the booking page, naming the price and notice", () => {
+    const e = bookingLinkEmail({ price: "£30", practitionerId: "p-1", practitionerName: "Patience" });
+    assert.match(e.text, /https:\/\/thrivsphere\.org\/portal\/book\?with=p-1/);
+    assert.match(e.text, /50 minutes, online, £30/);
+    assert.match(e.text, /72 hours' notice/);
   });
 
-  it("omits fields that were not provided rather than printing empty rows", () => {
-    const e = enquiryNotification(fields);
-    assert.ok(!/Preferred times/.test(e.html));
+  it("escape a practitioner name in HTML", () => {
+    const e = bookingLinkEmail({ price: "£30", practitionerName: "<b>x</b>" });
+    assert.ok(!e.html.includes("<b>x</b>"));
   });
 });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { Section } from "../Section";
+import { bookCta } from "@/data/site";
 import { PillButton } from "../PillButton";
 import { FancyHeadline } from "../FancyHeadline";
 import { HowItWorksSteps } from "../HowItWorksSteps";
@@ -21,8 +22,8 @@ export function HowItWorks() {
         <HowItWorksSteps compact />
       </div>
       <div className="cta-stack" style={{ marginTop: 26, display: "flex", gap: 14, flexWrap: "wrap" }}>
-        <PillButton variant="gold" size="lg" href="/book" icon="arrow">
-          Book an Appointment
+        <PillButton variant="gold" size="lg" href={bookCta.href} icon="arrow">
+          {bookCta.label}
         </PillButton>
         <PillButton variant="ghost" size="lg" href="/pricing">
           Pricing

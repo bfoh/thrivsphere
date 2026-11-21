@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, eq, gte, lt, sql, sum } from "drizzle-orm";
+import { and, count, eq, gte, lt, ne, sql, sum } from "drizzle-orm";
 import type { AnyColumn } from "drizzle-orm";
 import { getDb } from "@/db";
 import {
@@ -78,7 +78,10 @@ export async function getReport(range: ReportRange) {
       .select({ n: count() })
       .from(appointments)
       .where(and(within(appointments.startsAt), eq(appointments.status, "no_show"))),
-    db.select({ n: count() }).from(appointments).where(within(appointments.startsAt)),
+    db
+      .select({ n: count() })
+      .from(appointments)
+      .where(and(within(appointments.startsAt), ne(appointments.status, "pending_payment"))),
     db
       .select({ total: sum(orders.amountPence) })
       .from(orders)

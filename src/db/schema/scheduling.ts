@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { users } from "./identity";
 import { clients } from "./clients";
-import { packages, services } from "./commerce";
+import { orders, packages, services } from "./commerce";
 
 /**
  * Recurring weekly availability for a practitioner.
@@ -55,12 +55,20 @@ export const availabilityExceptions = pgTable(
   (t) => [index("availability_exceptions_idx").on(t.practitionerId, t.date)]
 );
 
+/**
+ * `pending_payment` is a time held while the client pays for their initial
+ * consultation at Stripe (IT handover §19, Route A). It blocks the slot like a
+ * booking, so nobody else can take it mid-payment, but it is not a booking:
+ * it shows in no diary, gets no reminders, and is removed if payment does not
+ * complete. The webhook turns it into `scheduled` once Stripe confirms.
+ */
 export const appointmentStatus = pgEnum("appointment_status", [
   "scheduled",
   "completed",
   "cancelled_by_client",
   "cancelled_by_service",
   "no_show",
+  "pending_payment",
 ]);
 
 /**
@@ -89,10 +97,14 @@ export const appointments = pgTable(
     serviceId: uuid("service_id").references(() => services.id, { onDelete: "set null" }),
     /** Which prepaid block this session draws down from. */
     packageId: uuid("package_id").references(() => packages.id, { onDelete: "set null" }),
+    /** The payment this time is held for, when it was booked and paid in one go. */
+    orderId: uuid("order_id").references(() => orders.id, { onDelete: "set null" }),
 
     startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
     endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
     status: appointmentStatus("status").notNull().default("scheduled"),
+    /** When an unpaid hold may be released. Null for every real booking. */
+    holdExpiresAt: timestamp("hold_expires_at", { withTimezone: true }),
 
     provider: meetingProvider("provider").notNull().default("external_link"),
     /**
@@ -116,6 +128,7 @@ export const appointments = pgTable(
     index("appointments_practitioner_idx").on(t.practitionerId),
     index("appointments_starts_idx").on(t.startsAt),
     index("appointments_status_idx").on(t.status),
+    index("appointments_order_idx").on(t.orderId),
   ]
 );
 

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, ne, or } from "drizzle-orm";
 import { getDb } from "@/db";
 import {
   appointments,
@@ -166,7 +166,8 @@ export async function getClientRecord(clientId: string) {
     db
       .select()
       .from(appointments)
-      .where(eq(appointments.clientId, clientId))
+      // A time still being paid for is not an appointment yet.
+      .where(and(eq(appointments.clientId, clientId), ne(appointments.status, "pending_payment")))
       .orderBy(desc(appointments.startsAt)),
     db.select().from(packages).where(eq(packages.clientId, clientId)),
     db.select().from(consents).where(eq(consents.clientId, clientId)),

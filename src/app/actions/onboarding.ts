@@ -2,9 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { getDb } from "@/db";
-import { clients, consents, intakeSubmissions, users } from "@/db/schema";
+import { clients, consents, enquiries, enquiryEvents, intakeSubmissions, users } from "@/db/schema";
 import { getCurrentActor } from "@/lib/session";
 import { recordAudit } from "@/lib/audit";
 import {
@@ -156,10 +156,31 @@ export async function confirmAgeAndRegister(
     detail: "registered and confirmed 18+",
   });
 
+  // One client profile (IT handover §19): enquiries and callback requests
+  // made before registering join the new record. Matched on the email
+  // address the account has verified, never on a name.
+  const joined = await db
+    .update(enquiries)
+    .set({ clientId, updatedAt: new Date() })
+    .where(and(isNull(enquiries.clientId), sql`lower(${enquiries.email}) = lower(${user.email})`))
+    .returning({ id: enquiries.id });
+  if (joined.length) {
+    await db.insert(enquiryEvents).values(
+      joined.map((e) => ({ enquiryId: e.id, kind: "linked" as const, detail: "Joined to the client record when they registered" }))
+    );
+  }
+
   redirect("/portal/register");
 }
 
-/** Step 2 — intake. Stored as versioned JSON against the question set used. */
+/**
+ * Step 2 — contact details and anything the client chooses to share.
+ *
+ * Stored as versioned JSON against the question set used. Nothing here is
+ * required: the Wellbeing Needs Review happens in the paid initial
+ * consultation, and nobody may be made to complete it before booking (IT
+ * handover §13.1, §19).
+ */
 export async function submitIntake(
   _prev: OnboardingFormState,
   formData: FormData
@@ -171,13 +192,6 @@ export async function submitIntake(
   if (!state.clientId || state.step === "age") redirect("/portal/register");
 
   const presentingConcern = str(formData, "presentingConcern");
-  if (!presentingConcern) {
-    return {
-      status: "error",
-      message: "Please check the highlighted fields.",
-      fieldErrors: { presentingConcern: "Please tell us a little about what brings you here." },
-    };
-  }
 
   const answers = {
     presentingConcern,
@@ -197,7 +211,7 @@ export async function submitIntake(
     clientId: state.clientId,
     formVersion: INTAKE_VERSION,
     answers,
-    presentingConcern,
+    presentingConcern: presentingConcern || null,
   });
 
   // Mirror the few fields the practitioner needs at a glance onto the record.
@@ -283,5 +297,6 @@ export async function recordConsents(
     detail: `consents recorded: ${REQUIRED_CONSENTS.map((c) => c.type).join(", ")}`,
   });
 
-  redirect("/portal");
+  // Most people register to book: take them straight to the times.
+  redirect("/portal/book");
 }

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, gte, inArray, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, isNotNull, lt, ne, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import {
   appointments,
@@ -20,6 +20,7 @@ import {
   type BookingKind,
 } from "./allocation";
 import { getPooledSlots } from "./queries/availability";
+import { expireCheckoutSession, retrieveCheckoutSession } from "./stripe";
 import { sendEmail } from "./email";
 import { staffAppointmentNotice, type Email } from "./email-templates";
 
@@ -66,19 +67,6 @@ export async function nextBookingKind(clientId: string): Promise<BookingKind> {
     )
     .limit(1);
   return live ? "session" : "review";
-}
-
-/**
- * Whether the client can still buy the review: not once they have had or
- * booked it, and not while they hold review credit they have yet to use,
- * which is all a second purchase could ever pay for.
- */
-export async function canBuyReview(clientId: string, now: Date = new Date()): Promise<boolean> {
-  const [booking, owned] = await Promise.all([nextBookingKind(clientId), getClientCredits(clientId)]);
-  if (booking !== "review") return false;
-  return !owned.some(
-    (p) => p.forReview && p.status === "active" && p.sessionsUsed < p.sessionsTotal && (p.expiresAt === null || p.expiresAt > now)
-  );
 }
 
 /**
@@ -139,21 +127,31 @@ export type PlaceResult =
  * The time must be one currently offered to this client. Practitioners free
  * then are tried in order (see `rankPractitioners`); if the database's
  * no-overlap rule refuses one because the slot has just gone, the next is
- * tried, so the client only sees "taken" when nobody is left.
+ * tried, so the client only sees "taken" when nobody is left. A client who
+ * chose a practitioner (§19) is booked with them or not at all.
+ *
+ * With `hold`, the time is held while the client pays rather than booked: it
+ * blocks the slot for everyone else, and becomes a booking only when Stripe
+ * confirms payment (`confirmHold`).
  */
 export async function placeBooking({
   clientId,
   startsAt,
   packageId,
   preferPractitionerId,
+  onlyPractitionerId,
   excludeAppointmentId,
+  hold,
   now = new Date(),
 }: {
   clientId: string;
   startsAt: Date;
   packageId: string | null;
   preferPractitionerId?: string | null;
+  /** The practitioner the client chose. */
+  onlyPractitionerId?: string | null;
   excludeAppointmentId?: string;
+  hold?: { orderId: string; expiresAt: Date };
   now?: Date;
 }): Promise<PlaceResult> {
   const db = getDb();
@@ -163,6 +161,10 @@ export async function placeBooking({
   const offered = await getPooledSlots({ clientId, days: 35, excludeAppointmentId, now });
   const slot = offered.find((s) => s.startsAt.getTime() === startsAt.getTime());
   if (!slot) return { ok: false, message: "That time is no longer available. Please choose another." };
+  if (onlyPractitionerId && !slot.practitionerIds.includes(onlyPractitionerId)) {
+    return { ok: false, message: "That practitioner is no longer free at that time. Please choose another." };
+  }
+  const candidates = onlyPractitionerId ? [onlyPractitionerId] : slot.practitionerIds;
 
   const [load, previous, settings] = await Promise.all([
     db
@@ -172,7 +174,7 @@ export async function placeBooking({
         and(
           eq(appointments.status, "scheduled"),
           gte(appointments.startsAt, now),
-          inArray(appointments.practitionerId, slot.practitionerIds)
+          inArray(appointments.practitionerId, candidates)
         )
       )
       .groupBy(appointments.practitionerId),
@@ -192,11 +194,11 @@ export async function placeBooking({
     db
       .select()
       .from(practitionerSettings)
-      .where(inArray(practitionerSettings.userId, slot.practitionerIds)),
+      .where(inArray(practitionerSettings.userId, candidates)),
   ]);
 
   const order = rankPractitioners({
-    candidates: slot.practitionerIds,
+    candidates,
     previousPractitionerId: previous[0]?.practitionerId,
     upcomingLoad: Object.fromEntries(load.map((r) => [r.practitionerId, Number(r.n)])),
   });
@@ -211,8 +213,10 @@ export async function placeBooking({
           practitionerId,
           startsAt: slot.startsAt,
           endsAt: slot.endsAt,
-          status: "scheduled",
+          status: hold ? "pending_payment" : "scheduled",
           packageId,
+          orderId: hold?.orderId ?? null,
+          holdExpiresAt: hold?.expiresAt ?? null,
           // Already encrypted; copied as is so the client has a joining link
           // from the moment they book.
           meetingLinkEncrypted: defaultLink.get(practitionerId) ?? null,
@@ -227,6 +231,124 @@ export async function placeBooking({
   }
 
   return { ok: false, message: "That time has just been taken. Please choose another." };
+}
+
+/* ------------------------------------------------------------ paid holds */
+
+/**
+ * Let go of a client's earlier unpaid times before they choose another.
+ *
+ * Each checkout is closed at Stripe first, so the old time can no longer be
+ * paid for once it is released. A checkout Stripe says is complete was paid
+ * after all: that hold is kept for the webhook to confirm.
+ */
+export async function releaseClientHolds(clientId: string): Promise<void> {
+  const db = getDb();
+  const holds = await db
+    .select({ id: appointments.id, orderId: appointments.orderId, checkoutSessionId: orders.checkoutSessionId, orderStatus: orders.status })
+    .from(appointments)
+    .leftJoin(orders, eq(orders.id, appointments.orderId))
+    .where(and(eq(appointments.clientId, clientId), eq(appointments.status, "pending_payment")));
+
+  for (const h of holds) {
+    if (h.orderStatus === "paid") continue;
+    if (h.checkoutSessionId) {
+      try {
+        await expireCheckoutSession(h.checkoutSessionId);
+      } catch {
+        // Refused because it had already expired (fine) or been paid (keep it).
+        const current = await retrieveCheckoutSession(h.checkoutSessionId).catch(() => null);
+        if (!current || current.status !== "expired") continue;
+      }
+    }
+    await db.delete(appointments).where(and(eq(appointments.id, h.id), eq(appointments.status, "pending_payment")));
+    if (h.orderId) {
+      await db.update(orders).set({ status: "cancelled" }).where(and(eq(orders.id, h.orderId), eq(orders.status, "pending")));
+    }
+  }
+}
+
+/** Release the time held for a payment that will not complete. */
+export async function releaseHold(orderId: string): Promise<number> {
+  const released = await getDb()
+    .delete(appointments)
+    .where(and(eq(appointments.orderId, orderId), eq(appointments.status, "pending_payment")))
+    .returning({ id: appointments.id });
+  return released.length;
+}
+
+/**
+ * Release holds whose checkout has long expired, in case Stripe's "expired"
+ * event never arrived. A hold whose order was paid is never swept: the
+ * webhook confirms it.
+ */
+export async function sweepExpiredHolds(now: Date = new Date()): Promise<number> {
+  const db = getDb();
+  const stale = await db
+    .select({ id: appointments.id })
+    .from(appointments)
+    .leftJoin(orders, eq(orders.id, appointments.orderId))
+    .where(
+      and(
+        eq(appointments.status, "pending_payment"),
+        isNotNull(appointments.holdExpiresAt),
+        lt(appointments.holdExpiresAt, now),
+        sql`(${orders.status} is null or ${orders.status} <> 'paid')`
+      )
+    );
+  if (stale.length === 0) return 0;
+  const released = await db
+    .delete(appointments)
+    .where(and(inArray(appointments.id, stale.map((r) => r.id)), eq(appointments.status, "pending_payment")))
+    .returning({ id: appointments.id });
+  return released.length;
+}
+
+export type ConfirmedHold = { appointmentId: string; practitionerId: string; startsAt: Date };
+
+/**
+ * Turn a paid-for hold into a booking, paid by the package that payment
+ * created.
+ *
+ * Both writes run in one transaction, and each is conditional, so a webhook
+ * delivered twice or retried after a failure books once and spends the
+ * session once. Returns the booking only to the call that made it, so
+ * confirmation emails go out once; null means there was no hold to confirm.
+ */
+export async function confirmHold(orderId: string, packageId: string, now: Date = new Date()): Promise<ConfirmedHold | null> {
+  const db = getDb();
+  const [confirmed] = await db.batch([
+    db
+      .update(appointments)
+      .set({ status: "scheduled", packageId, holdExpiresAt: null, updatedAt: now })
+      .where(and(eq(appointments.orderId, orderId), eq(appointments.status, "pending_payment")))
+      .returning({ appointmentId: appointments.id, practitionerId: appointments.practitionerId, startsAt: appointments.startsAt }),
+    db
+      .update(packages)
+      .set({
+        sessionsUsed: sql`${packages.sessionsUsed} + 1`,
+        status: sql`case when ${packages.sessionsUsed} + 1 >= ${packages.sessionsTotal} then 'exhausted'::package_status else ${packages.status} end`,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(packages.id, packageId),
+          sql`${packages.sessionsUsed} < ${packages.sessionsTotal}`,
+          sql`exists (select 1 from ${appointments} where ${appointments.packageId} = ${packageId} and ${appointments.orderId} = ${orderId} and ${appointments.status} = 'scheduled')`
+        )
+      ),
+  ]);
+  return confirmed[0] ?? null;
+}
+
+/** Whether the payment's booking is already confirmed: a repeat of a settled event. */
+export async function holdAlreadyConfirmed(orderId: string): Promise<boolean> {
+  const [row] = await getDb()
+    .select({ id: appointments.id })
+    .from(appointments)
+    .where(and(eq(appointments.orderId, orderId), ne(appointments.status, "pending_payment")))
+    .limit(1);
+  return !!row;
 }
 
 /**
