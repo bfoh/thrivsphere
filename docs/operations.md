@@ -246,10 +246,9 @@ the pages, so they always need a redeploy.
       library, AI usage record). Applied 21 November 2026.
 - [ ] Patience reads and approves Brand Kit version 1 (**Marketing → Brand
       kit**), including the logo colours.
-- [ ] Apply migration `0017_safeguarding_record` (the Safeguarding Incident /
+- [x] Apply migration `0017_safeguarding_record` (the Safeguarding Incident /
       Concern Record; removes risk levels). Unlike the others it removes
-      columns, so it refuses to run if any concern or flag exists, and the
-      back office's client, safeguarding and staff pages error for the minutes
-      between applying it and the new code going live.
+      columns, so it refuses to run if any concern or flag exists. Applied
+      21 November 2026.
 - [ ] Once Lucy has an account, Patience makes her *Deputy Safeguarding Lead*
       on **Staff**.
