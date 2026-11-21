@@ -23,8 +23,8 @@ describe("navFor", () => {
 
   it("gives a practitioner service pages only", () => {
     const l = labels("practitioner");
-    assert.deepEqual(l, ["Dashboard", "Clients", "Appointments", "Availability", "Safeguarding", "Resources", "Library"]);
-    for (const forbidden of ["Staff", "Activity", "Services & prices", "Revenue", "HR", "Accounting", "Reports", "Enquiries"]) {
+    assert.deepEqual(l, ["Dashboard", "Clients", "Enquiries", "Appointments", "Availability", "Safeguarding", "Resources", "Library"]);
+    for (const forbidden of ["Staff", "Activity", "Services & prices", "Revenue", "HR", "Accounting", "Reports"]) {
       assert.ok(!l.includes(forbidden), `practitioner must not see ${forbidden}`);
     }
   });

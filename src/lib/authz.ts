@@ -93,6 +93,9 @@ const PRACTITIONER_CAPS: Capability[] = [
   "safeguarding:escalate",
   "incident:write",
   "referral:write",
+  // Website enquiries and callback requests: practitioners arrange the
+  // consultation with the person (owner's decision, 21 November 2026).
+  "enquiry:manage",
   "appointment:manage:any",
   "availability:manage",
   "document:write:any",
@@ -112,7 +115,6 @@ const ADMIN_CAPS: Capability[] = [
   ...SUPERVISOR_CAPS,
   "availability:manage:any",
   "payment:read:any",
-  "enquiry:manage",
   "catalogue:manage",
   "audit:read",
   "staff:read",

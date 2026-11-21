@@ -57,8 +57,8 @@ a member who can be removed.
   guide, teaching presentation, client learning guide and activity worksheet,
   searchable, with print-ready PDFs. To add or change a material, see
   `docs/library.md`.
-- **Enquiries and callbacks:** **Enquiries** (`/admin/enquiries`, founder and
-  admins). Every message from the contact form and every callback request
+- **Enquiries and callbacks:** **Enquiries** (`/admin/enquiries`, every
+  member of staff, practitioners included). Every message from the contact form and every callback request
   from the Book page is saved there with a reference such as `TS-7K2QXM`.
   The enquirer gets an acknowledgement quoting it; the email to
   `ENQUIRY_TO_EMAIL` carries only the reference and a link, never the
