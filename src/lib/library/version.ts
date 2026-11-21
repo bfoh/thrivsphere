@@ -5,4 +5,4 @@
  * committed, so publishing a new build of the library is a normal deploy and
  * rolling one back is a normal revert. Null until the first upload.
  */
-export const LIBRARY_MANIFEST: string | null = "d111f156fa05a3ac7eb368d80658e9327e7a559a3d0e8ac0fe2299df699cb62f.json";
+export const LIBRARY_MANIFEST: string | null = "59c39293bdf6ae3a4312148d1ab0073bce880f67e0ad5c20a8b79fa3abd16ac6.json";

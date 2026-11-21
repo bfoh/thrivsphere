@@ -15,7 +15,7 @@
 
 import { WORKSHEET_5_KEY } from "@/lib/forms/library";
 
-export type SeriesKey = "getting-started" | "worksheets" | "act" | "relationships";
+export type SeriesKey = "getting-started" | "foundation" | "worksheets" | "act" | "relationships";
 
 export type MaterialKind =
   | "practitioner-guide"
@@ -65,6 +65,12 @@ export const SERIES: Series[] = [
     blurb: "The first appointment: the Initial Wellbeing Needs Review and agreeing support.",
   },
   {
+    key: "foundation",
+    title: "Foundation skills",
+    unit: null,
+    blurb: "CBT-informed wellbeing education: how thoughts, feelings and actions connect.",
+  },
+  {
     key: "worksheets",
     title: "Emotional wellbeing worksheets",
     unit: "Worksheet",
@@ -80,7 +86,8 @@ export const SERIES: Series[] = [
     key: "relationships",
     title: "Relationship difficulties",
     unit: "Relationship resource",
-    blurb: "Individual wellbeing education on how relationship difficulties affect wellbeing.",
+    blurb:
+      "Individual wellbeing education on relationship difficulties: how they affect wellbeing, what I can and cannot control, and my feelings, needs and expectations.",
   },
 ];
 
@@ -121,6 +128,27 @@ export const COLLECTIONS: CatalogueCollection[] = [
         id: "review-form",
         kind: "review-form",
         file: "ThriveSphere_Initial_Wellbeing_Needs_Review_and_Agreed_Support.docx",
+      },
+    ],
+  },
+  {
+    slug: "foundation-skill",
+    series: "foundation",
+    number: null,
+    title: "Understanding How Thoughts, Feelings and Actions Connect",
+    aliases: ["My Thoughts, Feelings & Actions — Connect the Dots"],
+    // The owner sent no practitioner guide for this skill.
+    materials: [
+      { id: "presentation", kind: "presentation", file: "ThriveSphere_Thought_Check_Clarified-1.pptx" },
+      {
+        id: "learning-guide",
+        kind: "learning-guide",
+        file: "ThriveSphere_Foundation_Skill_Client_Learning_Guide_Colour_Highlights_Review.docx",
+      },
+      {
+        id: "activity-worksheet",
+        kind: "activity-worksheet",
+        file: "ThriveSphere_Foundation_Skill_Interactive_Client_Worksheet_Copyright_Updated.docx",
       },
     ],
   },
@@ -346,6 +374,31 @@ export const COLLECTIONS: CatalogueCollection[] = [
       activity: "ThriveSphere_Relationship_Resource_1_Client_Activity_Worksheet.docx",
     }),
   },
+  {
+    slug: "relationships-2",
+    series: "relationships",
+    number: 2,
+    title: "What I Can and Cannot Control",
+    aliases: ["When relationship problems take up too much energy", "My Circle of Control"],
+    materials: four({
+      guide: "ThriveSphere_Relationship_Difficulties_Resource_2_Practitioner_Delivery_Guide_REVIEW.docx",
+      slides: "ThriveSphere_Relationship_Difficulties_Resource_2_Client_Facing_Interactive_Presentation_REVISED.pptx",
+      learning: "ThriveSphere_Relationship_Difficulties_Resource_2_Client_Learning_Guide_ENHANCED_REVIEW.docx",
+      activity: "ThriveSphere_Relationship_Difficulties_Resource_2_Client_Activity_Worksheet_COPYRIGHT_CORRECTED.docx",
+    }),
+  },
+  {
+    slug: "relationships-3",
+    series: "relationships",
+    number: 3,
+    title: "Understanding My Feelings, Needs and Expectations",
+    materials: four({
+      guide: "ThriveSphere_Relationship_Resource_3_Practitioner_Delivery_Guide_HIGHLIGHTED_REVIEW.docx",
+      slides: "ThriveSphere_Resource_3_Relationship_Difficulties_Invite_Examples_REVIEW.pptx",
+      learning: "ThriveSphere_Resource_3_Copyright_IN_DOCUMENT(1).docx",
+      activity: "ThriveSphere_Resource_3_Client_Activity_Worksheet_UPDATED_REVIEW.docx",
+    }),
+  },
 ];
 
 /**
@@ -355,6 +408,8 @@ export const COLLECTIONS: CatalogueCollection[] = [
 export const IGNORED_FILES: Record<string, string> = {
   "ThriveSphere_Client_Learning_Guide_With_Original_Images (1).docx":
     "Byte-for-byte copy of the ACT Resource 1 learning guide.",
+  "ThriveSphere_Foundation_Skill_Informative_Presentation_Larger_Title_Triangle.pptx":
+    "Earlier save of the Foundation Skill deck. ThriveSphere_Thought_Check_Clarified-1.pptx is the same 21 slides, saved later, with slide 12 clarified.",
 };
 
 export function seriesFor(key: SeriesKey): Series {

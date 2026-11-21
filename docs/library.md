@@ -7,14 +7,15 @@ the top of **Resources**. Clients cannot see it.
 
 ## What is in it
 
-The files in `resources/` are grouped into 17 resources across four series:
+The files in `resources/` are grouped into 20 resources across five series:
 
 | Series | Resources |
 |---|---|
 | Getting started | The Initial Wellbeing Needs Review: practitioner guide and the review & agreed support form |
+| Foundation skills | Understanding How Thoughts, Feelings and Actions Connect |
 | Emotional wellbeing worksheets | Worksheets 1 to 12 |
 | ACT-informed resources | ACT resources 1 to 3 |
-| Relationship difficulties | Relationship resource 1 |
+| Relationship difficulties | Relationship resources 1 to 3 |
 
 Each worksheet, ACT and relationship resource has its materials in the order
 a session uses them:
@@ -23,6 +24,9 @@ a session uses them:
 2. **Teach:** the teaching presentation. Worksheet 12 has two.
 3. **Explain:** the client learning guide.
 4. **Practise:** the client activity worksheet.
+
+The foundation skill has the last three. The owner has not sent a
+practitioner guide for it.
 
 The grouping is set in `src/lib/library/catalogue.ts`. That file names each
 file in `resources/` and says which resource and step it belongs to.
