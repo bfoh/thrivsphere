@@ -36,7 +36,7 @@ export const legal = {
     "ThriveSphere Wellbeing is a trading name of 3G AND PAT HEALTHCARE LIMITED. Registered in England and Wales. Company Registration Number: 11615975.",
 };
 
-/** Primary nav — the homepage links the owner listed (checklist §3). */
+/** Primary nav: the homepage links the owner listed (checklist §3), plus Blog. */
 export type NavItem = { label: string; href: string };
 
 export const nav: NavItem[] = [
@@ -44,6 +44,8 @@ export const nav: NavItem[] = [
   { label: "Our Services", href: "/services" },
   { label: "How It Works", href: "/how-it-works" },
   { label: "Pricing", href: "/pricing" },
+  // Added 21 November 2026: the blog was reachable only from the footer.
+  { label: "Blog", href: "/blog" },
   { label: "Contact Us", href: "/contact" },
 ];
 
