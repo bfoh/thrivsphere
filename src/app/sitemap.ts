@@ -1,9 +1,13 @@
 import type { MetadataRoute } from "next";
-import { policyLinks, posts, resources } from "@/data/site";
+import { policyLinks, resources } from "@/data/site";
+import { getPublishedPosts } from "@/lib/queries/blog";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thrivsphere.org";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+/** Rebuilt hourly, and straight away when a post is published or taken down. */
+export const revalidate = 3600;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
 
   const core: MetadataRoute.Sitemap = [
@@ -22,8 +26,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const content: MetadataRoute.Sitemap = [
     ...resources.map((r) => ({ url: `${SITE_URL}/resources/${r.slug}`, priority: 0.6 })),
-    ...posts.map((p) => ({ url: `${SITE_URL}/blog/${p.slug}`, priority: 0.6 })),
   ];
+
+  // A database hiccup should cost the sitemap its articles, not the whole sitemap.
+  const posts = await getPublishedPosts().catch((err) => {
+    console.error("[sitemap] blog posts unavailable", err);
+    return [];
+  });
+  const articles: MetadataRoute.Sitemap = posts.map((p) => ({
+    url: `${SITE_URL}/blog/${p.slug}`,
+    lastModified: p.publishedAt,
+    priority: 0.6,
+  }));
 
   // Policies are low priority for search but should still be discoverable.
   const policies: MetadataRoute.Sitemap = policyLinks.map((p) => ({
@@ -32,5 +46,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.3,
   }));
 
-  return [...core, ...content, ...policies].map((entry) => ({ lastModified, ...entry }));
+  return [...core, ...content, ...articles, ...policies].map((entry) => ({ lastModified, ...entry }));
 }

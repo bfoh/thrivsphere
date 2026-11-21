@@ -631,6 +631,50 @@ export function enquiryStaffNotice(o: { id: string; reference: string; category:
 }
 
 /**
+ * A blog post is waiting for review. Link only, like every staff notice: the
+ * post itself is read in the back office.
+ */
+export function blogReviewRequest(o: { postId: string }): Email {
+  const href = `${siteUrl()}/admin/blog/${o.postId}`;
+  return {
+    subject: "A blog post is waiting for your review",
+    html: shell({
+      preheader: "A blog post is ready for review.",
+      heading: "A blog post is ready for review",
+      body: `
+        <p style="margin:0 0 14px;">A colleague has sent a blog post for review. Nothing goes on the website until a reviewer approves it.</p>
+        <p style="margin:0;">You can read it, see what changed and approve it or ask for changes in the admin dashboard.</p>`,
+      cta: { label: "Review the post", href },
+      showCrisis: false,
+    }),
+    text: textShell(
+      ["A colleague has sent a blog post for review. Nothing goes on the website until a reviewer approves it.", "", `Review it: ${href}`],
+      { crisis: false }
+    ),
+  };
+}
+
+/** The author hears what the reviewer decided. The comment stays in the dashboard. */
+export function blogReviewDecision(o: { postId: string; approved: boolean }): Email {
+  const href = `${siteUrl()}/admin/blog/${o.postId}`;
+  const heading = o.approved ? "Your blog post was approved" : "Changes were requested on your blog post";
+  const line = o.approved
+    ? "Your blog post has been approved. You can now publish it or schedule it."
+    : "The reviewer has asked for some changes before your blog post can go on the website. Their comments are in the admin dashboard.";
+  return {
+    subject: heading,
+    html: shell({
+      preheader: heading,
+      heading,
+      body: `<p style="margin:0;">${line}</p>`,
+      cta: { label: "Open the post", href },
+      showCrisis: false,
+    }),
+    text: textShell([line, "", `Open it: ${href}`], { crisis: false }),
+  };
+}
+
+/**
  * The booking and payment link staff send after a callback (§19, Route B).
  *
  * The client books and pays the same way as everyone else, so the price, the

@@ -357,6 +357,49 @@ export async function cancelStaffInvitation(
   return { status: "ok", message: `Invitation for ${invitation.email} cancelled.` };
 }
 
+/**
+ * Name a colleague as a blog reviewer, or stop. The founder only. A reviewer
+ * may approve other people's blog posts, never their own; the founder always
+ * may, so the flag isn't offered for founders.
+ */
+export async function setBlogReviewer(_prev: StaffFormState, formData: FormData): Promise<StaffFormState> {
+  const targetId = str(formData, "userId");
+  const on = str(formData, "reviewer") === "true";
+
+  let actor;
+  try {
+    actor = await requireCapability("staff:manage", {
+      entity: "users",
+      entityId: targetId,
+      action: "update",
+      detail: on ? "blog reviewer added" : "blog reviewer removed",
+    });
+  } catch (err) {
+    const mapped = mapGuardError(err, "Only the founder can choose blog reviewers.");
+    if (mapped) return mapped;
+    throw err;
+  }
+  if (actor.role !== "founder") return { status: "error", message: "Only the founder can choose blog reviewers." };
+
+  const db = getDb();
+  const [target] = await db.select().from(users).where(eq(users.id, targetId)).limit(1);
+  if (!target || target.status === "deleted") return { status: "error", message: "That account no longer exists." };
+  if (target.role === "client") return { status: "error", message: "Only staff can review blog posts." };
+  if (target.role === "founder") return { status: "error", message: "The founder can always approve blog posts." };
+
+  await db.update(users).set({ blogReviewer: on, updatedAt: new Date() }).where(eq(users.id, targetId));
+  await recordAudit({
+    actorId: actor.userId,
+    action: "update",
+    entity: "users",
+    entityId: targetId,
+    detail: `${target.email} ${on ? "can now approve" : "can no longer approve"} blog posts`,
+  });
+
+  revalidatePath("/admin/staff");
+  return { status: "ok", message: on ? `${target.email} can now approve other people's blog posts.` : `${target.email} can no longer approve blog posts.` };
+}
+
 /** Back-office accounts, for the staff screen. */
 export async function listStaff() {
   await requireCapability("staff:read", {
@@ -372,6 +415,7 @@ export async function listStaff() {
       displayName: users.displayName,
       role: users.role,
       status: users.status,
+      blogReviewer: users.blogReviewer,
       createdAt: users.createdAt,
       lastSeenAt: users.lastSeenAt,
     })

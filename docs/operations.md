@@ -103,6 +103,19 @@ a member who can be removed.
     in between. Revenue shows *Discounts given* and *Complimentary sessions*;
     income is always what was actually paid. Every change is in **Activity**.
     Never record health details in a discount's note.
+- **Blog** (`/admin/blog`; the founder and practitioners write, see
+  `docs/blog.md`):
+  - *New post* starts a draft. Write in the editor (with a preview), list the
+    sources, and add a cover photo if wanted. Every save is kept as a version.
+  - *Send for review* emails the reviewers a link. Patience approves any
+    post, her own included; a colleague she names as a *Blog reviewer* on
+    **Staff** approves other people's posts, never their own. Approving needs
+    four ticks: read in full, facts match the sources, safe for someone who
+    may be struggling, nothing identifies a client.
+  - Only the exact approved version can be published or scheduled. Any edit
+    afterwards needs approving again; a live post stays as approved until the
+    new version is published. Scheduled posts go live within the hour.
+  - The founder or a reviewer can take a post off the website at any time.
 - **Prices and service descriptions:** **Services & prices**
   (`/admin/catalogue`). A price change reaches the pricing page, the client's
   *Buy sessions* page and card checkout together. Service wording shows on the
@@ -181,3 +194,8 @@ the pages, so they always need a redeploy.
       one client record per sign-in). Applied 21 November 2026.
 - [x] Apply migration `0012_discounts` (concessions, codes, free sessions).
       Applied 21 November 2026.
+- [x] Apply migration `0013_blog` and move the four existing articles into
+      the blog (`scripts/import-blog-posts.ts`). Applied 21 November 2026; the
+      articles stay live, marked not yet reviewed, for Patience to review.
+- [ ] Patience reviews the four imported articles in **Blog**, and names any
+      colleague who should approve posts on **Staff** (*Blog reviewer*).

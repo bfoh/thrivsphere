@@ -6,6 +6,7 @@ import { listInvitations } from "@/lib/clerk-admin";
 import { assignableRoles, canCancelInvitation, canManageStaff, roleLabel } from "@/lib/staff-rules";
 import {
   BlockControl,
+  BlogReviewerControl,
   CancelInvitationControl,
   InviteStaffForm,
   RemoveStaffControl,
@@ -66,10 +67,10 @@ export default async function StaffPage() {
           <Empty>No staff accounts yet.</Empty>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 640 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 760 }}>
               <thead>
                 <tr>
-                  {["Person", "Role", "Status", "Last seen", ""].map((h) => (
+                  {["Person", "Role", "Blog reviewer", "Status", "Last seen", ""].map((h) => (
                     <th key={h} style={th}>{h}</th>
                   ))}
                 </tr>
@@ -91,6 +92,16 @@ export default async function StaffPage() {
                           roleLabel(s.role as Role)
                         ) : (
                           <RoleControl userId={s.id} email={s.email} currentRole={s.role as Role} roles={roles} />
+                        )}
+                      </td>
+                      <td style={td}>
+                        {/* Approves blog posts written by others. The founder always may. */}
+                        {s.role === "founder" ? (
+                          <span style={{ fontSize: 13, color: "var(--navy-soft)" }}>Always</span>
+                        ) : acting?.role === "founder" && s.status === "active" ? (
+                          <BlogReviewerControl userId={s.id} reviewer={s.blogReviewer} />
+                        ) : (
+                          <span style={{ fontSize: 13, color: "var(--navy-soft)" }}>{s.blogReviewer ? "Yes" : "No"}</span>
                         )}
                       </td>
                       <td style={{ ...td, fontWeight: 700, color: s.status === "active" ? "var(--teal-deep)" : "#b4553f" }}>

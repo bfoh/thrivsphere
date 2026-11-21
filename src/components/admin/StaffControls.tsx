@@ -7,6 +7,7 @@ import {
   changeStaffRole,
   inviteStaffMember,
   removeStaffMember,
+  setBlogReviewer,
   setStaffBlocked,
 } from "@/app/actions/staff";
 import { initialStaffState } from "@/lib/staff-state";
@@ -181,3 +182,19 @@ export function CancelInvitationControl({ invitationId, email }: { invitationId:
 const label: React.CSSProperties = {
   fontSize: 12, fontWeight: 800, color: "var(--navy)", display: "block", marginBottom: 5,
 };
+
+/** Founder only: let a colleague approve other people's blog posts. */
+export function BlogReviewerControl({ userId, reviewer }: { userId: string; reviewer: boolean }) {
+  const [state, action, pending] = useActionState(setBlogReviewer, initialStaffState);
+  return (
+    <form action={action} style={{ display: "flex", flexDirection: "column", gap: 5, alignItems: "flex-start" }}>
+      <input type="hidden" name="userId" value={userId} />
+      <input type="hidden" name="reviewer" value={reviewer ? "false" : "true"} />
+      <span style={{ fontSize: 13, fontWeight: 700, color: reviewer ? "var(--teal-deep)" : "var(--navy-soft)" }}>{reviewer ? "Yes" : "No"}</span>
+      <button className="pill pill-ghost" disabled={pending} style={{ padding: "6px 12px", fontSize: 12, opacity: pending ? 0.6 : 1 }}>
+        {pending ? "Saving…" : reviewer ? "Stop" : "Make reviewer"}
+      </button>
+      <Result state={state} />
+    </form>
+  );
+}

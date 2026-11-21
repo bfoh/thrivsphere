@@ -54,6 +54,8 @@ export type Capability =
   | "document:read:own"
   | "document:write:any"
   | "enquiry:manage"
+  // Writing blog posts. Approving them is a separate rule (blog-rules).
+  | "blog:write"
   | "discount:manage"
   | "catalogue:manage"
   | "report:read"
@@ -104,6 +106,9 @@ const PRACTITIONER_CAPS: Capability[] = [
   "supervision:write",
   "worksheet:manage",
   "library:read",
+  // The founder and practitioners write blog posts; a reviewer approves each
+  // one before it goes on the website (21 November 2026).
+  "blog:write",
 ];
 
 const SUPERVISOR_CAPS: Capability[] = [

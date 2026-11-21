@@ -1,4 +1,5 @@
 import {
+  boolean,
   pgEnum,
   pgTable,
   text,
@@ -41,6 +42,11 @@ export const users = pgTable(
     displayName: text("display_name"),
     role: userRole("role").notNull().default("client"),
     status: userStatus("status").notNull().default("active"),
+    /**
+     * May approve blog posts written by others. The founder always may; she
+     * names anyone else (owner's decision, 21 November 2026).
+     */
+    blogReviewer: boolean("blog_reviewer").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),

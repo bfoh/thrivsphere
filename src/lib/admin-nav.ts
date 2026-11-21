@@ -37,6 +37,8 @@ export const ADMIN_NAV: NavItem[] = [
   { label: "Resources", href: "/admin/resources", capability: "worksheet:manage", group: "service" },
   // Practitioner guides, teaching slides and client materials for every session.
   { label: "Library", href: "/admin/library", capability: "library:read", group: "service" },
+  // Writing, reviewing and publishing blog posts.
+  { label: "Blog", href: "/admin/blog", capability: "blog:write", group: "service" },
   { label: "Reports", href: "/admin/reports", capability: "report:read", group: "service" },
 
   // Running the organisation.
