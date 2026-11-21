@@ -3,14 +3,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getClientRecord } from "@/lib/queries/clients";
-import { RiskBadge } from "@/components/admin/RiskBadge";
+import { SafeguardingRecord } from "@/components/admin/SafeguardingRecord";
+import { CONCERN_TYPES, IMMEDIATE_THREAT, canStandDownFlag, labelFor, labelsFor } from "@/lib/safeguarding-rules";
+import { isSafeguardingDeputy, listPractitionerChoices, staffNames } from "@/lib/queries/safeguarding";
 import { Section, Field, Empty } from "@/components/admin/RecordUI";
 import { NoteForm } from "@/components/admin/NoteForm";
 import {
   AmendNoteForm,
   ClearFlagButton,
   CloseConcernForm,
-  EscalateForm,
   RaiseConcernForm,
   ReferralForm,
 } from "@/components/admin/SafeguardingForms";
@@ -99,6 +100,15 @@ export default async function ClientRecordPage({
     decisions,
   } = record;
   const [decision, ...earlierDecisions] = decisions;
+
+  // Safeguarding records: who may stand a flag down, and the names on each record.
+  const [practitioners, names, deputy] = await Promise.all([
+    listPractitionerChoices(),
+    staffNames(concerns.flatMap((c) => [c.practitionerId, c.raisedBy, c.closedBy])),
+    actor ? isSafeguardingDeputy(actor.userId) : Promise.resolve(false),
+  ]);
+  const canStandDown = !!actor && canStandDownFlag({ role: actor.role, safeguardingDeputy: deputy });
+  const me = actor ? (practitioners.find((p) => p.id === actor.userId) ?? null) : null;
   const canDecide = !!actor && can(actor, "notes:write");
 
   // Prices and discounts are for the founder and admins only.
@@ -146,17 +156,23 @@ export default async function ClientRecordPage({
           }}
         >
           <h2 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 800, color: "#8c2a1c", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-            Active risk flags
+            Safeguarding flag
           </h2>
           <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
             {riskFlags.map((f) => (
               <li key={f.id} style={{ display: "flex", gap: 12, alignItems: "flex-start", flexWrap: "wrap" }}>
-                <RiskBadge level={f.level} compact />
                 <span style={{ fontSize: 14, color: "var(--ink)", lineHeight: 1.5, flex: "1 1 320px" }}>
-                  <strong style={{ color: "var(--navy)" }}>{f.category.replace(/_/g, " ")}</strong> — {f.summary}
+                  {f.summary}.{" "}
+                  {f.concernId && (
+                    <a href={`#concern-${f.concernId}`} style={{ color: "var(--teal-deep)", fontWeight: 700 }}>Read the record</a>
+                  )}
                 </span>
                 <span style={{ fontSize: 12, color: "var(--navy-soft)" }}>raised {d(f.raisedAt)}</span>
-                <ClearFlagButton flagId={f.id} clientId={client.id} />
+                {canStandDown ? (
+                  <ClearFlagButton flagId={f.id} clientId={client.id} />
+                ) : (
+                  <span style={{ fontSize: 12, color: "var(--navy-soft)" }}>The Safeguarding Lead or Deputy stands this down.</span>
+                )}
               </li>
             ))}
           </ul>
@@ -388,35 +404,30 @@ export default async function ClientRecordPage({
       {/* safeguarding */}
       <Section id="safeguarding" title="Safeguarding concerns" subtitle={`${concerns.length} recorded`}>
         <div style={{ marginBottom: 16 }}>
-          <RaiseConcernForm clientId={client.id} />
+          <RaiseConcernForm clientId={client.id} clientName={client.preferredName} practitioners={practitioners} me={me} />
         </div>
         {concerns.length === 0 ? (
           <Empty>No safeguarding concerns recorded.</Empty>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {concerns.map((c) => (
-              <div key={c.id} style={{ border: "1px solid rgba(31,58,95,0.1)", borderRadius: 12, padding: "14px 18px" }}>
+              <div key={c.id} id={`concern-${c.id}`} style={{ border: "1px solid rgba(31,58,95,0.1)", borderRadius: 12, padding: "14px 18px" }}>
                 <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 8 }}>
-                  <RiskBadge level={c.level} compact />
-                  <strong style={{ fontSize: 13.5, color: "var(--navy)" }}>{c.category.replace(/_/g, " ")}</strong>
+                  <strong style={{ fontSize: 13.5, color: "var(--navy)" }}>{labelsFor(CONCERN_TYPES, c.concernTypes, c.concernTypeOther).join("; ")}</strong>
                   <span style={{ fontSize: 12, fontWeight: 700, color: c.status === "closed" ? "var(--navy-soft)" : "#a1421c" }}>
                     {c.status}
                   </span>
-                  <span style={{ fontSize: 12, color: "var(--navy-soft)", marginLeft: "auto" }}>{dt(c.raisedAt)}</span>
+                  <span style={{ fontSize: 12, color: "var(--navy-soft)", marginLeft: "auto" }}>{dt(c.occurredAt)}</span>
                 </div>
-                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--ink)" }}>{c.detail}</p>
-                <div style={{ marginTop: 10, display: "grid", gap: 8 }} className="two-col">
-                  <Field label="Immediate action" value={c.immediateAction} small />
-                  <Field label="Escalated to" value={c.escalatedTo ? `${c.escalatedTo} (${dt(c.escalatedAt)})` : null} small />
-                  <Field label="Client informed" value={c.clientInformed ? "Yes" : "No"} small />
-                  <Field label="Outcome" value={c.outcome} small />
-                </div>
-                {c.status !== "closed" && (
-                  <>
-                    {!c.escalatedAt && <EscalateForm concernId={c.id} clientId={client.id} />}
-                    <CloseConcernForm concernId={c.id} clientId={client.id} />
-                  </>
-                )}
+                <p style={{ margin: "0 0 6px", fontSize: 13, color: "var(--navy-soft)" }}>
+                  Immediate threat to life or serious harm: <strong style={{ color: "var(--ink)" }}>{labelFor(IMMEDIATE_THREAT, c.immediateThreat)}</strong>
+                </p>
+                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--ink)", whiteSpace: "pre-wrap" }}>{c.detail}</p>
+                <details style={{ marginTop: 10 }}>
+                  <summary style={{ cursor: "pointer", fontSize: 13, fontWeight: 700, color: "var(--teal-deep)" }}>Read the full record</summary>
+                  <SafeguardingRecord c={c} clientName={client.preferredName} names={names} />
+                </details>
+                {c.status !== "closed" && <CloseConcernForm concernId={c.id} clientId={client.id} />}
               </div>
             ))}
           </div>

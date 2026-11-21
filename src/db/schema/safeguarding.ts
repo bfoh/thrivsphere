@@ -1,5 +1,6 @@
 import {
   boolean,
+  date,
   index,
   integer,
   pgEnum,
@@ -11,20 +12,11 @@ import {
 import { users } from "./identity";
 import { clients } from "./clients";
 
-/**
- * The categories the brief requires ThriveSphere to be able to record and
- * escalate. Kept as an enum so that reporting can count them reliably.
- */
-export const concernCategory = pgEnum("concern_category", [
-  "adult_safeguarding",
-  "domestic_abuse",
-  "suicide_self_harm",
-  "immediate_danger",
-  "child_at_risk",
-  "other",
-]);
+/** Section 3 of the record: did there appear to be an immediate threat? */
+export const immediateThreat = pgEnum("immediate_threat", ["no", "yes", "unclear"]);
 
-export const riskLevel = pgEnum("risk_level", ["low", "medium", "high", "immediate"]);
+/** Section 5 of the record: did the client agree to a trusted person's involvement? */
+export const clientAgreement = pgEnum("client_agreement", ["yes", "no", "not_applicable"]);
 
 export const concernStatus = pgEnum("concern_status", [
   "open",
@@ -34,11 +26,14 @@ export const concernStatus = pgEnum("concern_status", [
 ]);
 
 /**
- * A standing risk flag on a client record.
+ * A standing safeguarding flag on a client record.
  *
  * Separate from `safeguardingConcerns`: a concern is an event that happened, a
  * flag is a state that persists. A practitioner opening a record needs to see
  * the flag before the session starts, not discover it by reading history.
+ * There is no risk level: ThriveSphere does not score risk. `summary` says why
+ * the flag was raised; only the founder or the Deputy Safeguarding Lead can
+ * stand it down.
  */
 export const riskFlags = pgTable(
   "risk_flags",
@@ -47,8 +42,8 @@ export const riskFlags = pgTable(
     clientId: uuid("client_id")
       .notNull()
       .references(() => clients.id, { onDelete: "cascade" }),
-    category: concernCategory("category").notNull(),
-    level: riskLevel("level").notNull().default("low"),
+    /** The record that raised it. */
+    concernId: uuid("concern_id").references(() => safeguardingConcerns.id, { onDelete: "set null" }),
     summary: text("summary").notNull(),
     active: boolean("active").notNull().default(true),
     raisedBy: uuid("raised_by").references(() => users.id, { onDelete: "set null" }),
@@ -63,12 +58,18 @@ export const riskFlags = pgTable(
 );
 
 /**
- * A safeguarding concern and what was done about it.
+ * A Safeguarding Incident / Concern Record.
  *
- * The fields follow what a safeguarding review actually asks: what was
- * disclosed, what immediate action was taken, whether the client knew, who it
- * was escalated to and when, and what the outcome was. `escalatedTo` is free
- * text because it may be a local authority team, the police, or a GP.
+ * One row per completed record, following ThriveSphere's own form section by
+ * section (the owner's form, 21 November 2026). It documents the concern,
+ * decisions and actions; it is not a clinical risk assessment and holds no
+ * risk score. Ticked options are stored as keys (see safeguarding-rules.ts),
+ * each with its "Other" text.
+ *
+ * `raisedAt` is when the record was completed; `occurredAt` is when the
+ * contact happened. `escalatedTo` / `escalatedAt` are section 6's external
+ * service and when it was contacted. `outcome` is written when the concern is
+ * closed, separate from section 8's outcome at the end of the contact.
  */
 export const safeguardingConcerns = pgTable(
   "safeguarding_concerns",
@@ -77,20 +78,65 @@ export const safeguardingConcerns = pgTable(
     clientId: uuid("client_id")
       .notNull()
       .references(() => clients.id, { onDelete: "restrict" }),
-    category: concernCategory("category").notNull(),
-    level: riskLevel("level").notNull(),
     status: concernStatus("status").notNull().default("open"),
 
-    detail: text("detail").notNull(),
-    immediateAction: text("immediate_action"),
-    /** Whether consent to share was sought, and what the client said. */
-    clientInformed: boolean("client_informed").notNull().default(false),
-    consentToShare: boolean("consent_to_share"),
-    /** Recorded when information is shared without consent — this needs a reason. */
-    sharedWithoutConsentReason: text("shared_without_consent_reason"),
+    // 1. Client and session details
+    occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
+    practitionerId: uuid("practitioner_id").references(() => users.id, { onDelete: "set null" }),
+    clientLocation: text("client_location"),
 
+    // 2. Safeguarding / safety concern
+    arose: text("arose").array().notNull(),
+    aroseOther: text("arose_other"),
+    concernTypes: text("concern_types").array().notNull(),
+    concernTypeOther: text("concern_type_other"),
+    detail: text("detail").notNull(),
+
+    // 3. Immediate safety
+    immediateThreat: immediateThreat("immediate_threat").notNull(),
+    immediateThreatInfo: text("immediate_threat_info").notNull(),
+
+    // 4. Client's wishes and agreed action
+    clientWishes: text("client_wishes"),
+    agreedActions: text("agreed_actions").array().notNull(),
+    agreedActionOther: text("agreed_action_other"),
+    agreedActionDetails: text("agreed_action_details"),
+
+    // 5. Trusted person / emergency contact
+    trustedPersonRequired: boolean("trusted_person_required").notNull(),
+    trustedPersonAgreed: clientAgreement("trusted_person_agreed"),
+    trustedPersonContacted: text("trusted_person_contacted"),
+    trustedPersonOutcome: text("trusted_person_outcome"),
+
+    // 6. External service / information sharing
+    externalContacted: boolean("external_contacted").notNull(),
     escalatedTo: text("escalated_to"),
     escalatedAt: timestamp("escalated_at", { withTimezone: true }),
+    informationShared: text("information_shared"),
+    sharingReason: text("sharing_reason"),
+    sharingClientInformed: boolean("sharing_client_informed"),
+    /** Why sharing without the client's agreement was necessary and proportionate. */
+    sharedWithoutConsentReason: text("shared_without_consent_reason"),
+
+    // 7. Internal escalation
+    discussedInternally: boolean("discussed_internally").notNull(),
+    discussedWith: text("discussed_with").array().notNull(),
+    discussedAt: timestamp("discussed_at", { withTimezone: true }),
+    internalAdvice: text("internal_advice"),
+
+    // 8. Outcome and ThriveSphere follow-up
+    contactOutcome: text("contact_outcome"),
+    nextSteps: text("next_steps").array().notNull(),
+    nextStepOther: text("next_step_other"),
+    followUpAction: text("follow_up_action"),
+    followUpBy: text("follow_up_by"),
+    followUpDate: date("follow_up_date"),
+
+    // 9. Practitioner record
+    additionalInfo: text("additional_info"),
+    initials: text("initials").notNull(),
+
+    /** Written when the concern is closed. */
     outcome: text("outcome"),
 
     raisedBy: uuid("raised_by")
@@ -103,7 +149,6 @@ export const safeguardingConcerns = pgTable(
   (t) => [
     index("concerns_client_idx").on(t.clientId),
     index("concerns_status_idx").on(t.status),
-    index("concerns_category_idx").on(t.category),
   ]
 );
 

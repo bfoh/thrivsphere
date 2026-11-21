@@ -5,8 +5,7 @@ import { getDb } from "@/db";
 import { clients, incidents, safeguardingConcerns } from "@/db/schema";
 import { requireCapability } from "@/lib/guard";
 import { Section, Empty } from "@/components/admin/RecordUI";
-import { RiskBadge } from "@/components/admin/RiskBadge";
-import { categoryLabel } from "@/lib/safeguarding-rules";
+import { CONCERN_TYPES, IMMEDIATE_THREAT, labelFor, labelsFor } from "@/lib/safeguarding-rules";
 import { IncidentForm } from "@/components/admin/IncidentForm";
 
 export const metadata: Metadata = { title: "Safeguarding", robots: { index: false, follow: false } };
@@ -33,8 +32,12 @@ export default async function SafeguardingPage() {
     db
       .select({
         id: safeguardingConcerns.id,
-        category: safeguardingConcerns.category,
-        level: safeguardingConcerns.level,
+        concernTypes: safeguardingConcerns.concernTypes,
+        concernTypeOther: safeguardingConcerns.concernTypeOther,
+        immediateThreat: safeguardingConcerns.immediateThreat,
+        nextSteps: safeguardingConcerns.nextSteps,
+        followUpDate: safeguardingConcerns.followUpDate,
+        occurredAt: safeguardingConcerns.occurredAt,
         status: safeguardingConcerns.status,
         detail: safeguardingConcerns.detail,
         escalatedTo: safeguardingConcerns.escalatedTo,
@@ -55,7 +58,7 @@ export default async function SafeguardingPage() {
     <div style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 24px 72px" }}>
       <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Safeguarding</h1>
       <p style={{ margin: "0 0 24px", fontSize: 14, color: "var(--navy-soft)" }}>
-        Concerns are raised from a client&apos;s record. Everything here is logged.
+        A Safeguarding Incident / Concern Record is completed from the client&apos;s record. Everything here is logged.
       </p>
 
       <Section title="Open concerns" subtitle={`${open.length} not yet closed`}>
@@ -66,19 +69,28 @@ export default async function SafeguardingPage() {
             {open.map((c) => (
               <div key={c.id} style={{ border: "1px solid rgba(31,58,95,0.1)", borderRadius: 12, padding: "14px 18px" }}>
                 <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 7 }}>
-                  <RiskBadge level={c.level} compact />
-                  <strong style={{ fontSize: 13.5, color: "var(--navy)" }}>{categoryLabel(c.category)}</strong>
+                  <strong style={{ fontSize: 13.5, color: "var(--navy)" }}>{labelsFor(CONCERN_TYPES, c.concernTypes, c.concernTypeOther).join("; ")}</strong>
                   {c.clientId && (
                     <Link href={`/admin/clients/${c.clientId}`} style={{ fontSize: 13.5, fontWeight: 700, color: "var(--teal-deep)", textDecoration: "none" }}>
                       {c.clientName}
                     </Link>
                   )}
-                  <span style={{ fontSize: 12, fontWeight: 700, color: c.escalatedAt ? "var(--teal-deep)" : "#a1421c" }}>
-                    {c.escalatedAt ? `escalated to ${c.escalatedTo}` : "not yet escalated"}
+                  <span style={{ fontSize: 12, fontWeight: 700, color: c.escalatedAt ? "var(--teal-deep)" : "var(--navy-soft)" }}>
+                    {c.escalatedAt ? `external service contacted: ${c.escalatedTo}` : "no external service contacted"}
                   </span>
-                  <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--navy-soft)" }}>{dt(c.raisedAt)}</span>
+                  <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--navy-soft)" }}>{dt(c.occurredAt)}</span>
                 </div>
-                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--ink)" }}>{c.detail}</p>
+                <p style={{ margin: "0 0 6px", fontSize: 13, color: "var(--navy-soft)" }}>
+                  Immediate threat to life or serious harm: <strong style={{ color: "var(--ink)" }}>{labelFor(IMMEDIATE_THREAT, c.immediateThreat)}</strong>
+                  {c.nextSteps.includes("review") && <> · <strong style={{ color: "#a1421c" }}>Review with Safeguarding Lead/Deputy before next session</strong></>}
+                  {c.followUpDate && <> · follow-up {new Date(`${c.followUpDate}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</>}
+                </p>
+                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--ink)", whiteSpace: "pre-wrap" }}>{c.detail}</p>
+                {c.clientId && (
+                  <Link href={`/admin/clients/${c.clientId}#concern-${c.id}`} style={{ display: "inline-block", marginTop: 8, fontSize: 13, fontWeight: 700, color: "var(--teal-deep)" }}>
+                    Read the full record
+                  </Link>
+                )}
               </div>
             ))}
           </div>

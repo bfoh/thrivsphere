@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listClients } from "@/lib/queries/clients";
-import { RiskBadge } from "@/components/admin/RiskBadge";
+import { FlagBadge } from "@/components/admin/FlagBadge";
 import { Icon } from "@/components/icons";
 
 export const metadata: Metadata = {
@@ -75,7 +75,7 @@ export default async function ClientsPage({
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
               <thead>
                 <tr style={{ background: "rgba(31,58,95,0.04)" }}>
-                  {["Name", "Email", "Status", "Risk", "Registered", ""].map((h) => (
+                  {["Name", "Email", "Status", "Safeguarding", "Registered", ""].map((h) => (
                     <th
                       key={h}
                       style={{
@@ -107,8 +107,8 @@ export default async function ClientsPage({
                       </span>
                     </td>
                     <td style={{ padding: "13px 16px" }}>
-                      {r.highestRisk ? (
-                        <RiskBadge level={r.highestRisk} compact />
+                      {r.flagged ? (
+                        <FlagBadge compact />
                       ) : (
                         <span style={{ color: "var(--navy-soft)", fontSize: 13 }}>—</span>
                       )}

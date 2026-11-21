@@ -3,7 +3,7 @@ import { requireCapability } from "@/lib/guard";
 import { can } from "@/lib/authz";
 import { getDb } from "@/db";
 import { clients, enquiries, appointments, safeguardingConcerns } from "@/db/schema";
-import { count, eq } from "drizzle-orm";
+import { count, eq, ne } from "drizzle-orm";
 import Link from "next/link";
 import { countResourceWork } from "@/lib/queries/worksheets";
 import { listOutcomesDue } from "@/lib/queries/suitability";
@@ -35,7 +35,7 @@ export default async function AdminPage() {
     db
       .select({ n: count() })
       .from(safeguardingConcerns)
-      .where(eq(safeguardingConcerns.status, "open")),
+      .where(ne(safeguardingConcerns.status, "closed")),
     countResourceWork(actor.userId),
     listOutcomesDue(),
   ]);

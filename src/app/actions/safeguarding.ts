@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { getDb } from "@/db";
 import {
   incidents,
@@ -10,17 +10,17 @@ import {
   safeguardingConcerns,
   sessionNoteAmendments,
   sessionNotes,
+  users,
 } from "@/db/schema";
 import { requireCapability, requireClientAccess } from "@/lib/guard";
 import { ForbiddenError, UnauthenticatedError } from "@/lib/authz";
-import { shouldRaiseRiskFlag, validateConcern } from "@/lib/safeguarding-rules";
+import { canStandDownFlag, flagReason, initialStatus, parseConcernRecord } from "@/lib/safeguarding-rules";
 import type { SafeguardingState } from "@/lib/safeguarding-state";
 
 function str(fd: FormData, name: string) {
   const v = fd.get(name);
   return typeof v === "string" ? v.trim() : "";
 }
-const on = (fd: FormData, name: string) => fd.get(name) === "on";
 
 function mapGuardError(err: unknown): SafeguardingState | null {
   if (err instanceof UnauthenticatedError) {
@@ -33,11 +33,12 @@ function mapGuardError(err: unknown): SafeguardingState | null {
 }
 
 /**
- * Raise a safeguarding concern.
+ * Record a Safeguarding Incident / Concern Record (the owner's form).
  *
- * A concern at medium risk or above also raises a standing risk flag, so the
- * next practitioner to open the record sees it before the session rather than
- * having to read back through the history.
+ * Saved in one step with any flag it raises, so a record can never exist
+ * without the flag it should have put on the client's record. There is no
+ * risk score: a flag follows the form's immediate-safety answer and next step
+ * (see flagReason).
  */
 export async function raiseConcern(
   _prev: SafeguardingState,
@@ -46,21 +47,14 @@ export async function raiseConcern(
   const clientId = str(formData, "clientId");
   if (!clientId) return { status: "error", message: "Missing client." };
 
-  const consentRaw = str(formData, "consentToShare");
-  const input = {
-    category: str(formData, "category"),
-    level: str(formData, "level"),
-    detail: str(formData, "detail"),
-    immediateAction: str(formData, "immediateAction"),
-    clientInformed: on(formData, "clientInformed"),
-    consentToShare: consentRaw === "" ? null : consentRaw === "yes",
-    sharedWithoutConsentReason: str(formData, "sharedWithoutConsentReason"),
-  };
-
-  const fieldErrors = validateConcern(input);
-  if (Object.keys(fieldErrors).length) {
-    return { status: "error", message: "Please complete the highlighted fields.", fieldErrors };
+  const parsed = parseConcernRecord({
+    get: (n) => str(formData, n),
+    getAll: (n) => formData.getAll(n).filter((v): v is string => typeof v === "string"),
+  });
+  if (!parsed.ok) {
+    return { status: "error", message: "Please complete the highlighted parts of the form.", fieldErrors: parsed.errors };
   }
+  const record = parsed.record;
 
   let actor;
   try {
@@ -68,12 +62,12 @@ export async function raiseConcern(
       entity: "safeguarding_concerns",
       subjectClientId: clientId,
       action: "create",
-      detail: `raised ${input.category} concern at ${input.level} risk`,
+      detail: "completed a safeguarding concern record",
     });
     await requireClientAccess(clientId, {
       entity: "safeguarding_concerns",
       action: "create",
-      detail: "raised a safeguarding concern",
+      detail: "completed a safeguarding concern record",
     });
   } catch (err) {
     const mapped = mapGuardError(err);
@@ -82,76 +76,41 @@ export async function raiseConcern(
   }
 
   const db = getDb();
+  const [practitioner] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.id, record.practitionerId), eq(users.status, "active"), ne(users.role, "client")))
+    .limit(1);
+  if (!practitioner) {
+    return { status: "error", message: "Please complete the highlighted parts of the form.", fieldErrors: { practitionerId: "Choose the wellbeing practitioner." } };
+  }
 
-  await db.insert(safeguardingConcerns).values({
+  const concernId = crypto.randomUUID();
+  const reason = flagReason(record);
+  const insertConcern = db.insert(safeguardingConcerns).values({
+    id: concernId,
     clientId,
-    category: input.category as "adult_safeguarding",
-    level: input.level as "low",
-    detail: input.detail,
-    immediateAction: input.immediateAction || null,
-    clientInformed: input.clientInformed,
-    consentToShare: input.consentToShare,
-    sharedWithoutConsentReason: input.sharedWithoutConsentReason || null,
+    status: initialStatus(record),
+    ...record,
     raisedBy: actor.userId,
-    status: "open",
   });
-
-  if (shouldRaiseRiskFlag(input.level)) {
-    await db.insert(riskFlags).values({
-      clientId,
-      category: input.category as "adult_safeguarding",
-      level: input.level as "low",
-      summary: input.detail.slice(0, 280),
-      raisedBy: actor.userId,
-      active: true,
-    });
+  if (reason) {
+    await db.batch([
+      insertConcern,
+      db.insert(riskFlags).values({ clientId, concernId, summary: reason, raisedBy: actor.userId, active: true }),
+    ]);
+  } else {
+    await insertConcern;
   }
 
   revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath("/admin/safeguarding");
-  return { status: "ok", message: "Concern recorded." };
-}
-
-/** Escalate a concern to an external service, recording who and when. */
-export async function escalateConcern(
-  _prev: SafeguardingState,
-  formData: FormData
-): Promise<SafeguardingState> {
-  const concernId = str(formData, "concernId");
-  const clientId = str(formData, "clientId");
-  const escalatedTo = str(formData, "escalatedTo");
-
-  if (!concernId) return { status: "error", message: "Missing concern." };
-  if (escalatedTo.length < 3) {
-    return {
-      status: "error",
-      message: "Record who this was escalated to.",
-      fieldErrors: { escalatedTo: "Name the service or person contacted." },
-    };
-  }
-
-  try {
-    await requireCapability("safeguarding:escalate", {
-      entity: "safeguarding_concerns",
-      entityId: concernId,
-      subjectClientId: clientId || null,
-      action: "update",
-      detail: `escalated to ${escalatedTo}`,
-    });
-  } catch (err) {
-    const mapped = mapGuardError(err);
-    if (mapped) return mapped;
-    throw err;
-  }
-
-  await getDb()
-    .update(safeguardingConcerns)
-    .set({ escalatedTo, escalatedAt: new Date(), status: "escalated" })
-    .where(eq(safeguardingConcerns.id, concernId));
-
-  revalidatePath(`/admin/clients/${clientId}`);
-  revalidatePath("/admin/safeguarding");
-  return { status: "ok", message: "Escalation recorded." };
+  return {
+    status: "ok",
+    message: reason
+      ? "Record saved. A safeguarding flag is now on this client's record until the Safeguarding Lead or Deputy stands it down."
+      : "Record saved.",
+  };
 }
 
 /** Close a concern with an outcome. */
@@ -198,9 +157,10 @@ export async function closeConcern(
 }
 
 /**
- * Clear a standing risk flag.
+ * Stand down a safeguarding flag. The founder (Safeguarding Lead) or the
+ * Deputy Safeguarding Lead only.
  *
- * Flags are deactivated rather than deleted — that a risk was once present and
+ * Flags are deactivated rather than deleted — that a flag was once raised and
  * later stood down is itself part of the record.
  */
 export async function clearRiskFlag(
@@ -211,18 +171,23 @@ export async function clearRiskFlag(
   const clientId = str(formData, "clientId");
   if (!flagId) return { status: "error", message: "Missing flag." };
 
+  let actor;
   try {
-    await requireCapability("safeguarding:write", {
+    actor = await requireCapability("safeguarding:write", {
       entity: "risk_flags",
       entityId: flagId,
       subjectClientId: clientId || null,
       action: "update",
-      detail: "cleared a risk flag",
+      detail: "stood down a safeguarding flag",
     });
   } catch (err) {
     const mapped = mapGuardError(err);
     if (mapped) return mapped;
     throw err;
+  }
+  const [me] = await getDb().select({ deputy: users.safeguardingDeputy }).from(users).where(eq(users.id, actor.userId)).limit(1);
+  if (!canStandDownFlag({ role: actor.role, safeguardingDeputy: me?.deputy ?? false })) {
+    return { status: "error", message: "Only the Safeguarding Lead or the Deputy Safeguarding Lead can stand a flag down." };
   }
 
   await getDb()
@@ -231,7 +196,7 @@ export async function clearRiskFlag(
     .where(eq(riskFlags.id, flagId));
 
   revalidatePath(`/admin/clients/${clientId}`);
-  return { status: "ok", message: "Flag cleared." };
+  return { status: "ok", message: "Flag stood down." };
 }
 
 /** Record a referral or signpost made for a client. */

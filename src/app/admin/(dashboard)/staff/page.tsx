@@ -7,6 +7,7 @@ import { assignableRoles, canCancelInvitation, canManageStaff, roleLabel } from 
 import {
   BlockControl,
   BlogReviewerControl,
+  SafeguardingDeputyControl,
   CancelInvitationControl,
   InviteStaffForm,
   RemoveStaffControl,
@@ -67,10 +68,10 @@ export default async function StaffPage() {
           <Empty>No staff accounts yet.</Empty>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 760 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 900 }}>
               <thead>
                 <tr>
-                  {["Person", "Role", "Blog reviewer", "Status", "Last seen", ""].map((h) => (
+                  {["Person", "Role", "Blog reviewer", "Deputy Safeguarding Lead", "Status", "Last seen", ""].map((h) => (
                     <th key={h} style={th}>{h}</th>
                   ))}
                 </tr>
@@ -102,6 +103,16 @@ export default async function StaffPage() {
                           <BlogReviewerControl userId={s.id} reviewer={s.blogReviewer} />
                         ) : (
                           <span style={{ fontSize: 13, color: "var(--navy-soft)" }}>{s.blogReviewer ? "Yes" : "No"}</span>
+                        )}
+                      </td>
+                      <td style={td}>
+                        {/* May stand down safeguarding flags. The founder is the Safeguarding Lead. */}
+                        {s.role === "founder" ? (
+                          <span style={{ fontSize: 13, color: "var(--navy-soft)" }}>Lead</span>
+                        ) : acting?.role === "founder" && s.status === "active" ? (
+                          <SafeguardingDeputyControl userId={s.id} deputy={s.safeguardingDeputy} />
+                        ) : (
+                          <span style={{ fontSize: 13, color: "var(--navy-soft)" }}>{s.safeguardingDeputy ? "Yes" : "No"}</span>
                         )}
                       </td>
                       <td style={{ ...td, fontWeight: 700, color: s.status === "active" ? "var(--teal-deep)" : "#b4553f" }}>

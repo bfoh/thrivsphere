@@ -8,6 +8,7 @@ import {
   inviteStaffMember,
   removeStaffMember,
   setBlogReviewer,
+  setSafeguardingDeputy,
   setStaffBlocked,
 } from "@/app/actions/staff";
 import { initialStaffState } from "@/lib/staff-state";
@@ -193,6 +194,21 @@ export function BlogReviewerControl({ userId, reviewer }: { userId: string; revi
       <span style={{ fontSize: 13, fontWeight: 700, color: reviewer ? "var(--teal-deep)" : "var(--navy-soft)" }}>{reviewer ? "Yes" : "No"}</span>
       <button className="pill pill-ghost" disabled={pending} style={{ padding: "6px 12px", fontSize: 12, opacity: pending ? 0.6 : 1 }}>
         {pending ? "Saving…" : reviewer ? "Stop" : "Make reviewer"}
+      </button>
+      <Result state={state} />
+    </form>
+  );
+}
+
+export function SafeguardingDeputyControl({ userId, deputy }: { userId: string; deputy: boolean }) {
+  const [state, action, pending] = useActionState(setSafeguardingDeputy, initialStaffState);
+  return (
+    <form action={action} style={{ display: "flex", flexDirection: "column", gap: 5, alignItems: "flex-start" }}>
+      <input type="hidden" name="userId" value={userId} />
+      <input type="hidden" name="deputy" value={deputy ? "false" : "true"} />
+      <span style={{ fontSize: 13, fontWeight: 700, color: deputy ? "var(--teal-deep)" : "var(--navy-soft)" }}>{deputy ? "Yes" : "No"}</span>
+      <button className="pill pill-ghost" disabled={pending} style={{ padding: "6px 12px", fontSize: 12, opacity: pending ? 0.6 : 1 }}>
+        {pending ? "Saving…" : deputy ? "Stop" : "Make deputy"}
       </button>
       <Result state={state} />
     </form>

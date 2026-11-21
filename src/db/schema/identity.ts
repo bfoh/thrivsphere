@@ -47,6 +47,8 @@ export const users = pgTable(
      * names anyone else (owner's decision, 21 November 2026).
      */
     blogReviewer: boolean("blog_reviewer").notNull().default(false),
+    /** Deputy Safeguarding Lead: may stand down safeguarding flags. Set by the founder. */
+    safeguardingDeputy: boolean("safeguarding_deputy").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),

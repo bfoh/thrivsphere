@@ -400,6 +400,48 @@ export async function setBlogReviewer(_prev: StaffFormState, formData: FormData)
   return { status: "ok", message: on ? `${target.email} can now approve other people's blog posts.` : `${target.email} can no longer approve blog posts.` };
 }
 
+/**
+ * Name the Deputy Safeguarding Lead, or stop. The founder only. The deputy may
+ * stand down safeguarding flags; the founder, as Safeguarding Lead, always may.
+ */
+export async function setSafeguardingDeputy(_prev: StaffFormState, formData: FormData): Promise<StaffFormState> {
+  const targetId = str(formData, "userId");
+  const on = str(formData, "deputy") === "true";
+
+  let actor;
+  try {
+    actor = await requireCapability("staff:manage", {
+      entity: "users",
+      entityId: targetId,
+      action: "update",
+      detail: on ? "deputy safeguarding lead added" : "deputy safeguarding lead removed",
+    });
+  } catch (err) {
+    const mapped = mapGuardError(err, "Only the founder can choose the Deputy Safeguarding Lead.");
+    if (mapped) return mapped;
+    throw err;
+  }
+  if (actor.role !== "founder") return { status: "error", message: "Only the founder can choose the Deputy Safeguarding Lead." };
+
+  const db = getDb();
+  const [target] = await db.select().from(users).where(eq(users.id, targetId)).limit(1);
+  if (!target || target.status === "deleted") return { status: "error", message: "That account no longer exists." };
+  if (target.role === "client") return { status: "error", message: "Only staff can be the Deputy Safeguarding Lead." };
+  if (target.role === "founder") return { status: "error", message: "The founder is the Safeguarding Lead." };
+
+  await db.update(users).set({ safeguardingDeputy: on, updatedAt: new Date() }).where(eq(users.id, targetId));
+  await recordAudit({
+    actorId: actor.userId,
+    action: "update",
+    entity: "users",
+    entityId: targetId,
+    detail: `${target.email} ${on ? "is now" : "is no longer"} the Deputy Safeguarding Lead`,
+  });
+
+  revalidatePath("/admin/staff");
+  return { status: "ok", message: on ? `${target.email} is now the Deputy Safeguarding Lead.` : `${target.email} is no longer the Deputy Safeguarding Lead.` };
+}
+
 /** Back-office accounts, for the staff screen. */
 export async function listStaff() {
   await requireCapability("staff:read", {
@@ -416,6 +458,7 @@ export async function listStaff() {
       role: users.role,
       status: users.status,
       blogReviewer: users.blogReviewer,
+      safeguardingDeputy: users.safeguardingDeputy,
       createdAt: users.createdAt,
       lastSeenAt: users.lastSeenAt,
     })

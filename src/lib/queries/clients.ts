@@ -28,15 +28,15 @@ export type ClientListRow = {
   email: string;
   status: string;
   createdAt: Date;
-  /** Highest active risk level, so the list can warn before anyone opens a record. */
-  highestRisk: string | null;
+  /** An active safeguarding flag, so the list can warn before anyone opens a record. */
+  flagged: boolean;
   openConcerns: number;
 };
 
 /**
  * Client list for staff.
  *
- * Carries each client's highest active risk level and open-concern count so a
+ * Carries whether each client has an active safeguarding flag, and their open-concern count, so a
  * practitioner sees the warning in the list rather than discovering it after
  * opening the record.
  */
@@ -84,7 +84,7 @@ export async function listClients(search?: string): Promise<ClientListRow[]> {
    */
   const [flagRows, concernRows] = await Promise.all([
     db
-      .select({ clientId: riskFlags.clientId, level: riskFlags.level })
+      .select({ clientId: riskFlags.clientId })
       .from(riskFlags)
       .where(and(inArray(riskFlags.clientId, ids), eq(riskFlags.active, true))),
     db
@@ -244,7 +244,7 @@ export async function getDashboardCounts() {
     db
       .select({ n: count() })
       .from(safeguardingConcerns)
-      .where(eq(safeguardingConcerns.status, "open")),
+      .where(ne(safeguardingConcerns.status, "closed")),
   ]);
   return { clients: clientCount.n, openConcerns: openConcerns.n };
 }

@@ -103,6 +103,23 @@ a member who can be removed.
     in between. Revenue shows *Discounts given* and *Complimentary sessions*;
     income is always what was actually paid. Every change is in **Activity**.
     Never record health details in a discount's note.
+- **Safeguarding:** when the Safeguarding & Safety Escalation Procedure has
+  been activated, complete a *Safeguarding Incident / Concern Record* from the
+  client's record (**Clients** → the client → *Safeguarding concerns*). It
+  follows ThriveSphere's form section by section. There is no risk score.
+  - Required: when it happened and the practitioner; how it arose and the type
+    of concern; what happened; the immediate-safety answer and the information
+    behind it; whether a trusted person, an external service, or the
+    Safeguarding Lead/Deputy were involved (with who, when and what was shared
+    where they were); at least one next step; initials.
+  - A record whose immediate-safety answer is *Yes* or *Unclear*, or whose next
+    step is *Review with Safeguarding Lead/Deputy before next session*, puts a
+    **safeguarding flag** at the top of the client's record and in the client
+    list. Only Patience (founder) or the Deputy Safeguarding Lead can stand it
+    down. Patience names the deputy on **Staff** (*Deputy Safeguarding Lead*).
+  - **Safeguarding** (`/admin/safeguarding`) lists every record not yet
+    closed. Close one with its outcome from the client's record. Records are
+    never edited after saving; complete a new one if something new happens.
 - **Blog** (`/admin/blog`; the founder and practitioners write, see
   `docs/blog.md`):
   - *New post* starts a draft. Write in the editor (with a preview), list the
@@ -184,8 +201,10 @@ the pages, so they always need a redeploy.
 1. Run `npm test`, `npx tsc --noEmit`, `npm run lint` and `npx next build`.
 2. If the change adds a migration in `drizzle/`, apply it **first** with
    `npm run db:migrate`, using production credentials from
-   `vercel env pull .env.local`. Migrations here only ever add, so the live
-   site keeps working against the new database.
+   `vercel env pull .env.local`. Migrations here almost always only add, so
+   the live site keeps working against the new database. A migration that
+   removes columns says so at the top; expect the pages that read them to
+   error until the new code is live.
 3. Push to `main`, which makes Vercel deploy to production.
 4. Check the live site: the pages you changed, a booking, and the reminder job
    under Vercel → Cron Jobs.
@@ -227,3 +246,10 @@ the pages, so they always need a redeploy.
       library, AI usage record). Applied 21 November 2026.
 - [ ] Patience reads and approves Brand Kit version 1 (**Marketing → Brand
       kit**), including the logo colours.
+- [ ] Apply migration `0017_safeguarding_record` (the Safeguarding Incident /
+      Concern Record; removes risk levels). Unlike the others it removes
+      columns, so it refuses to run if any concern or flag exists, and the
+      back office's client, safeguarding and staff pages error for the minutes
+      between applying it and the new code going live.
+- [ ] Once Lucy has an account, Patience makes her *Deputy Safeguarding Lead*
+      on **Staff**.
