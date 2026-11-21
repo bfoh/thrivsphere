@@ -10,6 +10,7 @@ import {
   enquiryStaffNotice,
   paidTimeUnavailable,
   sessionsOpen,
+  sessionsAdded,
   paymentAlert,
   paymentReceipt,
   reminder1h,
@@ -47,6 +48,9 @@ const brandedEmails = () => [
   bookingLinkEmail({ price: "£30" }),
   paidTimeUnavailable(),
   sessionsOpen(),
+  sessionsAdded({ sessions: 3, consultation: false }),
+  sessionsAdded({ sessions: 1, consultation: true }),
+  paymentReceipt("Single session", 1750, 1, { discount: { listPence: 3500, discountPence: 1750, label: "Concessionary rate" } }),
 ];
 
 // Emails to someone with an account. An enquirer has none, so the

@@ -133,6 +133,16 @@ export default async function RevenuePage() {
             note="average, per paying client"
           />
           <Stat label="Refunded" value={formatPence(r.refundedPence)} note="all time" />
+          <Stat
+            label="Discounts given"
+            value={formatPence(r.discountsGivenPence)}
+            note={`off ${r.discountedOrders} payment${r.discountedOrders === 1 ? "" : "s"}, 12 months`}
+          />
+          <Stat
+            label="Complimentary sessions"
+            value={String(r.complimentarySessions)}
+            note={`worth ${formatPence(r.complimentaryValuePence)} at full price, 12 months`}
+          />
         </div>
         <p style={{ margin: "16px 0 0", fontSize: 13, lineHeight: 1.6, color: "var(--navy-soft)" }}>
           <strong style={{ color: "var(--navy)" }}>Sessions owed</strong> is money already received

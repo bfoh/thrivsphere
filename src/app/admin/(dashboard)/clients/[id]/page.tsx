@@ -28,6 +28,9 @@ import { outcomeLabel, sessionGate } from "@/lib/suitability-rules";
 import { kindLabel } from "@/lib/allocation";
 import { getCurrentActor } from "@/lib/session";
 import { can } from "@/lib/authz";
+import { ConcessionForm, EndDiscountButton, FreeSessionsForm } from "@/components/admin/DiscountForms";
+import { getActiveConcession, listClientDiscountHistory, planPrices } from "@/lib/queries/discounts";
+import { describeDiscount, penceLabel, reasonLabel } from "@/lib/discounts";
 
 export const metadata: Metadata = {
   title: "Client record",
@@ -97,6 +100,14 @@ export default async function ClientRecordPage({
   } = record;
   const [decision, ...earlierDecisions] = decisions;
   const canDecide = !!actor && can(actor, "notes:write");
+
+  // Prices and discounts are for the founder and admins only.
+  const canDiscount = !!actor && can(actor, "discount:manage");
+  const [concession, discountHistory, plans] = canDiscount
+    ? await Promise.all([getActiveConcession(id), listClientDiscountHistory(id), planPrices()])
+    : [null, [], []];
+  const concessionPlans = (slugs: string[] | null) =>
+    slugs ? slugs.map((s) => plans.find((p) => p.slug === s)?.name ?? s).join(", ") : "everything";
 
   const library = worksheetLibrary().map((w) => ({ key: w.key, label: worksheetLabel(w) }));
   const pastSessions = sessionsForWorksheet.slice(0, 20).map((a) => ({ id: a.id, label: dt(a.startsAt) }));
@@ -445,6 +456,54 @@ export default async function ClientRecordPage({
           </ul>
         )}
       </Section>
+
+      {/* discounts: founder and admins only */}
+      {canDiscount && (
+        <Section id="discounts" title="Discounts & free sessions" subtitle="Only the founder and admins see this">
+          {concession ? (
+            <div style={{ border: "1px solid rgba(31,58,95,0.1)", borderRadius: 12, padding: "13px 17px" }}>
+              <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                <strong style={{ fontSize: 14, color: "var(--navy)" }}>{concession.label}</strong>
+                <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink)" }}>{describeDiscount(concession)}</span>
+                <span style={{ fontSize: 12.5, color: "var(--navy-soft)" }}>on {concessionPlans(concession.planSlugs)}</span>
+              </div>
+              <div style={{ marginTop: 4, display: "flex", gap: 14, flexWrap: "wrap", fontSize: 12.5, color: "var(--navy-soft)" }}>
+                <span>{reasonLabel(concession.reason)}</span>
+                {concession.maxUses != null && <span>Up to {concession.maxUses} purchase{concession.maxUses === 1 ? "" : "s"}</span>}
+                {concession.endsAt && <span>Until {d(new Date(concession.endsAt.getTime() - 1))}</span>}
+                <span>Given {d(concession.createdAt)}</span>
+              </div>
+              {concession.note && <p style={{ margin: "6px 0 0", fontSize: 12.5, color: "var(--navy-soft)" }}>Note: {concession.note}</p>}
+              <div style={{ marginTop: 8 }}>
+                <EndDiscountButton discountId={concession.id} kind="client" />
+              </div>
+            </div>
+          ) : (
+            <Empty>No concession. The client pays the listed prices.</Empty>
+          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <ConcessionForm clientId={client.id} plans={plans} hasConcession={!!concession} />
+            <FreeSessionsForm clientId={client.id} />
+          </div>
+
+          {discountHistory.length > 0 && (
+            <div style={{ marginTop: 18 }}>
+              <p style={{ margin: "0 0 8px", fontSize: 12, fontWeight: 800, color: "var(--navy)" }}>Discounted and free purchases</p>
+              <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 6 }}>
+                {discountHistory.map((o) => (
+                  <li key={o.id} style={{ fontSize: 13.5, color: "var(--ink)" }}>
+                    <strong style={{ color: "var(--navy)" }}>{d(o.createdAt)}</strong> — {o.plan}:{" "}
+                    {o.complimentary && o.amountPence === 0
+                      ? `complimentary (${o.discountLabel ?? "free"})`
+                      : `${penceLabel(o.amountPence)} instead of ${penceLabel(o.listPricePence ?? o.amountPence)} (${o.discountLabel ?? "discount"})`}
+                    <span style={{ color: "var(--navy-soft)" }}> · {o.status}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </Section>
+      )}
 
       {/* consent */}
       <Section title="Consent" subtitle="Each pinned to the policy version accepted">

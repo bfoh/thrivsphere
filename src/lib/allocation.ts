@@ -85,6 +85,9 @@ export type PackageCandidate = {
 /** The `price_plans.slug` of the Initial Wellbeing Needs Review (checklist §6). */
 export const REVIEW_PLAN_SLUG = "initial-consultation";
 
+/** The `price_plans.slug` of a single support session: what free sessions are given as. */
+export const SESSION_PLAN_SLUG = "individual-session";
+
 /** What a booking is: the client's first appointment is their review. */
 export type BookingKind = "review" | "session";
 

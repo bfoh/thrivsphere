@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, gte, isNotNull, sql, sum } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, isNotNull, sql, sum } from "drizzle-orm";
 import { getDb } from "@/db";
 import { appointments, clients, orders, packages } from "@/db/schema";
 import { requireCapability } from "@/lib/guard";
@@ -31,9 +31,22 @@ export type RevenueSummary = {
   sessionsDelivered: number;
   sessionsRemaining: number;
   payingClients: number;
+  /** Taken off paid purchases by concessions and codes, in the period. */
+  discountsGivenPence: number;
+  discountedOrders: number;
+  /** Free sessions given (and purchases a 100% concession made free), in the period. */
+  complimentarySessions: number;
+  complimentaryValuePence: number;
 };
 
 const settledAt = sql<Date>`coalesce(${orders.paidAt}, ${orders.createdAt})`;
+
+/**
+ * A payment: settled and not complimentary. Free sessions are £0 orders, so
+ * they add nothing to income either way, but counting them as payments
+ * would pull the average down and count their clients as paying.
+ */
+const paid = and(eq(orders.status, "paid"), eq(orders.complimentary, false));
 
 export async function getRevenue(months = 12): Promise<RevenueSummary> {
   await requireCapability("revenue:read", {
@@ -56,11 +69,13 @@ export async function getRevenue(months = 12): Promise<RevenueSummary> {
     delivered,
     packageTotals,
     payingClients,
+    discountRows,
+    complimentaryRows,
   ] = await Promise.all([
     db
       .select({ at: settledAt, amountPence: orders.amountPence })
       .from(orders)
-      .where(and(eq(orders.status, "paid"), gte(settledAt, since))),
+      .where(and(paid, gte(settledAt, since))),
 
     db
       .select({ total: sum(orders.amountPence), n: count() })
@@ -79,7 +94,7 @@ export async function getRevenue(months = 12): Promise<RevenueSummary> {
         orders: count(),
       })
       .from(orders)
-      .where(and(eq(orders.status, "paid"), gte(settledAt, since)))
+      .where(and(paid, gte(settledAt, since)))
       .groupBy(orders.planNameAtPurchase),
 
     db
@@ -91,7 +106,7 @@ export async function getRevenue(months = 12): Promise<RevenueSummary> {
       })
       .from(orders)
       .leftJoin(clients, eq(clients.id, orders.clientId))
-      .where(and(eq(orders.status, "paid"), gte(settledAt, since)))
+      .where(and(paid, gte(settledAt, since)))
       .groupBy(orders.clientId, clients.preferredName)
       .orderBy(desc(sum(orders.amountPence)))
       .limit(20),
@@ -112,7 +127,18 @@ export async function getRevenue(months = 12): Promise<RevenueSummary> {
     db
       .select({ n: sql<number>`count(distinct ${orders.clientId})` })
       .from(orders)
-      .where(eq(orders.status, "paid")),
+      .where(paid),
+
+    db
+      .select({ total: sum(orders.discountPence), n: count() })
+      .from(orders)
+      .where(and(paid, gt(orders.discountPence, 0), gte(settledAt, since))),
+
+    db
+      .select({ sessions: sum(packages.sessionsTotal), value: sum(orders.discountPence) })
+      .from(orders)
+      .innerJoin(packages, eq(packages.orderId, orders.id))
+      .where(and(eq(orders.status, "paid"), eq(orders.complimentary, true), gte(settledAt, since))),
   ]);
 
   const settledPence = settledRows.reduce((total, row) => total + row.amountPence, 0);
@@ -157,5 +183,9 @@ export async function getRevenue(months = 12): Promise<RevenueSummary> {
     // Prepaid and not yet used: a liability, not income already earned.
     sessionsRemaining: Math.max(0, packagesTotal - packagesUsed),
     payingClients: paying,
+    discountsGivenPence: Number(discountRows[0]?.total ?? 0),
+    discountedOrders: discountRows[0]?.n ?? 0,
+    complimentarySessions: Number(complimentaryRows[0]?.sessions ?? 0),
+    complimentaryValuePence: Number(complimentaryRows[0]?.value ?? 0),
   };
 }

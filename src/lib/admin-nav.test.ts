@@ -24,7 +24,7 @@ describe("navFor", () => {
   it("gives a practitioner service pages only", () => {
     const l = labels("practitioner");
     assert.deepEqual(l, ["Dashboard", "Clients", "Enquiries", "Appointments", "Availability", "Safeguarding", "Resources", "Library"]);
-    for (const forbidden of ["Staff", "Activity", "Services & prices", "Revenue", "HR", "Accounting", "Reports"]) {
+    for (const forbidden of ["Staff", "Activity", "Services & prices", "Discounts", "Revenue", "HR", "Accounting", "Reports"]) {
       assert.ok(!l.includes(forbidden), `practitioner must not see ${forbidden}`);
     }
   });
@@ -41,6 +41,7 @@ describe("navFor", () => {
     assert.ok(l.includes("Services & prices"), "admin should be able to update services and prices");
     assert.ok(l.includes("Staff"), "admin should be able to remove a colleague who has left");
     assert.ok(l.includes("Enquiries"), "admin should work the enquiry and callback queue");
+    assert.ok(l.includes("Discounts"), "admin should give concessions, codes and free sessions");
     for (const forbidden of ["Revenue", "HR", "Accounting"]) {
       assert.ok(!l.includes(forbidden), `admin must not see ${forbidden}`);
     }
@@ -71,7 +72,7 @@ describe("ADMIN_NAV", () => {
 
   it("separates running the organisation from delivering the service", () => {
     const org = ADMIN_NAV.filter((i) => i.group === "organisation").map((i) => i.label);
-    assert.deepEqual(org, ["Staff", "Activity", "Services & prices", "Revenue", "HR", "Accounting"]);
+    assert.deepEqual(org, ["Staff", "Activity", "Services & prices", "Discounts", "Revenue", "HR", "Accounting"]);
   });
 
   it("every destination is a page that exists", () => {

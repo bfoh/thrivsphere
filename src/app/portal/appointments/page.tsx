@@ -4,7 +4,7 @@ import { and, eq, ne } from "drizzle-orm";
 import { requirePortalClient } from "@/lib/portal-guard";
 import { requireClientAccess } from "@/lib/guard";
 import { getDb } from "@/db";
-import { appointments, packages, users } from "@/db/schema";
+import { appointments, orders, packages, users } from "@/db/schema";
 import { decryptSecret } from "@/lib/crypto";
 import {
   NOTICE_PERIOD,
@@ -55,7 +55,7 @@ export default async function AppointmentsPage() {
   await requireClientAccess(clientId, { entity: "appointments", action: "view" });
 
   const db = getDb();
-  const [rows, owned] = await Promise.all([
+  const [rows, ownedRows] = await Promise.all([
     db
       .select({
         id: appointments.id,
@@ -72,8 +72,13 @@ export default async function AppointmentsPage() {
       .leftJoin(users, eq(users.id, appointments.practitionerId))
       // A time still being paid for is not an appointment yet.
       .where(and(eq(appointments.clientId, clientId), ne(appointments.status, "pending_payment"))),
-    db.select().from(packages).where(eq(packages.clientId, clientId)),
+    db
+      .select({ pkg: packages, complimentary: orders.complimentary })
+      .from(packages)
+      .leftJoin(orders, eq(orders.id, packages.orderId))
+      .where(eq(packages.clientId, clientId)),
   ]);
+  const owned = ownedRows.map((r) => ({ ...r.pkg, complimentary: r.complimentary === true }));
 
   const now = new Date();
   const upcoming = rows
@@ -83,7 +88,7 @@ export default async function AppointmentsPage() {
     .filter((a) => !upcoming.includes(a))
     .sort((a, b) => b.startsAt.getTime() - a.startsAt.getTime());
   const remaining = sessionsRemaining(owned, now);
-  const livePackages = owned.filter((p) => p.sessionsTotal > 1 && p.status === "active");
+  const livePackages = owned.filter((p) => (p.sessionsTotal > 1 || p.complimentary) && p.status === "active");
 
   return (
     <div style={{ maxWidth: 860, margin: "0 auto", padding: "40px 24px 72px" }}>
@@ -174,7 +179,9 @@ export default async function AppointmentsPage() {
           <ul style={{ margin: "12px 0 0", padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 6 }}>
             {livePackages.map((p) => (
               <li key={p.id} style={{ fontSize: 13.5, color: "var(--navy-soft)" }}>
-                {p.sessionsTotal}-session package: {p.sessionsTotal - p.sessionsUsed} of {p.sessionsTotal} left
+                {p.complimentary
+                  ? `Complimentary: ${p.sessionsTotal - p.sessionsUsed} of ${p.sessionsTotal} session${p.sessionsTotal === 1 ? "" : "s"} left`
+                  : `${p.sessionsTotal}-session package: ${p.sessionsTotal - p.sessionsUsed} of ${p.sessionsTotal} left`}
                 {p.expiresAt ? `, use by ${p.expiresAt.toLocaleDateString("en-GB", { timeZone: "Europe/London", day: "numeric", month: "long", year: "numeric" })}` : ""}
               </li>
             ))}

@@ -54,6 +54,7 @@ export type Capability =
   | "document:read:own"
   | "document:write:any"
   | "enquiry:manage"
+  | "discount:manage"
   | "catalogue:manage"
   | "report:read"
   | "audit:read"
@@ -116,6 +117,9 @@ const ADMIN_CAPS: Capability[] = [
   "availability:manage:any",
   "payment:read:any",
   "catalogue:manage",
+  // Concessions, discount codes and free sessions (owner's decision: founder
+  // and admins, 21 November 2026).
+  "discount:manage",
   "audit:read",
   "staff:read",
   "staff:remove",

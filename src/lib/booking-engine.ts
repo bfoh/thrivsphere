@@ -24,6 +24,7 @@ import {
 } from "./allocation";
 import { sessionGate, type SessionGate, type SuitabilityOutcome } from "./suitability-rules";
 import { getPooledSlots } from "./queries/availability";
+import { packageExpiry } from "./fulfilment";
 import { expireCheckoutSession, retrieveCheckoutSession } from "./stripe";
 import { sendEmail } from "./email";
 import { staffAppointmentNotice, type Email } from "./email-templates";
@@ -86,6 +87,37 @@ export async function latestSuitability(clientId: string): Promise<SuitabilityOu
  */
 export async function getSessionGate(clientId: string): Promise<SessionGate> {
   return sessionGate(await latestSuitability(clientId));
+}
+
+/**
+ * Credit the sessions an order paid for: one package per order.
+ *
+ * Shared by the Stripe webhook and by free sessions, which never go to
+ * Stripe. The unique index on the order makes a repeat harmless: the second
+ * call finds the package the first made, and says it did not create it.
+ */
+export async function grantPackage(o: {
+  clientId: string;
+  orderId: string;
+  sessions: number;
+  validityDays: number | null;
+}): Promise<{ pkg: typeof packages.$inferSelect | null; created: boolean }> {
+  const db = getDb();
+  const [created] = await db
+    .insert(packages)
+    .values({
+      clientId: o.clientId,
+      orderId: o.orderId,
+      sessionsTotal: o.sessions,
+      sessionsUsed: 0,
+      status: "active",
+      expiresAt: packageExpiry(o.validityDays),
+    })
+    .onConflictDoNothing({ target: packages.orderId })
+    .returning();
+  if (created) return { pkg: created, created: true };
+  const [existing] = await db.select().from(packages).where(eq(packages.orderId, o.orderId)).limit(1);
+  return { pkg: existing ?? null, created: false };
 }
 
 /**

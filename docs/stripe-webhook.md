@@ -43,6 +43,19 @@ expires after 31 minutes. Then:
 Owner emails go to `ENQUIRY_TO_EMAIL`. Like the diary notices they carry no
 client details, only a link to the client's record.
 
+## Discounts
+
+Concessions and discount codes are worked out by the website, not by Stripe:
+Checkout is opened for the reduced price, and the order records the full
+price, the discount and its name alongside what was paid. So the amount check
+on `checkout.session.completed`, refunds and revenue all use what was actually
+charged. Stripe's own coupons and promotion codes are not used; don't turn on
+"Allow promotion codes" in Stripe.
+
+Nothing goes to Stripe when there is nothing to pay (a 100% concession, or
+free sessions): the website records a £0 order marked complimentary and adds
+the sessions itself.
+
 ## Refunds
 
 Refunds are made in the Stripe Dashboard. The client keeps the sessions that
@@ -55,6 +68,7 @@ session worth an equal share of the price:
 | £112.50 of a £150 four-session package | 1 session |
 | £70 of a £150 four-session package (£40 kept for each of 2 used) | 2 sessions |
 | A small goodwill amount, such as £10 | All of them |
+| £37.50 of £75 paid for four sessions at 50% off | 2 sessions |
 
 Sessions already booked against credit that a refund removed stay in the
 diary. The owner's email says how many there are, so they can be cancelled

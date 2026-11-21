@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePortalClient } from "@/lib/portal-guard";
 import { SESSION_MINUTES, getBookablePractitioners, getPooledSlots } from "@/lib/queries/availability";
-import { NOTICE_PERIOD, bookingRoute, sessionsRemaining } from "@/lib/allocation";
+import { NOTICE_PERIOD, REVIEW_PLAN_SLUG, bookingRoute, sessionsRemaining } from "@/lib/allocation";
 import { bookingRequiresPayment, getClientCredits, getSessionGate, nextBookingKind } from "@/lib/booking-engine";
 import { getInitialConsultationPrice } from "@/lib/queries/catalogue";
+import { getOffer } from "@/lib/queries/discounts";
+import { penceLabel } from "@/lib/discounts";
 import { groupSlotsByDay } from "@/lib/slot-groups";
 import { SlotPicker } from "@/components/portal/SlotPicker";
 import { NotCrisisNotice } from "@/components/NotCrisisNotice";
@@ -46,6 +48,12 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
   const firstBooking = booking === "review";
   // Ongoing sessions open only after the practitioner records Suitable.
   const sessionsClosed = !firstBooking && !gate.open ? gate.message : null;
+  // Their own price for the consultation: lower with a concession.
+  const offer =
+    route === "checkout" ? await getOffer({ clientId, planSlug: REVIEW_PLAN_SLUG, listPence: price.pence, now }) : null;
+  const priceText = offer?.discount
+    ? `${offer.pricePence === 0 ? "with nothing to pay" : penceLabel(offer.pricePence)} (${offer.discount.label}; usually ${price.label})`
+    : price.label;
   const mustPayFirst = route === "credit" && !firstBooking && bookingRequiresPayment() && remaining === 0;
   // Clients see practitioners by name only; one without a name is still
   // offered through "first available".
@@ -59,14 +67,14 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
       </h1>
       <p style={{ margin: "0 0 10px", fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>
         {firstBooking
-          ? `A ${SESSION_MINUTES}-minute online consultation, ${price.label}. Your practitioner carries out your Wellbeing Needs Review with you in it, so there is nothing to complete beforehand. `
+          ? `A ${SESSION_MINUTES}-minute online consultation, ${priceText}. Your practitioner carries out your Wellbeing Needs Review with you in it, so there is nothing to complete beforehand. `
           : `Sessions are ${SESSION_MINUTES} minutes, online. `}
         Times are shown in UK time. Your joining link appears in your account under Appointments — we never
         send it by email.
       </p>
       <p style={{ margin: "0 0 26px", fontSize: 14, lineHeight: 1.6, color: "var(--navy-soft)" }}>
         {route === "checkout"
-          ? `Choose a practitioner and a time, then pay securely. To cancel or move free of charge, please give at least ${NOTICE_PERIOD}' notice.`
+          ? `Choose a practitioner and a time, then ${offer?.pricePence === 0 ? "confirm" : "pay securely"}. To cancel or move free of charge, please give at least ${NOTICE_PERIOD}' notice.`
           : remaining > 0
             ? `You have ${remaining} prepaid session${remaining === 1 ? "" : "s"}; booking uses one.`
             : brand.availabilityLine}
@@ -108,7 +116,18 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
           practitioners={practitioners}
           defaultPractitionerId={withId}
           noticePeriod={NOTICE_PERIOD}
-          checkout={route === "checkout" ? { name: CONSULTATION, price: price.label, minutes: SESSION_MINUTES } : undefined}
+          checkout={
+            route === "checkout" && offer
+              ? {
+                  name: CONSULTATION,
+                  planSlug: REVIEW_PLAN_SLUG,
+                  listPence: offer.listPence,
+                  pricePence: offer.pricePence,
+                  discountLabel: offer.discount?.label ?? null,
+                  minutes: SESSION_MINUTES,
+                }
+              : undefined
+          }
         />
       )}
 

@@ -6,7 +6,10 @@ import Link from "next/link";
 import { bookAppointment } from "@/app/actions/booking";
 import { rescheduleOwnAppointment } from "@/app/actions/appointments";
 import { startBookingCheckout } from "@/app/actions/payments";
+import { checkDiscountCode } from "@/app/actions/discounts";
 import { initialBookingState, type BookingState } from "@/lib/booking-state";
+import { initialCodeCheckState } from "@/lib/discount-state";
+import { normaliseCode, penceLabel } from "@/lib/discounts";
 import type { SlotGroup } from "@/lib/slot-groups";
 
 type Practitioner = { id: string; name: string };
@@ -38,7 +41,15 @@ export function SlotPicker({
   practitioners?: Practitioner[];
   defaultPractitionerId?: string;
   /** Book and pay in one go: the initial consultation. */
-  checkout?: { name: string; price: string; minutes: number };
+  checkout?: {
+    name: string;
+    planSlug: string;
+    /** The full price, and this client's price (lower with a concession). */
+    listPence: number;
+    pricePence: number;
+    discountLabel: string | null;
+    minutes: number;
+  };
   noticePeriod?: string;
 }) {
   const [selected, setSelected] = React.useState<string | null>(null);
@@ -50,6 +61,24 @@ export function SlotPicker({
     fd: FormData
   ) => Promise<BookingState>;
   const [state, formAction, pending] = useActionState(action, initialBookingState);
+
+  // A discount code, checked here so the price shown is the price paid, and
+  // checked again on the server when they press Pay.
+  const [codeState, checkCode, checking] = useActionState(checkDiscountCode, initialCodeCheckState);
+  const [code, setCode] = React.useState("");
+  const [codeOpen, setCodeOpen] = React.useState(false);
+  const codeApplied =
+    codeState.status === "ok" && !!codeState.code && codeState.pricePence != null && normaliseCode(codeState.code) === normaliseCode(code);
+  const pricePence = codeApplied ? codeState.pricePence! : (checkout?.pricePence ?? 0);
+  const priceLabel = codeApplied ? codeState.label : checkout?.discountLabel;
+  const free = !!checkout && pricePence === 0;
+  const applyCode = () => {
+    if (!checkout || !code.trim()) return;
+    const fd = new FormData();
+    fd.set("code", code);
+    fd.set("planSlug", checkout.planSlug);
+    React.startTransition(() => checkCode(fd));
+  };
 
   // Only the times the chosen practitioner is free for.
   const shown = React.useMemo(
@@ -157,7 +186,13 @@ export function SlotPicker({
           <dl style={{ margin: "0 0 14px", display: "grid", gridTemplateColumns: "auto 1fr", gap: "6px 16px", fontSize: 14.5, color: "var(--ink)" }}>
             <dt style={dt}>Price</dt>
             <dd style={dd}>
-              <strong>{checkout.price}</strong>
+              {pricePence < checkout.listPence && (
+                <s style={{ color: "var(--navy-soft)", marginRight: 8 }}>{penceLabel(checkout.listPence)}</s>
+              )}
+              <strong>{free ? "Nothing to pay" : penceLabel(pricePence)}</strong>
+              {pricePence < checkout.listPence && priceLabel && (
+                <span style={{ marginLeft: 8, fontSize: 13, fontWeight: 700, color: "var(--teal-deep)" }}>{priceLabel}</span>
+              )}
             </dd>
             <dt style={dt}>Length</dt>
             <dd style={dd}>{checkout.minutes} minutes, online</dd>
@@ -166,6 +201,52 @@ export function SlotPicker({
             <dt style={dt}>With</dt>
             <dd style={dd}>{chosenName ?? "The first available practitioner"}</dd>
           </dl>
+          {!free || code ? (
+            <div style={{ margin: "0 0 14px" }}>
+              {codeOpen || code ? (
+                <>
+                  <label htmlFor="code" style={{ display: "block", marginBottom: 5, fontSize: 13, fontWeight: 700, color: "var(--navy)" }}>
+                    Discount code
+                  </label>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <input
+                      id="code"
+                      name="code"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      onKeyDown={(e) => {
+                        // Enter applies the code rather than paying.
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          applyCode();
+                        }
+                      }}
+                      maxLength={24}
+                      autoCapitalize="characters"
+                      autoComplete="off"
+                      style={{ flex: "0 1 220px", fontFamily: "inherit", fontSize: 14.5, padding: "9px 12px", borderRadius: 10, border: "1px solid rgba(31,58,95,0.2)", textTransform: "uppercase" }}
+                    />
+                    <button type="button" className="pill pill-ghost" onClick={applyCode} disabled={checking || !code.trim()} style={{ padding: "9px 18px", fontSize: 13.5, opacity: checking ? 0.6 : 1 }}>
+                      {checking ? "Checking…" : "Apply"}
+                    </button>
+                  </div>
+                  {codeState.status !== "idle" && normaliseCode(codeState.code ?? code) === normaliseCode(code) && (
+                    <p role={codeState.status === "error" ? "alert" : "status"} style={{ margin: "6px 0 0", fontSize: 13, fontWeight: 600, color: codeState.status === "error" ? "#a1421c" : "var(--teal-deep)" }}>
+                      {codeState.message}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setCodeOpen(true)}
+                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "inherit", fontSize: 13.5, fontWeight: 700, color: "var(--teal-deep)" }}
+                >
+                  Have a discount code?
+                </button>
+              )}
+            </div>
+          ) : null}
           <label htmlFor="bookingTerms" style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13.5, lineHeight: 1.55, color: "var(--ink)" }}>
             {/* Never ticked in advance (handover §15.1, §19). */}
             <input id="bookingTerms" name="bookingTerms" type="checkbox" style={{ marginTop: 3 }} />
@@ -183,11 +264,18 @@ export function SlotPicker({
           </label>
           <div style={{ marginTop: 18, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
             <button className="pill pill-gold" disabled={!chosen || pending} style={{ padding: "14px 28px", fontSize: 15, opacity: !chosen || pending ? 0.55 : 1 }}>
-              {pending ? "Taking you to payment…" : `Pay ${checkout.price} securely`}
+              {free
+                ? pending
+                  ? "Booking…"
+                  : "Book with nothing to pay"
+                : pending
+                  ? "Taking you to payment…"
+                  : `Pay ${penceLabel(pricePence)} securely`}
             </button>
             <span style={{ fontSize: 13, lineHeight: 1.5, color: "var(--navy-soft)", maxWidth: 360 }}>
-              You&apos;ll pay on Stripe&apos;s secure page; your card details never reach ThriveSphere. The time is
-              held for you while you pay.
+              {free
+                ? "There is nothing to pay, so your consultation is booked straight away."
+                : "You'll pay on Stripe's secure page; your card details never reach ThriveSphere. The time is held for you while you pay."}
             </span>
           </div>
         </div>

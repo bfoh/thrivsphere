@@ -85,6 +85,13 @@
       "when": 1795253404372,
       "tag": "0011_suitability",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1795254084322,
+      "tag": "0012_discounts",
+      "breakpoints": true
     }
   ]
 }

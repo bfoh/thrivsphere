@@ -6,11 +6,13 @@ import { startCheckout } from "@/app/actions/payments";
 import { initialPaymentState } from "@/lib/payment-state";
 import { Icon } from "@/components/icons";
 
-export function PlanButton({ planSlug, cta, featured }: { planSlug: string; cta: string; featured?: boolean }) {
+/** `code`: a discount code the client applied on the page, checked again on the server. */
+export function PlanButton({ planSlug, cta, featured, code }: { planSlug: string; cta: string; featured?: boolean; code?: string }) {
   const [state, action, pending] = useActionState(startCheckout, initialPaymentState);
   return (
     <form action={action} style={{ marginTop: "auto" }}>
       <input type="hidden" name="planSlug" value={planSlug} />
+      {code && <input type="hidden" name="code" value={code} />}
       <button
         className={`pill ${featured ? "pill-gold" : "pill-teal"}`}
         disabled={pending}

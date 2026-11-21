@@ -9,6 +9,7 @@ import { sendEmail } from "./email";
 import { bookingConfirmation, paidTimeUnavailable, paymentAlert, paymentReceipt } from "./email-templates";
 import {
   confirmHold,
+  grantPackage,
   holdAlreadyConfirmed,
   notifyClient,
   notifyPractitioner,
@@ -23,7 +24,6 @@ import {
   amountMatches,
   creditsAfterRefund,
   disputeKeepsHold,
-  packageExpiry,
   packageStatusFor,
   parseBookingMetadata,
   parseCheckoutMetadata,
@@ -131,19 +131,12 @@ export async function fulfilCheckout(eventId: string, eventType: string, session
       .where(and(eq(orders.id, orderId), notInArray(orders.status, ["paid", "refunded"])));
   }
 
-  const [created] = await db
-    .insert(packages)
-    .values({
-      clientId: order.clientId,
-      orderId: order.id,
-      sessionsTotal: parsed.value.sessions,
-      sessionsUsed: 0,
-      status: "active",
-      expiresAt: packageExpiry(parsed.value.validityDays),
-    })
-    .onConflictDoNothing({ target: packages.orderId })
-    .returning();
-  const pkg = created ?? (await db.select().from(packages).where(eq(packages.orderId, orderId)).limit(1))[0];
+  const { pkg, created } = await grantPackage({
+    clientId: order.clientId,
+    orderId: order.id,
+    sessions: parsed.value.sessions,
+    validityDays: parsed.value.validityDays,
+  });
   if (!pkg) return new Response("Package not recorded", { status: 500 });
 
   if (created) {
@@ -193,6 +186,10 @@ export async function fulfilCheckout(eventId: string, eventType: string, session
     if (created && client?.email) {
       const receipt = paymentReceipt(parsed.value.planName, order.amountPence, parsed.value.sessions, {
         forBooking: !!booking && !timeLost,
+        discount:
+          order.discountPence > 0 && order.listPricePence != null
+            ? { listPence: order.listPricePence, discountPence: order.discountPence, label: order.discountLabel ?? "Discount" }
+            : undefined,
       });
       const sent = await sendEmail({ to: client.email, subject: receipt.subject, text: receipt.text, html: receipt.html });
       if (!sent.ok) console.error("[stripe] receipt not sent:", sent.reason, orderId);

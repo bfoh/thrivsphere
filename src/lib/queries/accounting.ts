@@ -48,10 +48,13 @@ export async function getLedger(from: Date, to: Date, forExport = false): Promis
         plan: orders.planNameAtPurchase,
         client: clients.preferredName,
         reference: orders.paymentIntentId,
+        discountPence: orders.discountPence,
+        discountLabel: orders.discountLabel,
       })
       .from(orders)
       .leftJoin(clients, eq(clients.id, orders.clientId))
-      .where(and(eq(orders.status, "paid"), gte(settledAt, from), lte(settledAt, to))),
+      // Complimentary sessions moved no money, so they are not income.
+      .where(and(eq(orders.status, "paid"), eq(orders.complimentary, false), gte(settledAt, from), lte(settledAt, to))),
 
     db
       .select()
@@ -65,7 +68,10 @@ export async function getLedger(from: Date, to: Date, forExport = false): Promis
       date: new Date(r.at),
       kind: "income" as const,
       category: "session_income",
-      description: r.plan,
+      description:
+        r.discountPence > 0
+          ? `${r.plan} (${r.discountLabel ?? "discount"}: £${(r.discountPence / 100).toFixed(2)} off)`
+          : r.plan,
       counterparty: r.client ?? null,
       amountPence: r.amountPence,
       vatPence: 0,

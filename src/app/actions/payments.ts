@@ -19,16 +19,70 @@ import {
 import {
   getClientCredits,
   getSessionGate,
+  grantPackage,
   nextBookingKind,
+  notifyClient,
+  notifyPractitioner,
   placeBooking,
   releaseClientHolds,
   releaseHold,
+  releaseSession,
+  reserveSession,
 } from "@/lib/booking-engine";
+import { getOffer, type PriceOffer } from "@/lib/queries/discounts";
+import { penceLabel } from "@/lib/discounts";
+import { sendEmail } from "@/lib/email";
+import { bookingConfirmation, sessionsAdded } from "@/lib/email-templates";
 import { getOnboardingState } from "@/lib/onboarding";
 import { SESSION_MINUTES } from "@/lib/queries/availability";
 import { formatAppointment } from "@/lib/slot-groups";
 import { policies } from "@/data/policies";
 import type { PaymentState } from "@/lib/payment-state";
+
+/** What an order records about the discount it was bought with. */
+function discountFields(offer: PriceOffer) {
+  return {
+    amountPence: offer.pricePence,
+    listPricePence: offer.listPence,
+    discountId: offer.discount?.id ?? null,
+    discountPence: offer.discountPence,
+    discountLabel: offer.discount?.label ?? null,
+  };
+}
+
+/** Shown on Stripe's page under the product, so the client sees the reduction. */
+function discountLine(offer: PriceOffer): string | null {
+  return offer.discount
+    ? `${offer.discount.label}: ${penceLabel(offer.discountPence)} off the ${penceLabel(offer.listPence)} price`
+    : null;
+}
+
+/**
+ * Nothing to pay (a 100% concession): record a settled £0 order and credit
+ * the sessions now, without Stripe, which cannot take a £0 payment.
+ */
+async function settleFreeOrder(
+  clientId: string,
+  plan: typeof pricePlans.$inferSelect,
+  offer: PriceOffer
+) {
+  const db = getDb();
+  const [order] = await db
+    .insert(orders)
+    .values({
+      clientId,
+      pricePlanId: plan.id,
+      planNameAtPurchase: plan.name,
+      currency: plan.currency,
+      status: "paid",
+      paidAt: new Date(),
+      complimentary: true,
+      ...discountFields(offer),
+    })
+    .returning();
+  const { pkg } = await grantPackage({ clientId, orderId: order.id, sessions: plan.sessions, validityDays: plan.validityDays });
+  return { order, pkg };
+}
 
 function siteUrl(): string {
   return (
@@ -75,11 +129,39 @@ export async function startCheckout(
   const gate = await getSessionGate(actor.clientId);
   if (!gate.open) return { status: "error", message: gate.message };
 
+  // Their concession or the code they entered, worked out here: the client
+  // never says what they pay.
+  const offer = await getOffer({
+    clientId: actor.clientId,
+    planSlug: plan.slug,
+    listPence: plan.amountPence,
+    code: String(formData.get("code") ?? ""),
+  });
+  if (offer.codeError) return { status: "error", message: offer.codeError };
+
   const [client] = await db
     .select({ email: clients.email })
     .from(clients)
     .where(eq(clients.id, actor.clientId))
     .limit(1);
+
+  if (offer.pricePence === 0) {
+    const { order } = await settleFreeOrder(actor.clientId, plan, offer);
+    await recordAudit({
+      actorId: actor.userId,
+      action: "create",
+      entity: "orders",
+      entityId: order.id,
+      subjectClientId: actor.clientId,
+      detail: `${plan.name} at no charge (${offer.discount?.label ?? "discount"})`,
+    });
+    if (client?.email) {
+      const email = sessionsAdded({ sessions: plan.sessions, consultation: false });
+      const sent = await sendEmail({ to: client.email, subject: email.subject, text: email.text, html: email.html });
+      if (!sent.ok) console.error("[payments] sessions-added email not sent:", sent.reason);
+    }
+    redirect("/portal/payment/success?free=1");
+  }
 
   const [order] = await db
     .insert(orders)
@@ -87,19 +169,19 @@ export async function startCheckout(
       clientId: actor.clientId,
       pricePlanId: plan.id,
       planNameAtPurchase: plan.name,
-      amountPence: plan.amountPence,
       currency: plan.currency,
       status: "pending",
+      ...discountFields(offer),
     })
     .returning();
 
   let url: string | null = null;
   try {
     const session = await createCheckoutSession({
-      amountPence: plan.amountPence,
+      amountPence: offer.pricePence,
       currency: plan.currency,
       productName: `ThriveSphere — ${plan.name}`,
-      description: plan.blurb ?? undefined,
+      description: [plan.blurb, discountLine(offer)].filter(Boolean).join(" · ") || undefined,
       successUrl: `${siteUrl()}/portal/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${siteUrl()}/portal/payment/cancelled`,
       customerEmail: client?.email ?? undefined,
@@ -110,6 +192,7 @@ export async function startCheckout(
         planName: plan.name,
         sessions: String(plan.sessions),
         validityDays: plan.validityDays == null ? "" : String(plan.validityDays),
+        discountId: offer.discount?.id ?? "",
       },
       // Keyed on the order alone, so retrying this request can never open a
       // second Stripe session for the same order.
@@ -136,7 +219,7 @@ export async function startCheckout(
     entity: "orders",
     entityId: order.id,
     subjectClientId: actor.clientId,
-    detail: `started checkout for ${plan.name}`,
+    detail: `started checkout for ${plan.name}${offer.discount ? ` with ${offer.discount.label} (${penceLabel(offer.discountPence)} off)` : ""}`,
   });
 
   if (!url) return { status: "error", message: "Payment could not be started." };
@@ -192,8 +275,67 @@ export async function startBookingCheckout(_prev: PaymentState, formData: FormDa
     return { status: "error", message: "Online booking isn't available just now. Please request a callback instead." };
   }
 
+  const offer = await getOffer({
+    clientId,
+    planSlug: plan.slug,
+    listPence: plan.amountPence,
+    code: String(formData.get("code") ?? ""),
+    now,
+  });
+  if (offer.codeError) return { status: "error", message: offer.codeError };
+
   // An earlier visit to Stripe that was abandoned holds a time; let it go.
   await releaseClientHolds(clientId);
+
+  // The separate, unticked booking acknowledgement (§15.1), pinned to the
+  // version of the Cancellation and Refund Policy on screen.
+  const h = await headers();
+  const acknowledge = () =>
+    db.insert(consents).values({
+      clientId,
+      type: "booking_terms",
+      policySlug: "payments",
+      policyVersion: policies.payments?.version ?? null,
+      granted: true,
+      ipAddress: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+      userAgent: h.get("user-agent") ?? null,
+    });
+
+  if (offer.pricePence === 0) {
+    // Nothing to pay: credit the consultation and book it straight away.
+    const { order } = await settleFreeOrder(clientId, plan, offer);
+    const packageId = await reserveSession(clientId, "review", now);
+    const placed = await placeBooking({
+      clientId,
+      startsAt,
+      kind: "initial",
+      packageId,
+      onlyPractitionerId: practitionerId,
+      now,
+    });
+    if (!placed.ok) {
+      // The consultation stays in their account; they choose another time.
+      if (packageId) await releaseSession(packageId);
+      return { status: "error", message: placed.message };
+    }
+    await acknowledge();
+    await recordAudit({
+      actorId: actor.userId,
+      action: "create",
+      entity: "appointments",
+      entityId: placed.appointmentId,
+      subjectClientId: clientId,
+      detail: `booked ${plan.name} at ${startsAt.toISOString()} at no charge (${offer.discount?.label ?? "discount"}); order ${order.id}`,
+    });
+    await Promise.all([
+      notifyClient(placed.appointmentId, clientId, bookingConfirmation(startsAt), "booking_confirmation"),
+      notifyPractitioner(placed.practitionerId, "booked", startsAt),
+    ]);
+    return {
+      status: "ok",
+      message: "Your consultation is booked, with nothing to pay. You'll find it, with your joining link, under Appointments.",
+    };
+  }
 
   const { checkoutExpiresAt, holdExpiresAt } = holdTimes(now);
   const [order] = await db
@@ -202,9 +344,9 @@ export async function startBookingCheckout(_prev: PaymentState, formData: FormDa
       clientId,
       pricePlanId: plan.id,
       planNameAtPurchase: plan.name,
-      amountPence: plan.amountPence,
       currency: plan.currency,
       status: "pending",
+      ...discountFields(offer),
     })
     .returning();
 
@@ -222,28 +364,19 @@ export async function startBookingCheckout(_prev: PaymentState, formData: FormDa
     return { status: "error", message: placed.message };
   }
 
-  // The separate, unticked booking acknowledgement (§15.1), pinned to the
-  // version of the Cancellation and Refund Policy on screen.
-  const h = await headers();
-  await db.insert(consents).values({
-    clientId,
-    type: "booking_terms",
-    policySlug: "payments",
-    policyVersion: policies.payments?.version ?? null,
-    granted: true,
-    ipAddress: h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
-    userAgent: h.get("user-agent") ?? null,
-  });
+  await acknowledge();
 
   const [client] = await db.select({ email: clients.email }).from(clients).where(eq(clients.id, clientId)).limit(1);
 
   let url: string | null = null;
   try {
     const session = await createCheckoutSession({
-      amountPence: plan.amountPence,
+      amountPence: offer.pricePence,
       currency: plan.currency,
       productName: `ThriveSphere — ${plan.name}`,
-      description: `${formatAppointment(startsAt)} (UK time), ${SESSION_MINUTES} minutes, online`,
+      description: [`${formatAppointment(startsAt)} (UK time), ${SESSION_MINUTES} minutes, online`, discountLine(offer)]
+        .filter(Boolean)
+        .join(" · "),
       successUrl: `${siteUrl()}/portal/payment/success?booking=1`,
       cancelUrl: `${siteUrl()}/portal/payment/cancelled?booking=1`,
       customerEmail: client?.email ?? undefined,
@@ -256,6 +389,7 @@ export async function startBookingCheckout(_prev: PaymentState, formData: FormDa
         validityDays: plan.validityDays == null ? "" : String(plan.validityDays),
         bookingStartsAt: startsAt.toISOString(),
         bookingPractitionerId: placed.practitionerId,
+        discountId: offer.discount?.id ?? "",
       },
       idempotencyKey: `order-${order.id}`,
       expiresAt: checkoutExpiresAt,

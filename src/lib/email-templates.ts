@@ -425,11 +425,19 @@ export function paymentReceipt(
   planName: string,
   amountPence: number,
   sessions: number,
-  opts: { forBooking?: boolean } = {}
+  opts: {
+    forBooking?: boolean;
+    /** A discount: the full price, the amount off and the discount's name. */
+    discount?: { listPence: number; discountPence: number; label: string };
+  } = {}
 ): Email {
-  const amount = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(
-    amountPence / 100
-  );
+  const gbp = (p: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(p / 100);
+  const amount = gbp(amountPence);
+  const d = opts.discount && opts.discount.discountPence > 0 ? opts.discount : null;
+  // Price, discount and what was paid, when a discount was used.
+  const breakdownHtml = d
+    ? `<p style="margin:0 0 6px;font-size:13px;color:${MUTED};">Price ${gbp(d.listPence)} · ${escapeHtml(d.label)} −${gbp(d.discountPence)}</p>`
+    : "";
   const s = sessions === 1 ? "1 session" : `${sessions} sessions`;
   // Paid while booking (§19): the session is already booked, so the receipt
   // points to the appointment rather than asking them to book.
@@ -451,7 +459,8 @@ export function paymentReceipt(
           <tr>
             <td style="padding:16px 20px;font-family:Arial,Helvetica,sans-serif;">
               <p style="margin:0 0 6px;font-size:13px;color:${MUTED};">${planName}</p>
-              <p style="margin:0;font-size:22px;font-weight:bold;color:${NAVY};">${amount}</p>
+              ${breakdownHtml}
+              <p style="margin:0;font-size:22px;font-weight:bold;color:${NAVY};">${d ? "Paid " : ""}${amount}</p>
               <p style="margin:6px 0 0;font-size:13.5px;color:${INK};">${what}</p>
             </td>
           </tr>
@@ -464,7 +473,9 @@ export function paymentReceipt(
       [
         "Thank you — your payment has been received.",
         "",
-        `${planName}: ${amount}`,
+        ...(d
+          ? [`${planName}`, `Price: ${gbp(d.listPence)}`, `${d.label}: -${gbp(d.discountPence)}`, `Paid: ${amount}`]
+          : [`${planName}: ${amount}`]),
         `${what}.`,
         "",
         opts.forBooking ? `${next} ${cta.href}` : `Book whenever you're ready: ${cta.href}`,
@@ -699,6 +710,29 @@ export function sessionsOpen(): Email {
       "You can now book your ongoing 50-minute sessions in your account, at a time that suits you:",
       `${siteUrl()}/portal/book`,
     ]),
+  };
+}
+
+/**
+ * Sessions added at no charge: free sessions from ThriveSphere, or a 100%
+ * concession. No amounts, and nothing about why.
+ */
+export function sessionsAdded(o: { sessions: number; consultation: boolean }): Email {
+  const what = o.consultation
+    ? "Your Initial Wellbeing Consultation has been added to your account, with nothing to pay."
+    : `${o.sessions === 1 ? "1 session has" : `${o.sessions} sessions have`} been added to your account, with nothing to pay.`;
+  const next = o.consultation ? "Choose a time whenever you're ready." : "You can book whenever you're ready.";
+  return {
+    subject: o.consultation ? "Your consultation is ready to book" : "Sessions added to your account",
+    html: shell({
+      preheader: o.consultation ? "Choose a time whenever you're ready." : "Your sessions are ready to book.",
+      heading: o.consultation ? "Your consultation is ready to book" : "Sessions added to your account",
+      body: `
+        <p style="margin:0 0 14px;">${what}</p>
+        <p style="margin:0;">${next}</p>`,
+      cta: { label: o.consultation ? "Choose a time" : "Book a session", href: `${siteUrl()}/portal/book` },
+    }),
+    text: textShell([what, "", `${next} ${siteUrl()}/portal/book`]),
   };
 }
 

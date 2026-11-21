@@ -43,6 +43,8 @@ export const ADMIN_NAV: NavItem[] = [
   { label: "Staff", href: "/admin/staff", capability: "staff:read", group: "organisation" },
   { label: "Activity", href: "/admin/activity", capability: "audit:read", group: "organisation" },
   { label: "Services & prices", href: "/admin/catalogue", capability: "catalogue:manage", group: "organisation" },
+  // Concessions, discount codes and free sessions.
+  { label: "Discounts", href: "/admin/discounts", capability: "discount:manage", group: "organisation" },
   { label: "Revenue", href: "/admin/revenue", capability: "revenue:read", group: "organisation" },
   { label: "HR", href: "/admin/hr", capability: "hr:read", group: "organisation" },
   { label: "Accounting", href: "/admin/accounting", capability: "accounting:read", group: "organisation" },

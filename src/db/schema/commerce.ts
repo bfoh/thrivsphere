@@ -1,5 +1,7 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   index,
   integer,
   jsonb,
@@ -11,6 +13,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { clients } from "./clients";
+import { users } from "./identity";
 
 /**
  * Delivery formats.
@@ -86,6 +89,75 @@ export const pricePlans = pgTable(
   (t) => [index("price_plans_active_idx").on(t.active)]
 );
 
+/**
+ * Discounts the founder or an admin gives.
+ *
+ * - `client`: a concession on one client's record, e.g. 50% off. That client
+ *   sees and pays the lower price wherever they buy; at most one is active.
+ * - `code`: a code anyone who has it can enter before paying.
+ *
+ * Either a percentage or an amount off each purchase, never both. The
+ * reduced price is worked out on our server and charged to Stripe as is, so
+ * the order's amount stays what was actually paid (see `orders`).
+ */
+export const discountKind = pgEnum("discount_kind", ["client", "code"]);
+
+/** Why a discount was given. Kept to a list: never health details. */
+export const discountReason = pgEnum("discount_reason", [
+  "financial_hardship",
+  "goodwill",
+  "partner_referral",
+  "other",
+]);
+
+export const discounts = pgTable(
+  "discounts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    kind: discountKind("kind").notNull(),
+    /** The client a concession is for. */
+    clientId: uuid("client_id").references(() => clients.id, { onDelete: "cascade" }),
+    /** A code, in capitals. */
+    code: text("code").unique(),
+    /** What the client sees, e.g. "Concessionary rate". */
+    label: text("label").notNull(),
+    percentOff: integer("percent_off"),
+    amountOffPence: integer("amount_off_pence"),
+    /** The price plans it covers; null covers them all. */
+    planSlugs: text("plan_slugs").array(),
+    /** Purchases it can be used for in total; null is unlimited. */
+    maxUses: integer("max_uses"),
+    /** For codes: purchases each client may use it for. */
+    maxUsesPerClient: integer("max_uses_per_client"),
+    startsAt: timestamp("starts_at", { withTimezone: true }),
+    endsAt: timestamp("ends_at", { withTimezone: true }),
+    active: boolean("active").notNull().default(true),
+    reason: discountReason("reason"),
+    /** Internal note. Never health details. */
+    note: text("note"),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    endedBy: uuid("ended_by").references(() => users.id, { onDelete: "set null" }),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("discounts_client_idx").on(t.clientId),
+    // One active concession per client.
+    uniqueIndex("discounts_one_concession")
+      .on(t.clientId)
+      .where(sql`${t.kind} = 'client' and ${t.active}`),
+    check(
+      "discounts_one_amount",
+      sql`(${t.percentOff} is null) <> (${t.amountOffPence} is null)`
+    ),
+    check(
+      "discounts_kind_target",
+      sql`(${t.kind} = 'client' and ${t.clientId} is not null and ${t.code} is null) or (${t.kind} = 'code' and ${t.code} is not null and ${t.clientId} is null)`
+    ),
+  ]
+);
+
 export const orderStatus = pgEnum("order_status", [
   "pending",
   "paid",
@@ -113,9 +185,18 @@ export const orders = pgTable(
     }),
     /** Snapshot of what was bought, so history survives a plan being edited. */
     planNameAtPurchase: text("plan_name_at_purchase").notNull(),
+    /** What was actually charged (after any discount): what refunds and revenue use. */
     amountPence: integer("amount_pence").notNull(),
     currency: text("currency").notNull().default("GBP"),
     status: orderStatus("status").notNull().default("pending"),
+    /** The full price before any discount. Null on orders from before discounts. */
+    listPricePence: integer("list_price_pence"),
+    discountId: uuid("discount_id").references(() => discounts.id, { onDelete: "set null" }),
+    discountPence: integer("discount_pence").notNull().default(0),
+    /** The discount's label when it was used, so history survives it changing. */
+    discountLabel: text("discount_label"),
+    /** Free sessions given by ThriveSphere: no payment, nothing at Stripe. */
+    complimentary: boolean("complimentary").notNull().default(false),
 
     checkoutSessionId: text("checkout_session_id").unique(),
     paymentIntentId: text("payment_intent_id"),
@@ -133,6 +214,7 @@ export const orders = pgTable(
   (t) => [
     index("orders_client_idx").on(t.clientId),
     index("orders_status_idx").on(t.status),
+    index("orders_discount_idx").on(t.discountId),
   ]
 );
 

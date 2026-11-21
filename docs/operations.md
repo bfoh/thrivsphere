@@ -83,6 +83,26 @@ a member who can be removed.
   is not emailed, so the practitioner explains it. Clients waiting for an
   outcome are listed on the **Dashboard**. A decision can be changed by
   recording a new one; earlier ones stay on the record.
+- **Discounts** (founder and admins only; practitioners never see prices):
+  - *A concession for one client*, e.g. 50% off: on the client's record,
+    under **Discounts & free sessions**, *Give a concession*. Choose % or £
+    off, what it covers, an optional end date or number of purchases, and a
+    reason. The client then sees and pays the lower price on *Book* and *Buy
+    sessions*, at Stripe and on the receipt. A client has one concession at a
+    time; *End concession* stops it at once. 100% makes things free: the
+    client books or adds sessions without going to Stripe.
+  - *A discount code*, e.g. `WELCOME10`: **Discounts** (`/admin/discounts`),
+    *New code*. Codes are once per client unless set otherwise, can have
+    start and end dates and a total limit, and can be turned off at any time.
+    A code can never make anything free, so a leaked code gives nothing away.
+  - *Free sessions*: on the client's record, *Add free sessions* gives the
+    Initial Wellbeing Consultation or 1–12 support sessions. They last as
+    long as bought ones, and the client is emailed (no amounts, no reason).
+  - Discounts never stack: the client pays the lower price. A price is free
+    or at least £1, because Stripe can't take less; the forms refuse anything
+    in between. Revenue shows *Discounts given* and *Complimentary sessions*;
+    income is always what was actually paid. Every change is in **Activity**.
+    Never record health details in a discount's note.
 - **Prices and service descriptions:** **Services & prices**
   (`/admin/catalogue`). A price change reaches the pricing page, the client's
   *Buy sessions* page and card checkout together. Service wording shows on the
@@ -159,3 +179,5 @@ the pages, so they always need a redeploy.
       setting now applies only to later sessions.
 - [x] Apply migration `0010_dual_booking` (payment holds, the enquiry queue,
       one client record per sign-in). Applied 21 November 2026.
+- [x] Apply migration `0012_discounts` (concessions, codes, free sessions).
+      Applied 21 November 2026.
