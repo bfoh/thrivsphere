@@ -234,7 +234,7 @@ the pages, so they always need a redeploy.
 - [ ] Confirm Stripe is in live mode, then make one real £30 purchase and
       refund it. The owner should get a "payment was refunded" email, and the
       session should leave the account.
-- [x] Business mobile 07360 303886 added for calls (Contact page) and
+- [x] Business mobile 07533 127647 added for calls (Contact page) and
       WhatsApp, confirmed as the business number on 21 November 2026.
 - [ ] Set the number up as a WhatsApp Business account, so the WhatsApp
       button reaches it.

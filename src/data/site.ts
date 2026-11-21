@@ -13,8 +13,8 @@ export const brand = {
    * Confirmed as the business number, not a personal one, and approved for
    * the public site on 21 November 2026.
    */
-  phone: "07360 303886",
-  phoneIntl: "+44 7360 303886",
+  phone: "07533 127647",
+  phoneIntl: "+44 7533 127647",
   location: "United Kingdom · Online wellbeing support",
   /** One-line positioning. Non-clinical — see `scopeOfPractice` below. */
   positioning:
