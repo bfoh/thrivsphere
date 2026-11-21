@@ -159,7 +159,7 @@ the pages, so they always need a redeploy.
 | `BLOB_READ_WRITE_TOKEN` | Client documents and receipts storage |
 | `NEXT_PUBLIC_SITE_URL` | The public address used in emails and links |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | The WhatsApp Business number, in any UK format. The WhatsApp button appears once this is set |
-| `ANTHROPIC_API_KEY` | AI help in the blog and marketing hub (not set yet). Use a key from an Anthropic account owned by the business, with a spending limit set there too |
+| `ANTHROPIC_API_KEY` | AI help in the blog and marketing hub (see `docs/marketing.md`). Use a key from an Anthropic account owned by the business, with a spending limit set there too |
 | `RECRAFT_API_KEY` | AI images in the marketing hub (not set yet) |
 | `AI_MONTHLY_BUDGET_USD` | The monthly limit on AI spending, in US dollars. Optional; $50 if not set. AI help pauses when it is reached |
 | `BOOKING_REQUIRES_PAYMENT` | `true` means clients must buy a session before choosing a time. Anything else (the default) lets them book and pay afterwards. The first appointment is the Initial Wellbeing Needs Review: Review credit pays only for it, and the Review can be bought once |

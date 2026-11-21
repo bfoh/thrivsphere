@@ -99,12 +99,40 @@ Open **Marketing** in the back office (anyone who writes for the blog).
 - Platform sizes were checked on 21 November 2026 (`SIZES` in
   `src/lib/graphics/spec.ts`). Check them each quarter.
 
+## AI help
+
+Shown once `ANTHROPIC_API_KEY` is set. Model: Claude Opus 5.5
+(`claude-opus-5-5`, $4 in / $20 out per million tokens, checked 21 November
+2026).
+
+- **Blog editor:** suggest titles, write the summary and search description,
+  check a draft against our rules, and rewrite selected text (warmer, plainer,
+  shorter, or for employers). Suggestions appear under the buttons; nothing
+  changes until someone presses *Use this*. A saved version that used a
+  suggestion is marked "Edited with AI help", and the reviewer is told to
+  check facts and tone. Approval is unchanged.
+- **Photo library:** *Suggest a description (AI)* writes alt text from the
+  image, and warns if the image may show people. Photos over 3.75 MB are not
+  sent.
+- **Every request**, in order: is this month's limit reached
+  (`AI_MONTHLY_BUDGET_USD`); does the text contain an email address, a mobile
+  number, an NHS-style number or something about a client (if so, nothing is
+  sent and staff are told why); then the request. Each one is recorded in
+  `ai_usage` (task, tokens, cost, outcome; never the text) and shows on
+  *AI usage*. 30 requests per person per 10 minutes.
+- **Instructions:** built from the approved Brand Kit and the scope of practice
+  (`src/lib/ai/brand-prompt.ts`): no treatment claims or promised outcomes, no
+  testimonials, no personal details, Samaritans' guidance and the crisis line,
+  no statements about the reader's health in social posts, facts only from the
+  sources given. The same kit gives the same text, so it is cached.
+- Code: `src/lib/ai/` (`tasks.ts` for what each button does, `run.ts` for the
+  checks and the request, `cost.ts`, `personal-data.ts`), the route
+  `src/app/api/admin/ai/[task]/route.ts`, and `src/components/admin/ai/`.
+
 ## Still to come
 
-1. AI help: writing assistance in the blog and the hub, with the monthly
-   spending limit, once the business has an Anthropic account.
-2. Plan, write, approve and post: content packs for each channel, checks,
+1. Plan, write, approve and post: content packs for each channel, checks,
    AI drafting and images, calendar with awareness days, campaigns, posting
    packs and a morning reminder.
-3. Newsletter with double opt-in, sent through Brevo.
-4. Insights and an AI monthly review.
+2. Newsletter with double opt-in, sent through Brevo.
+3. Insights and an AI monthly review.

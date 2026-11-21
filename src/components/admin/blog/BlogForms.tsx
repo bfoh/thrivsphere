@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { createPost, reviewPost, saveVersion, schedulePost } from "@/app/actions/blog";
 import { initialBlogState, type BlogFormState } from "@/lib/blog-state";
 import { BlogBody } from "@/components/BlogBody";
+import { BlogAssist } from "@/components/admin/ai/BlogAssist";
 import {
   AUDIENCES,
   BLOG_CATEGORIES,
@@ -154,12 +155,15 @@ export function PostEditor({
   slug,
   slugEditable,
   initial,
+  aiOn = false,
 }: {
   postId: string;
   versionId: string | null;
   slug: string;
   slugEditable: boolean;
   initial: BlogContent;
+  /** AI help is shown once the business's AI key is set. */
+  aiOn?: boolean;
 }) {
   const { state, pending, onSubmit } = useBlogAction(saveVersion);
   const start = React.useMemo(
@@ -181,6 +185,8 @@ export function PostEditor({
   const [tab, setTab] = React.useState<"write" | "preview">("write");
   const [upload, setUpload] = React.useState<{ busy: boolean; error: string }>({ busy: false, error: "" });
   const bodyRef = React.useRef<HTMLTextAreaElement>(null);
+  // Whether an AI suggestion was used since the last save; the version is marked so.
+  const [aiUsed, setAiUsed] = React.useState(false);
 
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setF((prev) => ({ ...prev, [k]: e.target.value }));
@@ -189,7 +195,10 @@ export function PostEditor({
   const sent = React.useRef(start);
   const lastState = React.useRef(state);
   React.useEffect(() => {
-    if (state !== lastState.current && state.status === "ok") setSaved(sent.current);
+    if (state !== lastState.current && state.status === "ok") {
+      setSaved(sent.current);
+      setAiUsed(false);
+    }
     lastState.current = state;
   }, [state]);
 
@@ -242,6 +251,7 @@ export function PostEditor({
       <input type="hidden" name="postId" value={postId} />
       <input type="hidden" name="expectedVersionId" value={versionId ?? ""} />
       <input type="hidden" name="coverImage" value={f.coverImage} />
+      <input type="hidden" name="aiAssisted" value={aiUsed ? "1" : ""} />
 
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -389,6 +399,21 @@ export function PostEditor({
         </div>
         <textarea id="e-meta" name="metaDescription" value={f.metaDescription} onChange={set("metaDescription")} rows={2} maxLength={200} placeholder="Uses the summary if left empty" style={{ ...input, resize: "vertical" }} />
       </div>
+
+      {aiOn && (
+        <BlogAssist
+          fields={{ postId, title: f.title, category: f.category, excerpt: f.excerpt, body: f.body, sources: f.sources }}
+          getSelection={() => {
+            const el = bodyRef.current;
+            if (!el || el.selectionStart === el.selectionEnd) return null;
+            return { start: el.selectionStart, end: el.selectionEnd, text: f.body.slice(el.selectionStart, el.selectionEnd) };
+          }}
+          onUse={(patch) => {
+            setF((prev) => ({ ...prev, ...patch }));
+            setAiUsed(true);
+          }}
+        />
+      )}
 
       {findings.length > 0 && (
         <div style={{ border: "1px solid rgba(138,109,18,0.35)", background: "rgba(212,175,55,0.08)", borderRadius: 12, padding: "12px 16px" }}>

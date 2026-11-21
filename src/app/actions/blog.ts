@@ -190,7 +190,15 @@ export async function saveVersion(_prev: State, fd: FormData): Promise<State> {
   try {
     const [version] = await db
       .insert(blogPostVersions)
-      .values({ postId: id, number: (latest?.number ?? 0) + 1, ...parsed.content, contentHash: hash, origin: "human_edit", createdBy: actor.userId })
+      .values({
+        postId: id,
+        number: (latest?.number ?? 0) + 1,
+        ...parsed.content,
+        contentHash: hash,
+        // Kept in the internal record: a version with any AI suggestion in it.
+        origin: fd.get("aiAssisted") === "1" ? "ai_assist" : "human_edit",
+        createdBy: actor.userId,
+      })
       .returning({ id: blogPostVersions.id });
     await db
       .update(blogPosts)

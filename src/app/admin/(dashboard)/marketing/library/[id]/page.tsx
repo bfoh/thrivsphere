@@ -6,6 +6,7 @@ import { Section, Field } from "@/components/admin/RecordUI";
 import { getAsset } from "@/lib/queries/marketing";
 import { setArchived } from "@/app/actions/marketing-assets";
 import { AssetDetailsForm } from "@/components/admin/marketing/LibraryForms";
+import { aiConfigured } from "@/lib/ai/run";
 import { h1, page } from "@/components/admin/marketing/ui";
 
 export const metadata: Metadata = { title: "Image", robots: { index: false, follow: false } };
@@ -51,6 +52,7 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
           <AssetDetailsForm
             id={asset.id}
             ai={asset.source === "ai_generated"}
+            suggestAlt={aiConfigured() && ["image/jpeg", "image/png", "image/webp"].includes(asset.contentType)}
             value={{ title: asset.title, altText: asset.altText, tags: asset.tags, rights: asset.rights, rightsNote: asset.rightsNote, people: asset.people, licenceExpires: asset.licenceExpires }}
           />
         </Section>

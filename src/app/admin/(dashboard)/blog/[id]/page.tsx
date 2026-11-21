@@ -6,6 +6,7 @@ import { Section, Empty } from "@/components/admin/RecordUI";
 import { BackLink } from "@/components/admin/BackLink";
 import { StatusBadge } from "@/components/admin/blog/StatusBadge";
 import { PostActionButton, PostEditor, ReviewForm, ScheduleForm } from "@/components/admin/blog/BlogForms";
+import { aiConfigured } from "@/lib/ai/run";
 import { archivePost, cancelSchedule, publishPost, restorePost, submitForReview, unpublishPost, withdrawFromReview } from "@/app/actions/blog";
 import { getPostForEditor, isBlogReviewer, postEngagement, toContent } from "@/lib/queries/blog";
 import { commentsLabel, likesLabel } from "@/lib/blog-comment-rules";
@@ -241,6 +242,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
                   </div>
                 </details>
               )}
+              {(current.version.origin === "ai_assist" || current.version.origin === "ai_draft") && (
+                <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "#8a6d12" }}>
+                  This version was written with AI help. Check every fact against the sources, and that it sounds like us.
+                </p>
+              )}
               <ReviewForm postId={post.id} versionId={current.version.id} />
             </div>
           ) : (
@@ -252,7 +258,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
       )}
 
       <Section title="Write" subtitle={live ? "Saving makes a new version for review. The website keeps the approved version until then." : "Saving makes a new version. Any change after approval needs approving again."}>
-        <PostEditor postId={post.id} versionId={post.currentVersionId} slug={post.slug} slugEditable={!post.firstPublishedAt} initial={content} />
+        <PostEditor postId={post.id} versionId={post.currentVersionId} slug={post.slug} slugEditable={!post.firstPublishedAt} initial={content} aiOn={aiConfigured()} />
       </Section>
 
       {post.brief && (

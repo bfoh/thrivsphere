@@ -4,6 +4,9 @@ import { Section, Empty } from "@/components/admin/RecordUI";
 import { aiSpendThisMonth, aiUsageReport } from "@/lib/queries/marketing";
 import { monthlyBudgetUsd, usd } from "@/lib/ai/budget-rules";
 import { h1, lead, page } from "@/components/admin/marketing/ui";
+import { TASKS, isTaskKey } from "@/lib/ai/tasks";
+
+const featureLabel = (f: string) => (isTaskKey(f) ? TASKS[f].label : f);
 
 export const metadata: Metadata = { title: "AI usage", robots: { index: false, follow: false } };
 
@@ -51,7 +54,7 @@ export default async function AiUsagePage() {
             <tbody>
               {report.byFeature.map((f) => (
                 <tr key={f.feature} style={{ borderTop: "1px solid rgba(31,58,95,0.08)" }}>
-                  <td style={{ padding: 8 }}>{f.feature}</td>
+                  <td style={{ padding: 8 }}>{featureLabel(f.feature)}</td>
                   <td style={{ padding: 8 }}>{f.requests}</td>
                   <td style={{ padding: 8 }}>{f.failed}</td>
                   <td style={{ padding: 8, fontWeight: 700 }}>{usd(f.usd)}</td>
@@ -76,7 +79,7 @@ export default async function AiUsagePage() {
                   <tr key={row.id} style={{ borderTop: "1px solid rgba(31,58,95,0.08)" }}>
                     <td style={{ padding: 8, whiteSpace: "nowrap" }}>{dt(row.createdAt)}</td>
                     <td style={{ padding: 8 }}>{actorName ?? "—"}</td>
-                    <td style={{ padding: 8 }}>{row.feature}</td>
+                    <td style={{ padding: 8 }}>{featureLabel(row.feature)}</td>
                     <td style={{ padding: 8 }}>{row.outcome}</td>
                     <td style={{ padding: 8 }}>{row.inputTokens.toLocaleString("en-GB")} / {row.outputTokens.toLocaleString("en-GB")}{row.images ? ` · ${row.images} image${row.images === 1 ? "" : "s"}` : ""}</td>
                     <td style={{ padding: 8, fontWeight: 700 }}>{usd(row.costMicroUsd / 1_000_000)}</td>

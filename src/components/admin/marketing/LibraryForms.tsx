@@ -6,10 +6,26 @@ import { updateAsset } from "@/app/actions/marketing-assets";
 import { ASSET_LIMITS, PEOPLE, RIGHTS, type AssetDetails } from "@/lib/asset-rules";
 import { Result, useMarketingAction } from "./KitForms";
 import { errorText, hint, input, label } from "./ui";
+import { callAi } from "@/components/admin/ai/call";
 
-function DetailFields({ value, upload, ai }: { value?: Partial<AssetDetails>; upload: boolean; ai?: boolean }) {
+function DetailFields({ value, upload, ai, suggestFor }: { value?: Partial<AssetDetails>; upload: boolean; ai?: boolean; suggestFor?: string }) {
   const [rights, setRights] = React.useState<string>(value?.rights ?? (upload ? "" : "owned"));
   const [people, setPeople] = React.useState<string>(value?.people ?? "none");
+  const altRef = React.useRef<HTMLTextAreaElement>(null);
+  const [suggest, setSuggest] = React.useState<{ busy: boolean; message: string; error: boolean }>({ busy: false, message: "", error: false });
+
+  async function suggestAlt() {
+    if (!suggestFor) return;
+    setSuggest({ busy: true, message: "", error: false });
+    const r = await callAi("image-alt", { assetId: suggestFor });
+    if ("error" in r) return setSuggest({ busy: false, message: r.error, error: true });
+    if (altRef.current) altRef.current.value = r.output.altText.slice(0, ASSET_LIMITS.alt);
+    const notes = [
+      "Suggested by AI. Check it describes the image well, then save.",
+      r.output.showsPeople ? "It may show people: only staff who agreed can appear, never a client." : "",
+    ];
+    setSuggest({ busy: false, message: notes.filter(Boolean).join(" "), error: false });
+  }
   return (
     <>
       <div>
@@ -18,8 +34,20 @@ function DetailFields({ value, upload, ai }: { value?: Partial<AssetDetails>; up
       </div>
       <div>
         <label htmlFor="a-alt" style={label}>Description for people who can&apos;t see it (alt text)</label>
-        <textarea id="a-alt" name="altText" maxLength={ASSET_LIMITS.alt} rows={2} defaultValue={value?.altText ?? ""} style={{ ...input, resize: "vertical" }} placeholder="e.g. Morning sunlight through green leaves" />
+        <textarea ref={altRef} id="a-alt" name="altText" maxLength={ASSET_LIMITS.alt} rows={2} defaultValue={value?.altText ?? ""} style={{ ...input, resize: "vertical" }} placeholder="e.g. Morning sunlight through green leaves" />
         <p style={hint}>Say what&apos;s in it, briefly. Posted with the image on every platform.</p>
+        {suggestFor && (
+          <div style={{ display: "flex", gap: 10, alignItems: "baseline", flexWrap: "wrap", marginTop: 4 }}>
+            <button type="button" className="pill pill-ghost" disabled={suggest.busy} onClick={suggestAlt} style={{ padding: "6px 13px", fontSize: 12.5 }}>
+              {suggest.busy ? "Looking at the image…" : "Suggest a description (AI)"}
+            </button>
+            {suggest.message && (
+              <span role={suggest.error ? "alert" : "status"} style={{ ...hint, marginTop: 0, ...(suggest.error ? { color: errorText, fontWeight: 700 } : {}) }}>
+                {suggest.message}
+              </span>
+            )}
+          </div>
+        )}
       </div>
       <div>
         <label htmlFor="a-tags" style={label}>Tags (optional)</label>
@@ -120,12 +148,12 @@ export function UploadForm() {
   );
 }
 
-export function AssetDetailsForm({ id, value, ai }: { id: string; value: AssetDetails; ai: boolean }) {
+export function AssetDetailsForm({ id, value, ai, suggestAlt = false }: { id: string; value: AssetDetails; ai: boolean; suggestAlt?: boolean }) {
   const { state, pending, onSubmit } = useMarketingAction(updateAsset);
   return (
     <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <input type="hidden" name="id" value={id} />
-      <DetailFields value={value} upload={false} ai={ai} />
+      <DetailFields value={value} upload={false} ai={ai} suggestFor={suggestAlt ? id : undefined} />
       {ai && <input type="hidden" name="rights" value="generated" />}
       <div>
         <button type="submit" className="pill pill-gold" disabled={pending} style={{ padding: "10px 20px", fontSize: 13.5 }}>
