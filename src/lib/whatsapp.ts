@@ -1,9 +1,10 @@
 /**
  * WhatsApp Business click-to-chat.
  *
- * The business number is not yet issued, so the link is driven by
- * NEXT_PUBLIC_WHATSAPP_NUMBER and appears only once it is set. Personal
- * numbers must never be shown on the public site.
+ * Uses ThriveSphere's business mobile (`brand.phone`, confirmed 21 November
+ * 2026); NEXT_PUBLIC_WHATSAPP_NUMBER overrides it if WhatsApp ever moves to
+ * another number. Personal numbers must never be shown on the public site
+ * (checklist §9).
  */
 
 /** The message a visitor's chat opens with. General enquiries only — no health details. */

@@ -183,7 +183,7 @@ the pages, so they always need a redeploy.
 | `CRON_SECRET` | Lets only Vercel run the reminder job |
 | `BLOB_READ_WRITE_TOKEN` | Client documents and receipts storage |
 | `NEXT_PUBLIC_SITE_URL` | The public address used in emails and links |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | The WhatsApp Business number, in any UK format. The WhatsApp button appears once this is set |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Optional. The WhatsApp button uses the business mobile in `src/data/site.ts` (`brand.phone`); set this only if WhatsApp moves to a different number |
 | `ANTHROPIC_API_KEY` | AI help in the blog and marketing hub (see `docs/marketing.md`). Use a key from an Anthropic account owned by the business, with a spending limit set there too |
 | `RECRAFT_API_KEY` | AI images in the marketing hub (not set yet) |
 | `AI_MONTHLY_BUDGET_USD` | The monthly limit on AI spending, in US dollars. Optional; $50 if not set. AI help pauses when it is reached |
@@ -234,7 +234,10 @@ the pages, so they always need a redeploy.
 - [ ] Confirm Stripe is in live mode, then make one real £30 purchase and
       refund it. The owner should get a "payment was refunded" email, and the
       session should leave the account.
-- [ ] Once the number exists, set `NEXT_PUBLIC_WHATSAPP_NUMBER`.
+- [x] Business mobile 07360 303886 added for calls (Contact page) and
+      WhatsApp, confirmed as the business number on 21 November 2026.
+- [ ] Set the number up as a WhatsApp Business account, so the WhatsApp
+      button reaches it.
 - [x] The owner decides on `BOOKING_REQUIRES_PAYMENT`: settled by the IT
       handover §19. The consultation is always paid as it is booked; the
       setting now applies only to later sessions.

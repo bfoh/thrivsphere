@@ -8,6 +8,13 @@ export const brand = {
    * replaces it only once a mailbox exists and the owner confirms it.
    */
   email: "patbarning@yahoo.co.uk",
+  /**
+   * ThriveSphere's business mobile, for calls and WhatsApp (checklist §9).
+   * Confirmed as the business number, not a personal one, and approved for
+   * the public site on 21 November 2026.
+   */
+  phone: "07360 303886",
+  phoneIntl: "+44 7360 303886",
   location: "United Kingdom · Online wellbeing support",
   /** One-line positioning. Non-clinical — see `scopeOfPractice` below. */
   positioning:

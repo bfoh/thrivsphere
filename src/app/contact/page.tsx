@@ -47,11 +47,27 @@ export default function ContactPage() {
 
           <div className="card" style={{ padding: 24 }}>
             <h2 style={{ margin: "0 0 10px", fontSize: 18, color: "var(--navy)", display: "flex", alignItems: "center", gap: 8 }}>
+              <Icon name="phone" size={20} stroke="var(--teal)" /> Call us
+            </h2>
+            <a
+              href={`tel:${brand.phoneIntl.replace(/\s/g, "")}`}
+              style={{ fontSize: 15.5, fontWeight: 700, color: "var(--teal-deep)", textDecoration: "none" }}
+            >
+              {brand.phone}
+            </a>
+            <p style={{ margin: "12px 0 0", fontSize: 13.5, lineHeight: 1.55, color: "var(--navy-soft)" }}>
+              For general enquiries and arranging appointments. This is not an emergency line: if you
+              need urgent help, call 999 or Samaritans on 116 123.
+            </p>
+          </div>
+
+          <div className="card" style={{ padding: 24 }}>
+            <h2 style={{ margin: "0 0 10px", fontSize: 18, color: "var(--navy)", display: "flex", alignItems: "center", gap: 8 }}>
               <Icon name="heart" size={20} stroke="var(--gold)" /> Arranging an appointment
             </h2>
             <p style={{ margin: "0 0 14px", fontSize: 14.5, lineHeight: 1.6, color: "var(--ink)" }}>
               {brand.availabilityLine} Book online by creating an account, or ask us to arrange a
-              time for you by enquiry form, email or WhatsApp.
+              time for you by enquiry form, email, phone or WhatsApp.
             </p>
             <Link href={bookCta.href} className="pill pill-gold" style={{ padding: "10px 20px", fontSize: 13.5 }}>
               {bookCta.label} <Icon name="arrow" size={16} />

@@ -3,16 +3,18 @@
  *
  * A check on the text before any request. It errs towards stopping: staff
  * can take the detail out and try again. Helpline numbers (0800, 116 123)
- * and ThriveSphere's own addresses are allowed; mobiles and other people's
- * email addresses are not.
+ * and ThriveSphere's own addresses and business mobile are allowed; other
+ * mobiles and other people's email addresses are not.
  */
 import { brand } from "../../data/site";
 
 const OWN_EMAILS = ["@thrivsphere.org", brand.email.toLowerCase()];
+/** The business mobile's last ten digits, however it is written. */
+const OWN_MOBILE = brand.phone.replace(/\D/g, "").slice(-10);
 
 const CHECKS: { pattern: RegExp; what: string; allow?: (match: string) => boolean }[] = [
   { pattern: /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, what: "an email address", allow: (m) => OWN_EMAILS.some((o) => m.toLowerCase().endsWith(o)) },
-  { pattern: /(?:\+44\s?7|\b07)\d{3}[\s-]?\d{3}[\s-]?\d{3}\b/g, what: "a mobile phone number" },
+  { pattern: /(?:\+44\s?7|\b07)\d{3}[\s-]?\d{3}[\s-]?\d{3}\b/g, what: "a mobile phone number", allow: (m) => m.replace(/\D/g, "").endsWith(OWN_MOBILE) },
   { pattern: /\b\d{3}[\s-]?\d{3}[\s-]?\d{4}\b/g, what: "what looks like an NHS number", allow: (m) => /^0[0-9]/.test(m) },
   { pattern: /\b(?:my|our|a|one of (?:my|our))\s+clients?\b(?:\s+(?:called|named|who|told|said|was|is|has|had))?/gi, what: "something about a client", allow: (m) => /^(?:a|our)\s+clients?$/i.test(m.trim()) },
   { pattern: /\bclient'?s?\s+name\b|\bdate of birth\b|\bDOB\b/gi, what: "personal details" },

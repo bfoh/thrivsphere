@@ -19,5 +19,6 @@ describe("personalDataFound", () => {
     assert.equal(personalDataFound(`Contact ${brand.email} or hello@thrivsphere.org`), null);
     assert.equal(personalDataFound("Every session is built around our clients' goals."), null);
     assert.equal(personalDataFound("Sessions for a client and their family"), null);
+    assert.equal(personalDataFound(`Call or WhatsApp us on ${brand.phone} or ${brand.phoneIntl}`), null);
   });
 });

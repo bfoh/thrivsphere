@@ -1,11 +1,12 @@
 import { Icon } from "./icons";
 import { whatsappHref } from "@/lib/whatsapp";
+import { brand } from "@/data/site";
 
 /**
  * WhatsApp Business contact (checklist §9).
  *
- * Renders nothing until NEXT_PUBLIC_WHATSAPP_NUMBER is set, so the business
- * number can be switched on without a code change.
+ * Uses the business mobile; NEXT_PUBLIC_WHATSAPP_NUMBER overrides it. Renders
+ * nothing if there is no usable number.
  */
 export function WhatsAppLink({
   variant = "card",
@@ -14,7 +15,7 @@ export function WhatsAppLink({
   variant?: "card" | "footer";
   heading?: "h2" | "h3";
 }) {
-  const href = whatsappHref(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER);
+  const href = whatsappHref(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || brand.phone);
   if (!href) return null;
 
   if (variant === "footer") {
