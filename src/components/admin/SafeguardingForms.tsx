@@ -64,7 +64,8 @@ function CrisisGuidance() {
         Emergency <strong style={{ color: "#fff" }}>999</strong> · Samaritans{" "}
         <strong style={{ color: "#fff" }}>116 123</strong> · NHS urgent mental health{" "}
         <strong style={{ color: "#fff" }}>111</strong>. Stay with the person if you can. Record what
-        you did below.
+        you did below. If the client is outside the UK, use the emergency number for where they are;
+        their emergency contact may be in another country too.
       </div>
     </div>
   );
@@ -192,11 +193,14 @@ export function RaiseConcernForm({
   clientName,
   practitioners,
   me,
+  emergencyContact,
 }: {
   clientId: string;
   clientName: string;
   practitioners: { id: string; name: string }[];
   me: { id: string; name: string } | null;
+  /** The client's Emergency Contact / Next of Kin, or null if this person may not see it. */
+  emergencyContact: string[] | null;
 }) {
   const [state, action, pending] = useActionState(raiseConcern, initialSafeguardingState);
   const [, startTransition] = React.useTransition();
@@ -302,6 +306,15 @@ export function RaiseConcernForm({
 
       <fieldset style={fieldset}>
         <legend style={legend}>5. Trusted Person / Emergency Contact</legend>
+        <div style={{ fontSize: 13, lineHeight: 1.6, color: "var(--ink)", background: "rgba(31,58,95,0.05)", borderRadius: 10, padding: "10px 14px" }}>
+          <strong style={{ color: "var(--navy)" }}>On the client&apos;s record: </strong>
+          {emergencyContact
+            ? emergencyContact.join(" · ")
+            : "only the Safeguarding Lead, the Deputy and the client's own practitioners can see the emergency contact."}
+          <span style={{ display: "block", color: "var(--navy-soft)" }}>
+            Nobody is contacted automatically. Record any contact you make here.
+          </span>
+        </div>
         <Choose name="trustedPersonRequired" options={YES_NO} label="Was involvement required?" fe={fe} value={trusted} onChange={setTrusted} />
         {trusted === "yes" && (
           <>

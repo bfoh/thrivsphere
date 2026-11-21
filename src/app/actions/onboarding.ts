@@ -223,8 +223,6 @@ export async function submitIntake(
       phone: str(formData, "phone") || null,
       safeToContactByPhone: answers.safeToContactByPhone,
       contactNotes: answers.contactNotes || null,
-      emergencyContactName: str(formData, "emergencyContactName") || null,
-      emergencyContactPhone: str(formData, "emergencyContactPhone") || null,
       gpPractice: str(formData, "gpPractice") || null,
       updatedAt: new Date(),
     })

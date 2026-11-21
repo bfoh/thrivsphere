@@ -12,6 +12,10 @@ import {
 } from "drizzle-orm/pg-core";
 import { users } from "./identity";
 
+/** Emergency Contact / Next of Kin (IT handover §15.2): the client's answer. */
+export const emergencyContactStatus = pgEnum("emergency_contact_status", ["provided", "unable", "prefer_not"]);
+export const emergencyContactMethod = pgEnum("emergency_contact_method", ["phone", "email", "other"]);
+
 export const clientStatus = pgEnum("client_status", [
   "enquiry",
   "registered",
@@ -70,10 +74,27 @@ export const clients = pgTable(
     emailRemindersEnabled: boolean("email_reminders_enabled").notNull().default(true),
     contactNotes: text("contact_notes"),
 
-    /** Kept for safeguarding escalation, not for marketing. */
+    /**
+     * Emergency Contact / Next of Kin (IT handover §15.2–15.4). Kept for serious
+     * safety concerns only, never marketing or routine updates. Seen only by
+     * the Safeguarding Lead, the Deputy and the client's own practitioners.
+     * Status is null until the client has answered; "unable" and "prefer_not"
+     * record a client who gave no contact, which never blocks them.
+     */
+    emergencyContactStatus: emergencyContactStatus("emergency_contact_status"),
     emergencyContactName: text("emergency_contact_name"),
-    emergencyContactPhone: text("emergency_contact_phone"),
     emergencyContactRelationship: text("emergency_contact_relationship"),
+    /** With the international dialling code. */
+    emergencyContactPhone: text("emergency_contact_phone"),
+    /** Alternative phone or email. */
+    emergencyContactAlt: text("emergency_contact_alt"),
+    emergencyContactCountry: text("emergency_contact_country"),
+    emergencyContactTimeZone: text("emergency_contact_time_zone"),
+    emergencyContactMethod: emergencyContactMethod("emergency_contact_method"),
+    emergencyContactMethodOther: text("emergency_contact_method_other"),
+    /** "I have informed this person, where practicable, …" */
+    emergencyContactInformed: boolean("emergency_contact_informed"),
+    emergencyContactUpdatedAt: timestamp("emergency_contact_updated_at", { withTimezone: true }),
     gpPractice: text("gp_practice"),
     gpPhone: text("gp_phone"),
 

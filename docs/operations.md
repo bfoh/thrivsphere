@@ -120,6 +120,14 @@ a member who can be removed.
   - **Safeguarding** (`/admin/safeguarding`) lists every record not yet
     closed. Close one with its outcome from the client's record. Records are
     never edited after saving; complete a new one if something new happens.
+- **Emergency Contact / Next of Kin** (IT handover §15.2–15.4): every client
+  is asked before they choose a time to book. They either give a contact or
+  say they are unable or would prefer not to; that is recorded and never
+  stops them booking. They can change it under *Your details* in their
+  account. Only Patience, the Deputy Safeguarding Lead and practitioners the
+  client has an appointment with can see the contact (on the client's record
+  and in section 5 of the concern form); other admins can't, and each showing
+  is logged. Nobody is ever contacted automatically.
 - **Blog** (`/admin/blog`; the founder and practitioners write, see
   `docs/blog.md`):
   - *New post* starts a draft. Write in the editor (with a preview), list the
@@ -252,3 +260,8 @@ the pages, so they always need a redeploy.
       21 November 2026.
 - [ ] Once Lucy has an account, Patience makes her *Deputy Safeguarding Lead*
       on **Staff**.
+- [x] Apply migration `0018_emergency_contact` (Emergency Contact / Next of
+      Kin). It only adds columns. Applied 21 November 2026.
+- [ ] Patience checks the new *Your emergency contact* section of the Privacy
+      Policy (1.5.0) and decides the §15.5 items: the lawful basis for holding
+      contacts' details, and what to do when a client is outside the UK.

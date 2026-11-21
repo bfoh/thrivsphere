@@ -30,7 +30,7 @@ export default async function BookPage() {
 
   const steps = [
     { title: "Create your account", text: "Sign up with your email address, or sign in if you already have an account." },
-    { title: "A few details", text: "Confirm you are 18 or over, add your contact details and read how our service works." },
+    { title: "A few details", text: "Confirm you are 18 or over, add your contact details and read how our service works. We'll also ask whether you'd like to give an emergency contact." },
     {
       title: "Choose and pay",
       text: `Choose a practitioner and a time, accept the booking terms and ${NOTICE_PERIOD}' cancellation notice, and pay ${price.label} securely by card. You'll receive a confirmation and a receipt.`,

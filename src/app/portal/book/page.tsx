@@ -11,6 +11,8 @@ import { groupSlotsByDay } from "@/lib/slot-groups";
 import { SlotPicker } from "@/components/portal/SlotPicker";
 import { NotCrisisNotice } from "@/components/NotCrisisNotice";
 import { brand } from "@/data/site";
+import { getEmergencyContact } from "@/lib/queries/emergency-contact";
+import { EmergencyContactForm } from "@/components/portal/EmergencyContactForm";
 
 export const metadata: Metadata = { title: "Book a session", robots: { index: false, follow: false } };
 
@@ -33,13 +35,14 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
   const { with: withId } = await searchParams;
 
   const now = new Date();
-  const [slots, owned, booking, bookable, price, gate] = await Promise.all([
+  const [slots, owned, booking, bookable, price, gate, emergency] = await Promise.all([
     getPooledSlots({ clientId, now }),
     getClientCredits(clientId),
     nextBookingKind(clientId),
     getBookablePractitioners(),
     getInitialConsultationPrice(),
     getSessionGate(clientId),
+    getEmergencyContact(clientId),
   ]);
 
   // Only credit that can pay for this booking: review credit is for the review.
@@ -55,6 +58,9 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
     ? `${offer.pricePence === 0 ? "with nothing to pay" : penceLabel(offer.pricePence)} (${offer.discount.label}; usually ${price.label})`
     : price.label;
   const mustPayFirst = route === "credit" && !firstBooking && bookingRequiresPayment() && remaining === 0;
+  // Emergency Contact / Next of Kin is asked once, before booking (IT handover
+  // §15.2–15.4). "Unable" or "prefer not" is an answer, so nobody is blocked.
+  const askEmergencyContact = !emergency?.status;
   // Clients see practitioners by name only; one without a name is still
   // offered through "first available".
   const practitioners = bookable.filter((p) => p.displayName).map((p) => ({ id: p.id, name: p.displayName! }));
@@ -87,6 +93,27 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
           <Link href="/portal/messages" className="pill pill-teal" style={{ padding: "12px 24px", fontSize: 14.5 }}>
             Message us
           </Link>
+        </div>
+      ) : askEmergencyContact ? (
+        <div className="card" style={{ padding: 32 }}>
+          <p style={{ margin: "0 0 18px", fontSize: 13, fontWeight: 700, color: "var(--teal-deep)", letterSpacing: 0.3 }}>
+            Before you choose a time
+          </p>
+          <EmergencyContactForm
+            from="book"
+            values={{
+              status: null,
+              name: emergency?.name ?? null,
+              relationship: emergency?.relationship ?? null,
+              phone: emergency?.phone ?? null,
+              alt: null,
+              country: null,
+              timeZone: null,
+              method: null,
+              methodOther: null,
+              informed: null,
+            }}
+          />
         </div>
       ) : mustPayFirst ? (
         <div className="card" style={{ padding: 32 }}>

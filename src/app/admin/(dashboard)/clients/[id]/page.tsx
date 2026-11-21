@@ -32,6 +32,9 @@ import { can } from "@/lib/authz";
 import { ConcessionForm, EndDiscountButton, FreeSessionsForm } from "@/components/admin/DiscountForms";
 import { getActiveConcession, listClientDiscountHistory, planPrices } from "@/lib/queries/discounts";
 import { describeDiscount, penceLabel, reasonLabel } from "@/lib/discounts";
+import { maySeeEmergencyContact } from "@/lib/queries/emergency-contact";
+import { answerLabel, contactLines, methodLabel } from "@/lib/emergency-contact";
+import { recordAudit } from "@/lib/audit";
 
 export const metadata: Metadata = {
   title: "Client record",
@@ -102,11 +105,35 @@ export default async function ClientRecordPage({
   const [decision, ...earlierDecisions] = decisions;
 
   // Safeguarding records: who may stand a flag down, and the names on each record.
-  const [practitioners, names, deputy] = await Promise.all([
+  const [practitioners, names, deputy, seeContact] = await Promise.all([
     listPractitionerChoices(),
     staffNames(concerns.flatMap((c) => [c.practitionerId, c.raisedBy, c.closedBy])),
     actor ? isSafeguardingDeputy(actor.userId) : Promise.resolve(false),
+    actor ? maySeeEmergencyContact(actor, id) : Promise.resolve(false),
   ]);
+  // Emergency Contact / Next of Kin (IT handover §15.4): only the Lead, the
+  // Deputy and the client's practitioners see it, and each showing is logged.
+  const ec = {
+    status: client.emergencyContactStatus,
+    name: client.emergencyContactName,
+    relationship: client.emergencyContactRelationship,
+    phone: client.emergencyContactPhone,
+    alt: client.emergencyContactAlt,
+    country: client.emergencyContactCountry,
+    timeZone: client.emergencyContactTimeZone,
+    method: client.emergencyContactMethod,
+    methodOther: client.emergencyContactMethodOther,
+  };
+  if (seeContact && actor && ec.status === "provided") {
+    await recordAudit({
+      actorId: actor.userId,
+      action: "view",
+      entity: "clients",
+      entityId: id,
+      subjectClientId: id,
+      detail: "emergency contact shown",
+    });
+  }
   const canStandDown = !!actor && canStandDownFlag({ role: actor.role, safeguardingDeputy: deputy });
   const me = actor ? (practitioners.find((p) => p.id === actor.userId) ?? null) : null;
   const canDecide = !!actor && can(actor, "notes:write");
@@ -249,8 +276,6 @@ export default async function ClientRecordPage({
             emphasis={!client.safeToContactByPhone}
           />
           <Field label="Date of birth" value={d(client.dateOfBirth)} />
-          <Field label="Emergency contact" value={client.emergencyContactName} />
-          <Field label="Emergency phone" value={client.emergencyContactPhone} />
           <Field label="GP practice" value={client.gpPractice} />
           <Field label="18+ confirmed" value={client.confirmedAdult ? dt(client.confirmedAdultAt) : "Not confirmed"} />
         </div>
@@ -259,6 +284,37 @@ export default async function ClientRecordPage({
             <Field label="Contact notes" value={client.contactNotes} />
           </div>
         )}
+        <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid rgba(31,58,95,0.08)" }}>
+          <h3 style={{ margin: "0 0 10px", fontSize: 14.5, color: "var(--navy)" }}>Emergency Contact / Next of Kin</h3>
+          {!seeContact ? (
+            <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.6, color: "var(--navy-soft)" }}>
+              Only the Safeguarding Lead, the Deputy Safeguarding Lead and this client&apos;s practitioners can see this.
+            </p>
+          ) : ec.status !== "provided" ? (
+            <Field label="The client's answer" value={answerLabel(ec.status)} />
+          ) : (
+            <>
+              <div className="two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px 28px" }}>
+                <Field label="Full name" value={ec.name} />
+                <Field label="Relationship to client" value={ec.relationship} />
+                <Field label="Phone" value={ec.phone} />
+                <Field label="Alternative phone or email" value={ec.alt} />
+                <Field label="Country" value={ec.country} />
+                <Field label="Time zone" value={ec.timeZone} />
+                <Field label="Preferred contact method" value={methodLabel(ec.method, ec.methodOther)} />
+                <Field
+                  label="Client has told them"
+                  value={client.emergencyContactInformed ? "Yes, where practicable" : "Not confirmed"}
+                />
+              </div>
+              <p style={{ margin: "12px 0 0", fontSize: 12.5, lineHeight: 1.55, color: "var(--navy-soft)" }}>
+                Only for a serious concern for the client&apos;s immediate safety, where appropriate and lawful; never
+                routine updates. Record any contact in a Safeguarding Incident / Concern Record.
+                {client.emergencyContactUpdatedAt ? ` Updated ${dt(client.emergencyContactUpdatedAt)}.` : ""}
+              </p>
+            </>
+          )}
+        </div>
       </Section>
 
       {/* intake */}
@@ -404,7 +460,13 @@ export default async function ClientRecordPage({
       {/* safeguarding */}
       <Section id="safeguarding" title="Safeguarding concerns" subtitle={`${concerns.length} recorded`}>
         <div style={{ marginBottom: 16 }}>
-          <RaiseConcernForm clientId={client.id} clientName={client.preferredName} practitioners={practitioners} me={me} />
+          <RaiseConcernForm
+            clientId={client.id}
+            clientName={client.preferredName}
+            practitioners={practitioners}
+            me={me}
+            emergencyContact={seeContact ? contactLines(ec) : null}
+          />
         </div>
         {concerns.length === 0 ? (
           <Empty>No safeguarding concerns recorded.</Empty>

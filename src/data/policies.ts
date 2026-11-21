@@ -55,11 +55,13 @@ const V4 = "1.3.0";
 const FROM4 = "2026-11-21";
 
 /**
- * "How did you hear about us?" and campaign links on the enquiry, callback
- * and booking forms (21 November 2026).
+ * Privacy policy 1.5.0: Emergency Contact / Next of Kin (IT handover
+ * §15.2–15.4; 21 November 2026) says what is held about the person a client
+ * names. It supersedes 1.4.0 ("How did you hear about us?" and campaign links,
+ * the same day).
  */
-const V5 = "1.4.0";
-const FROM5 = "2026-11-21";
+const V6 = "1.5.0";
+const FROM6 = "2026-11-21";
 
 /** "ThriveSphere Wellbeing is a trading name of …", with the registered office. */
 const whoWeAre = `${legal.statement} Registered office: ${legal.registeredOffice}.`;
@@ -68,8 +70,8 @@ export const policies: Record<string, Policy> = {
   privacy: {
     slug: "privacy",
     requiresConsent: true,
-    version: V5,
-    effectiveFrom: FROM5,
+    version: V6,
+    effectiveFrom: FROM6,
     audience: "public",
     title: "Privacy Policy",
     eyebrow: "Privacy · UK GDPR",
@@ -95,6 +97,14 @@ export const policies: Record<string, Policy> = {
           "If you comment on a blog post, your comment and the name you give are published once our team has approved them. Your email address is never shown; it is stored encrypted and used only if we need to contact you about your comment, including if it suggests you may be at risk. We may decide not to publish a comment. Comments we don't publish are deleted after 90 days.",
           `You can ask us to remove your comment at any time by emailing ${brand.email}. Please don't include health details or anything that could identify you or someone else in a comment.`,
           "If you like a post, we keep only an anonymous record that this browser liked it, so you can't like a post twice. Nothing else about you is kept.",
+        ],
+      },
+      {
+        heading: "Your emergency contact",
+        body: [
+          "Before your first booking we ask whether you would like to give an emergency contact. If you do, we keep their name, their relationship to you, their phone number and any alternative phone or email, the country and time zone they are in, and how they prefer to be contacted. You can choose not to give one.",
+          "We may consider contacting them only if there is a serious concern for your immediate safety and it is appropriate and lawful to do so. They are never contacted automatically, and they are not given your session notes or routine wellbeing information. Only our Safeguarding Lead, Deputy Safeguarding Lead and your own practitioners can see their details, and staff access is logged.",
+          "Please let the person know, where you can, that you have given us their details. You can change or remove them at any time in your account, under Your details. They are kept with your client record, in line with our Records Retention Policy.",
         ],
       },
       { heading: "Your rights", body: [`You have the right to access, correct, delete or restrict your data, to withdraw consent, and to complain to the Information Commissioner's Office (ICO). To exercise any right, email ${brand.email}.`] },

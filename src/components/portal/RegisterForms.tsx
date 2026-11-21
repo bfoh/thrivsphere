@@ -237,11 +237,6 @@ export function IntakeForm() {
         <textarea id="contactNotes" name="contactNotes" rows={2} style={{ ...input, resize: "vertical" }} />
       </div>
 
-      <div className="two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-        <Field name="emergencyContactName" labelText="Emergency contact name" />
-        <Field name="emergencyContactPhone" labelText="Emergency contact phone" type="tel" />
-      </div>
-
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <label htmlFor="accessibilityNeeds" style={label}>
           Anything that would make sessions work better for you?
