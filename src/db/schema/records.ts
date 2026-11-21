@@ -99,3 +99,35 @@ export const progressEntries = pgTable(
   },
   (t) => [index("progress_client_idx").on(t.clientId)]
 );
+
+/**
+ * The suitability decision made in the Initial Wellbeing Consultation (IT
+ * handover §13.1): Suitable, Clarification or further support needed, or
+ * Not suitable — signpost, always with the practitioner's rationale.
+ *
+ * Append-only, like notes: a changed decision is a new row, so the record
+ * shows every decision and who made it. The latest decides whether ongoing
+ * sessions can be booked; they are never opened automatically.
+ */
+export const suitabilityOutcome = pgEnum("suitability_outcome", ["suitable", "clarification", "not_suitable"]);
+
+export const suitabilityDecisions = pgTable(
+  "suitability_decisions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    clientId: uuid("client_id")
+      .notNull()
+      .references(() => clients.id, { onDelete: "cascade" }),
+    /** The consultation it was made in, when there is one. */
+    appointmentId: uuid("appointment_id").references(() => appointments.id, { onDelete: "set null" }),
+    outcome: suitabilityOutcome("outcome").notNull(),
+    rationale: text("rationale").notNull(),
+    /** Not suitable: where the client was signposted (also a referral row). */
+    signpostedTo: text("signposted_to"),
+    decidedBy: uuid("decided_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    decidedAt: timestamp("decided_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("suitability_client_idx").on(t.clientId, t.decidedAt)]
+);

@@ -129,6 +129,8 @@ export async function rescheduleOwnAppointment(
   const placed = await placeBooking({
     clientId: appt.clientId,
     startsAt,
+    // Moving an appointment never changes what it is.
+    kind: appt.kind,
     packageId: appt.packageId,
     preferPractitionerId: appt.practitionerId,
     excludeAppointmentId: appt.id,

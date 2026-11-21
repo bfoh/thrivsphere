@@ -6,6 +6,7 @@ import { clients, enquiries, appointments, safeguardingConcerns } from "@/db/sch
 import { count, eq } from "drizzle-orm";
 import Link from "next/link";
 import { countResourceWork } from "@/lib/queries/worksheets";
+import { listOutcomesDue } from "@/lib/queries/suitability";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -27,7 +28,7 @@ export default async function AdminPage() {
   });
 
   const db = getDb();
-  const [[clientCount], [openEnquiries], [upcoming], [openConcerns], resourceWork] = await Promise.all([
+  const [[clientCount], [openEnquiries], [upcoming], [openConcerns], resourceWork, outcomesDue] = await Promise.all([
     db.select({ n: count() }).from(clients),
     db.select({ n: count() }).from(enquiries).where(eq(enquiries.status, "new")),
     db.select({ n: count() }).from(appointments).where(eq(appointments.status, "scheduled")),
@@ -36,6 +37,7 @@ export default async function AdminPage() {
       .from(safeguardingConcerns)
       .where(eq(safeguardingConcerns.status, "open")),
     countResourceWork(actor.userId),
+    listOutcomesDue(),
   ]);
 
   const tiles: { label: string; value: number; href?: string }[] = [
@@ -75,6 +77,34 @@ export default async function AdminPage() {
           );
         })}
       </div>
+      {/*
+        Ongoing sessions stay closed until a decision is recorded (IT
+        handover §13.1), so a missing one leaves a client waiting.
+      */}
+      {outcomesDue.length > 0 && (
+        <section className="card" style={{ marginTop: 22, padding: "20px 22px" }}>
+          <h2 style={{ margin: "0 0 4px", fontSize: 17, color: "var(--navy)" }}>Consultation outcomes to record</h2>
+          <p style={{ margin: "0 0 12px", fontSize: 13.5, color: "var(--navy-soft)" }}>
+            These clients have had their Initial Wellbeing Consultation. They can book ongoing sessions once the
+            outcome is recorded as Suitable.
+          </p>
+          <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+            {outcomesDue.map((o) => (
+              <li key={o.clientId} style={{ fontSize: 14 }}>
+                <Link href={`/admin/clients/${o.clientId}`} style={{ color: "var(--teal-deep)", fontWeight: 700, textDecoration: "none" }}>
+                  {o.name}
+                </Link>
+                <span style={{ color: "var(--navy-soft)" }}>
+                  {" "}
+                  · consultation{" "}
+                  {o.consultedAt.toLocaleDateString("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short" })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <p style={{ margin: "26px 0 0", fontSize: 14.5 }}>
         <Link href="/admin/clients" style={{ color: "var(--teal-deep)", fontWeight: 700, textDecoration: "none" }}>
           View all clients →

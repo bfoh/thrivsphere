@@ -78,6 +78,13 @@
       "when": 1795251073651,
       "tag": "0010_dual_booking",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795253404372,
+      "tag": "0011_suitability",
+      "breakpoints": true
     }
   ]
 }

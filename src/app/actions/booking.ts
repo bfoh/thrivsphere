@@ -15,9 +15,10 @@ import { requireCapability } from "@/lib/guard";
 import { recordAudit } from "@/lib/audit";
 import { ForbiddenError, STAFF_ROLES, UnauthenticatedError } from "@/lib/authz";
 import { encryptSecret } from "@/lib/crypto";
-import { INITIAL_REVIEW, isOverlapViolation } from "@/lib/allocation";
+import { INITIAL_REVIEW, isOverlapViolation, kindFor } from "@/lib/allocation";
 import {
   bookingRequiresPayment,
+  getSessionGate,
   nextBookingKind,
   notifyClient,
   notifyPractitioner,
@@ -88,6 +89,12 @@ export async function bookAppointment(
 
   const now = new Date();
   const booking = await nextBookingKind(clientId);
+  // Ongoing sessions open only once the practitioner records Suitable after
+  // the initial consultation (IT handover §13.1); never automatically.
+  if (booking === "session") {
+    const gate = await getSessionGate(clientId);
+    if (!gate.open) return { status: "error", message: gate.message };
+  }
   const packageId = await reserveSession(clientId, booking, now);
   if (!packageId && booking === "review") {
     return {
@@ -99,7 +106,14 @@ export async function bookAppointment(
     return { status: "error", message: "Please buy a session before booking — you can do that under Buy sessions." };
   }
 
-  const placed = await placeBooking({ clientId, startsAt, packageId, onlyPractitionerId: practitionerId, now });
+  const placed = await placeBooking({
+    clientId,
+    startsAt,
+    kind: kindFor(booking),
+    packageId,
+    onlyPractitionerId: practitionerId,
+    now,
+  });
   if (!placed.ok) {
     if (packageId) await releaseSession(packageId);
     return { status: "error", message: placed.message };

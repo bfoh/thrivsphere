@@ -9,7 +9,7 @@ import { decryptSecret } from "@/lib/crypto";
 import {
   NOTICE_PERIOD,
   RESCHEDULED_REASON,
-  appointmentKinds,
+  kindLabel,
   canReschedule,
   cancellationOutcome,
   noticeDeadline,
@@ -62,6 +62,7 @@ export default async function AppointmentsPage() {
         startsAt: appointments.startsAt,
         endsAt: appointments.endsAt,
         status: appointments.status,
+        kind: appointments.kind,
         cancellationReason: appointments.cancellationReason,
         packageId: appointments.packageId,
         meetingLinkEncrypted: appointments.meetingLinkEncrypted,
@@ -75,7 +76,6 @@ export default async function AppointmentsPage() {
   ]);
 
   const now = new Date();
-  const kinds = appointmentKinds(rows);
   const upcoming = rows
     .filter((a) => a.status === "scheduled" && a.endsAt > now)
     .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
@@ -120,7 +120,7 @@ export default async function AppointmentsPage() {
                 <li key={a.id} style={{ padding: 16, borderRadius: 12, border: "1px solid rgba(31,58,95,0.12)", background: "#fff" }}>
                   <div style={{ fontSize: 15.5, fontWeight: 800, color: "var(--navy)" }}>{formatAppointment(a.startsAt)}</div>
                   <div style={{ marginTop: 3, fontSize: 13.5, color: "var(--navy-soft)" }}>
-                    {kinds.get(a.id)} · with {a.practitioner ?? "your practitioner"} · online
+                    {kindLabel(a.kind)} · with {a.practitioner ?? "your practitioner"} · online
                   </div>
                   {movable && (
                     <div style={{ marginTop: 3, fontSize: 13, color: "var(--navy-soft)" }}>
@@ -193,7 +193,7 @@ export default async function AppointmentsPage() {
                   ? "moved to a new time"
                   : a.status.startsWith("cancelled")
                     ? STATUS_LABEL[a.status]
-                    : `${kinds.get(a.id)}, ${STATUS_LABEL[a.status]?.toLowerCase() ?? a.status}`}
+                    : `${kindLabel(a.kind)}, ${STATUS_LABEL[a.status]?.toLowerCase() ?? a.status}`}
               </li>
             ))}
           </ul>

@@ -56,6 +56,15 @@ export const availabilityExceptions = pgTable(
 );
 
 /**
+ * What an appointment is (IT handover §13.1, §19). The first is the paid
+ * Initial Wellbeing Consultation, in which the practitioner carries out the
+ * Wellbeing Needs Review and decides suitability; every later one is an
+ * ongoing support session. Set when the appointment is booked, so the record
+ * never depends on working it out from the order of appointments.
+ */
+export const appointmentKind = pgEnum("appointment_kind", ["initial", "session"]);
+
+/**
  * `pending_payment` is a time held while the client pays for their initial
  * consultation at Stripe (IT handover §19, Route A). It blocks the slot like a
  * booking, so nobody else can take it mid-payment, but it is not a booking:
@@ -103,6 +112,7 @@ export const appointments = pgTable(
     startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
     endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
     status: appointmentStatus("status").notNull().default("scheduled"),
+    kind: appointmentKind("kind").notNull().default("session"),
     /** When an unpaid hold may be released. Null for every real booking. */
     holdExpiresAt: timestamp("hold_expires_at", { withTimezone: true }),
 

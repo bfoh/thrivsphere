@@ -677,6 +677,31 @@ export function paidTimeUnavailable(): Email {
   };
 }
 
+/**
+ * Sent when the practitioner records Suitable after the initial consultation
+ * (IT handover §13.1): ongoing sessions can now be booked. A neutral subject,
+ * and nothing about the review itself.
+ */
+export function sessionsOpen(): Email {
+  return {
+    subject: "Your next steps with ThriveSphere Wellbeing",
+    html: shell({
+      preheader: "You can now book your sessions.",
+      heading: "Your next steps",
+      body: `
+        <p style="margin:0 0 14px;">Thank you for attending your Initial Wellbeing Consultation. Your practitioner has confirmed your next steps.</p>
+        <p style="margin:0;">You can now book your ongoing 50-minute sessions in your account, at a time that suits you.</p>`,
+      cta: { label: "Book a session", href: `${siteUrl()}/portal/book` },
+    }),
+    text: textShell([
+      "Thank you for attending your Initial Wellbeing Consultation. Your practitioner has confirmed your next steps.",
+      "",
+      "You can now book your ongoing 50-minute sessions in your account, at a time that suits you:",
+      `${siteUrl()}/portal/book`,
+    ]),
+  };
+}
+
 /** Enquiry text is written by the public, so it is escaped before templating. */
 function escapeHtml(s: string): string {
   return s

@@ -18,6 +18,7 @@ import {
 } from "@/lib/allocation";
 import {
   getClientCredits,
+  getSessionGate,
   nextBookingKind,
   placeBooking,
   releaseClientHolds,
@@ -69,6 +70,10 @@ export async function startCheckout(
   if (plan.slug === REVIEW_PLAN_SLUG) {
     return { status: "error", message: `Your ${INITIAL_REVIEW} is paid for as you book it. Choose a time under Book.` };
   }
+  // Every other plan pays for ongoing sessions, which open only once the
+  // practitioner records Suitable (IT handover §13.1).
+  const gate = await getSessionGate(actor.clientId);
+  if (!gate.open) return { status: "error", message: gate.message };
 
   const [client] = await db
     .select({ email: clients.email })
@@ -206,6 +211,7 @@ export async function startBookingCheckout(_prev: PaymentState, formData: FormDa
   const placed = await placeBooking({
     clientId,
     startsAt,
+    kind: "initial",
     packageId: null,
     onlyPractitionerId: practitionerId,
     hold: { orderId: order.id, expiresAt: holdExpiresAt },

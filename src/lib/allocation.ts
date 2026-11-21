@@ -146,21 +146,30 @@ export function sessionsRemaining(
 export const INITIAL_REVIEW = "Initial Wellbeing Needs Review";
 export const SUPPORT_SESSION = "Wellbeing support session";
 
+export type AppointmentKind = "initial" | "session";
+
+/** What the client sees an appointment called. */
+export function kindLabel(kind: string): string {
+  return kind === "initial" ? INITIAL_REVIEW : SUPPORT_SESSION;
+}
+
+/** The kind of appointment a booking makes. */
+export function kindFor(booking: BookingKind): AppointmentKind {
+  return booking === "review" ? "initial" : "session";
+}
+
 /**
- * Name each of a client's appointments: the first that went ahead or is still
- * booked is the Initial Wellbeing Needs Review, and every later one is a
- * support session. A cancelled first booking does not use up the review.
+ * What a client's next booking is, from the appointments they have.
+ *
+ * Their initial consultation is done or booked once an `initial` appointment
+ * is booked or completed. One that was cancelled, or is still being paid for,
+ * leaves it to book; so does a missed one, because the review in it never
+ * took place.
  */
-export function appointmentKinds(
-  appointments: { id: string; startsAt: Date; status: string }[]
-): Map<string, string> {
-  const kinds = new Map<string, string>();
-  const live = appointments
-    .filter((a) => a.status !== "cancelled_by_client" && a.status !== "cancelled_by_service" && a.status !== "pending_payment")
-    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
-  for (const a of appointments) kinds.set(a.id, SUPPORT_SESSION);
-  if (live[0]) kinds.set(live[0].id, INITIAL_REVIEW);
-  return kinds;
+export function nextKindFrom(appointments: { kind: string; status: string }[]): BookingKind {
+  return appointments.some((a) => a.kind === "initial" && (a.status === "scheduled" || a.status === "completed"))
+    ? "session"
+    : "review";
 }
 
 /** Recorded on the old booking when a client moves an appointment. */

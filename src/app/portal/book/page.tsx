@@ -3,7 +3,7 @@ import Link from "next/link";
 import { requirePortalClient } from "@/lib/portal-guard";
 import { SESSION_MINUTES, getBookablePractitioners, getPooledSlots } from "@/lib/queries/availability";
 import { NOTICE_PERIOD, bookingRoute, sessionsRemaining } from "@/lib/allocation";
-import { bookingRequiresPayment, getClientCredits, nextBookingKind } from "@/lib/booking-engine";
+import { bookingRequiresPayment, getClientCredits, getSessionGate, nextBookingKind } from "@/lib/booking-engine";
 import { getInitialConsultationPrice } from "@/lib/queries/catalogue";
 import { groupSlotsByDay } from "@/lib/slot-groups";
 import { SlotPicker } from "@/components/portal/SlotPicker";
@@ -31,18 +31,21 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
   const { with: withId } = await searchParams;
 
   const now = new Date();
-  const [slots, owned, booking, bookable, price] = await Promise.all([
+  const [slots, owned, booking, bookable, price, gate] = await Promise.all([
     getPooledSlots({ clientId, now }),
     getClientCredits(clientId),
     nextBookingKind(clientId),
     getBookablePractitioners(),
     getInitialConsultationPrice(),
+    getSessionGate(clientId),
   ]);
 
   // Only credit that can pay for this booking: review credit is for the review.
   const remaining = sessionsRemaining(owned, now, booking);
   const route = bookingRoute(booking, remaining);
   const firstBooking = booking === "review";
+  // Ongoing sessions open only after the practitioner records Suitable.
+  const sessionsClosed = !firstBooking && !gate.open ? gate.message : null;
   const mustPayFirst = route === "credit" && !firstBooking && bookingRequiresPayment() && remaining === 0;
   // Clients see practitioners by name only; one without a name is still
   // offered through "first available".
@@ -69,7 +72,15 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
             : brand.availabilityLine}
       </p>
 
-      {mustPayFirst ? (
+      {sessionsClosed ? (
+        <div className="card" style={{ padding: 32 }}>
+          <h2 style={{ margin: "0 0 8px", fontSize: 19, color: "var(--navy)" }}>Next steps</h2>
+          <p style={{ margin: "0 0 18px", fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>{sessionsClosed}</p>
+          <Link href="/portal/messages" className="pill pill-teal" style={{ padding: "12px 24px", fontSize: 14.5 }}>
+            Message us
+          </Link>
+        </div>
+      ) : mustPayFirst ? (
         <div className="card" style={{ padding: 32 }}>
           <h2 style={{ margin: "0 0 8px", fontSize: 19, color: "var(--navy)" }}>Buy a session to book</h2>
           <p style={{ margin: "0 0 18px", fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>

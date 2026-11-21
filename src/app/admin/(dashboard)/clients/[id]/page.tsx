@@ -23,6 +23,11 @@ import { getTemplate, worksheetLibrary } from "@/lib/forms/registry";
 import { worksheetLabel } from "@/lib/forms/library";
 import { listSessionsForSheet } from "@/lib/queries/supervision";
 import { WORKSHEET_STATUS_LABEL, type WorksheetStatus } from "@/lib/resources-rules";
+import { SuitabilityForm } from "@/components/admin/SuitabilityForm";
+import { outcomeLabel, sessionGate } from "@/lib/suitability-rules";
+import { kindLabel } from "@/lib/allocation";
+import { getCurrentActor } from "@/lib/session";
+import { can } from "@/lib/authz";
 
 export const metadata: Metadata = {
   title: "Client record",
@@ -51,6 +56,12 @@ const chip = (draft: boolean): React.CSSProperties => ({
   color: draft ? "#7a5c0c" : "var(--teal-deep)",
 });
 
+const OUTCOME_COLOUR: Record<string, string> = {
+  suitable: "var(--teal-deep)",
+  clarification: "#8a6d12",
+  not_suitable: "#8c2a1c",
+};
+
 const d = (v: Date | string | null) =>
   v ? new Date(v).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
 
@@ -63,7 +74,11 @@ export default async function ClientRecordPage({
   const record = await getClientRecord(id);
   if (!record) notFound();
 
-  const [conversation, sessionsForWorksheet] = await Promise.all([getConversation(id), listSessionsForSheet(id)]);
+  const [conversation, sessionsForWorksheet, actor] = await Promise.all([
+    getConversation(id),
+    listSessionsForSheet(id),
+    getCurrentActor(),
+  ]);
 
   const {
     client,
@@ -78,7 +93,10 @@ export default async function ClientRecordPage({
     documents,
     supervision,
     worksheets,
+    decisions,
   } = record;
+  const [decision, ...earlierDecisions] = decisions;
+  const canDecide = !!actor && can(actor, "notes:write");
 
   const library = worksheetLibrary().map((w) => ({ key: w.key, label: worksheetLabel(w) }));
   const pastSessions = sessionsForWorksheet.slice(0, 20).map((a) => ({ id: a.id, label: dt(a.startsAt) }));
@@ -142,6 +160,54 @@ export default async function ClientRecordPage({
           {client.email} · {client.status} · registered {d(client.createdAt)}
         </p>
       </header>
+
+      {/* consultation outcome (IT handover §13.1) */}
+      <Section
+        title="Consultation outcome"
+        subtitle={sessionGate(decision?.outcome ?? null).open ? "Ongoing sessions are open" : "Ongoing sessions are closed until the outcome is Suitable"}
+      >
+        {decision ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <p style={{ margin: 0, fontSize: 15, color: "var(--ink)" }}>
+              <strong style={{ color: OUTCOME_COLOUR[decision.outcome] ?? "var(--navy)" }}>{outcomeLabel(decision.outcome)}</strong>
+              <span style={{ fontSize: 12.5, color: "var(--navy-soft)" }}>
+                {" "}
+                · {dt(decision.decidedAt)} · {decision.deciderName || decision.deciderEmail}
+              </span>
+            </p>
+            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--ink)", whiteSpace: "pre-wrap" }}>{decision.rationale}</p>
+            {decision.signpostedTo && (
+              <p style={{ margin: 0, fontSize: 13.5, color: "var(--ink)" }}>
+                Signposted to <strong>{decision.signpostedTo}</strong>
+              </p>
+            )}
+            {earlierDecisions.length > 0 && (
+              <details style={{ marginTop: 6 }}>
+                <summary style={{ cursor: "pointer", fontSize: 12.5, fontWeight: 700, color: "var(--teal-deep)" }}>
+                  Earlier decisions ({earlierDecisions.length})
+                </summary>
+                <ul style={{ margin: "8px 0 0", padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+                  {earlierDecisions.map((e) => (
+                    <li key={e.id} style={{ fontSize: 13, lineHeight: 1.5, color: "var(--ink)" }}>
+                      <strong>{outcomeLabel(e.outcome)}</strong>
+                      <span style={{ color: "var(--navy-soft)" }}> · {dt(e.decidedAt)} · {e.deciderName || e.deciderEmail}</span>
+                      <br />
+                      {e.rationale}
+                      {e.signpostedTo && ` (signposted to ${e.signpostedTo})`}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
+        ) : (
+          <Empty>
+            No decision yet. Record it in or after the Initial Wellbeing Consultation; ongoing sessions stay closed
+            until it is Suitable.
+          </Empty>
+        )}
+        {canDecide && <SuitabilityForm clientId={client.id} hasDecision={!!decision} />}
+      </Section>
 
       {/* contact + safety */}
       <Section title="Contact & safety">
@@ -371,7 +437,8 @@ export default async function ClientRecordPage({
           <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
             {appointments.map((a) => (
               <li key={a.id} style={{ fontSize: 14, color: "var(--ink)" }}>
-                <strong style={{ color: "var(--navy)" }}>{dt(a.startsAt)}</strong> — {a.status.replace(/_/g, " ")}
+                <strong style={{ color: "var(--navy)" }}>{dt(a.startsAt)}</strong> — {kindLabel(a.kind)},{" "}
+                {a.status.replace(/_/g, " ")}
                 {a.chargedToPackage && " (charged)"}
               </li>
             ))}

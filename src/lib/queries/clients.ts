@@ -12,8 +12,9 @@ import {
   referrals,
   riskFlags,
   safeguardingConcerns,
-  sessionNotes,
   sessionNoteAmendments,
+  sessionNotes,
+  suitabilityDecisions,
   users,
 } from "@/db/schema";
 import { requireCapability, requireClientAccess } from "@/lib/guard";
@@ -132,6 +133,7 @@ export async function getClientRecord(clientId: string) {
     docs,
     supervision,
     worksheets,
+    decisions,
   ] = await Promise.all([
     db
       .select()
@@ -176,6 +178,21 @@ export async function getClientRecord(clientId: string) {
     // Part of the record, so read under the same audited open.
     listSupervisionForClient(clientId),
     listWorksheetsForClient(clientId),
+    // Suitability decisions, newest first: the first is the one in force.
+    db
+      .select({
+        id: suitabilityDecisions.id,
+        outcome: suitabilityDecisions.outcome,
+        rationale: suitabilityDecisions.rationale,
+        signpostedTo: suitabilityDecisions.signpostedTo,
+        decidedAt: suitabilityDecisions.decidedAt,
+        deciderName: users.displayName,
+        deciderEmail: users.email,
+      })
+      .from(suitabilityDecisions)
+      .leftJoin(users, eq(users.id, suitabilityDecisions.decidedBy))
+      .where(eq(suitabilityDecisions.clientId, clientId))
+      .orderBy(desc(suitabilityDecisions.decidedAt)),
   ]);
 
   // Amendments are attached to their notes so the record reads as the original
@@ -215,6 +232,7 @@ export async function getClientRecord(clientId: string) {
     documents: docs,
     supervision,
     worksheets,
+    decisions,
   };
 }
 

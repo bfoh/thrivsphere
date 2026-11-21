@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { kindLabel } from "@/lib/allocation";
 import { and, desc, eq, gte, lt, ne, or, type SQL } from "drizzle-orm";
 import { getDb } from "@/db";
 import { appointments, clients } from "@/db/schema";
@@ -33,6 +34,7 @@ export default async function AppointmentsPage({
     startsAt: appointments.startsAt,
     endsAt: appointments.endsAt,
     status: appointments.status,
+    kind: appointments.kind,
     meetingLinkEncrypted: appointments.meetingLinkEncrypted,
     chargedToPackage: appointments.chargedToPackage,
     practitionerId: appointments.practitionerId,
@@ -118,7 +120,7 @@ export default async function AppointmentsPage({
                   )}
                 </div>
                 <div style={{ margin: "-4px 0 10px", fontSize: 13, color: "var(--navy-soft)" }}>
-                  With {a.practitionerId === actor.userId ? "you" : nameOf.get(a.practitionerId) ?? "a former colleague"}
+                  {kindLabel(a.kind)} · with {a.practitionerId === actor.userId ? "you" : nameOf.get(a.practitionerId) ?? "a former colleague"}
                 </div>
                 <StatusButtons appointmentId={a.id} />
                 <MeetingLinkForm appointmentId={a.id} hasLink={!!a.meetingLinkEncrypted} />
@@ -142,6 +144,7 @@ export default async function AppointmentsPage({
                   {a.startsAt.toLocaleString("en-GB", { timeZone: LDN, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                 </span>
                 <span>{a.clientName ?? "—"}</span>
+                <span style={{ color: "var(--navy-soft)" }}>{kindLabel(a.kind)}</span>
                 <span style={{ color: "var(--navy-soft)" }}>{nameOf.get(a.practitionerId) ?? "—"}</span>
                 <span style={{ color: "var(--navy-soft)" }}>{a.status.replace(/_/g, " ")}{a.chargedToPackage ? " · counted as used" : ""}</span>
                 {a.chargedToPackage && <ReturnSessionButton appointmentId={a.id} />}

@@ -73,6 +73,16 @@ a member who can be removed.
   pay at Stripe while the time is held (`docs/stripe-webhook.md`). The
   consultation is no longer sold on its own under *Buy sessions*. Later
   sessions are bought there and booked from credit as before.
+- **After the Initial Wellbeing Consultation:** on the client's record,
+  under **Consultation outcome**, the practitioner records *Suitable*,
+  *Clarification or further support needed* or *Not suitable — signpost*,
+  with the reason (IT handover §13.1). Only *Suitable* lets the client book
+  and buy ongoing sessions, and they are emailed that they can. *Not
+  suitable* adds the signposting under Referrals, marks the client declined
+  and reminds the owner to consider refunding the £30 in Stripe; the client
+  is not emailed, so the practitioner explains it. Clients waiting for an
+  outcome are listed on the **Dashboard**. A decision can be changed by
+  recording a new one; earlier ones stay on the record.
 - **Prices and service descriptions:** **Services & prices**
   (`/admin/catalogue`). A price change reaches the pricing page, the client's
   *Buy sessions* page and card checkout together. Service wording shows on the

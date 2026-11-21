@@ -9,6 +9,7 @@ import {
   enquiryAcknowledgement,
   enquiryStaffNotice,
   paidTimeUnavailable,
+  sessionsOpen,
   paymentAlert,
   paymentReceipt,
   reminder1h,
@@ -45,6 +46,7 @@ const brandedEmails = () => [
   callbackAcknowledgement("TS-234567"),
   bookingLinkEmail({ price: "£30" }),
   paidTimeUnavailable(),
+  sessionsOpen(),
 ];
 
 // Emails to someone with an account. An enquirer has none, so the

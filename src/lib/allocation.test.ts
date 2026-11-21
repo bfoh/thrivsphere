@@ -6,7 +6,9 @@ import {
   NOTICE_HOURS,
   NOTICE_PERIOD,
   SUPPORT_SESSION,
-  appointmentKinds,
+  kindFor,
+  kindLabel,
+  nextKindFrom,
   bookingRoute,
   canReschedule,
   cancellationOutcome,
@@ -154,31 +156,34 @@ describe("selectPackage", () => {
   });
 });
 
-describe("appointmentKinds", () => {
-  it("names the first live appointment the Initial Wellbeing Needs Review", () => {
-    const kinds = appointmentKinds([
-      { id: "second", startsAt: at("2026-11-20T18:00:00Z"), status: "scheduled" },
-      { id: "first", startsAt: at("2026-11-10T18:00:00Z"), status: "completed" },
-    ]);
-    assert.equal(kinds.get("first"), INITIAL_REVIEW);
-    assert.equal(kinds.get("second"), SUPPORT_SESSION);
+describe("appointment kinds (handover §13.1)", () => {
+  it("names each kind as the client sees it", () => {
+    assert.equal(kindLabel("initial"), INITIAL_REVIEW);
+    assert.equal(kindLabel("session"), SUPPORT_SESSION);
   });
 
-  it("does not let a cancelled first booking use up the review", () => {
-    const kinds = appointmentKinds([
-      { id: "cancelled", startsAt: at("2026-11-05T18:00:00Z"), status: "cancelled_by_client" },
-      { id: "rebooked", startsAt: at("2026-11-12T18:00:00Z"), status: "scheduled" },
-    ]);
-    assert.equal(kinds.get("rebooked"), INITIAL_REVIEW);
-    assert.equal(kinds.get("cancelled"), SUPPORT_SESSION);
+  it("books the review as the initial consultation and everything after as a session", () => {
+    assert.equal(kindFor("review"), "initial");
+    assert.equal(kindFor("session"), "session");
   });
 
-  it("does not treat a time still being paid for as the review", () => {
-    const kinds = appointmentKinds([
-      { id: "held", startsAt: at("2026-11-05T18:00:00Z"), status: "pending_payment" },
-      { id: "booked", startsAt: at("2026-11-12T18:00:00Z"), status: "scheduled" },
-    ]);
-    assert.equal(kinds.get("booked"), INITIAL_REVIEW);
+  it("starts with the review", () => {
+    assert.equal(nextKindFrom([]), "review");
+  });
+
+  it("moves on to sessions once the review is booked or done", () => {
+    assert.equal(nextKindFrom([{ kind: "initial", status: "scheduled" }]), "session");
+    assert.equal(nextKindFrom([{ kind: "initial", status: "completed" }]), "session");
+  });
+
+  it("leaves the review to book when it was cancelled, missed or is still being paid for", () => {
+    for (const status of ["cancelled_by_client", "cancelled_by_service", "no_show", "pending_payment"]) {
+      assert.equal(nextKindFrom([{ kind: "initial", status }]), "review", status);
+    }
+  });
+
+  it("does not count a session as the review", () => {
+    assert.equal(nextKindFrom([{ kind: "session", status: "completed" }]), "review");
   });
 });
 

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { requirePortalClient } from "@/lib/portal-guard";
 import { getActivePlans } from "@/lib/queries/catalogue";
 import { REVIEW_PLAN_SLUG } from "@/lib/allocation";
+import { getSessionGate } from "@/lib/booking-engine";
 import { PlanButton } from "@/components/portal/PlanButton";
 import { Icon } from "@/components/icons";
 
@@ -11,11 +13,13 @@ const money = (pence: number, currency: string) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency, minimumFractionDigits: 0 }).format(pence / 100);
 
 export default async function PurchasePage() {
-  await requirePortalClient();
+  const { clientId } = await requirePortalClient();
 
   // The initial consultation is paid for as it is booked (IT handover §19),
-  // so it is not sold on its own here.
-  const plans = (await getActivePlans()).filter((p) => p.slug !== REVIEW_PLAN_SLUG);
+  // so it is not sold on its own here; everything else pays for ongoing
+  // sessions, which open only after the practitioner records Suitable.
+  const [all, gate] = await Promise.all([getActivePlans(), getSessionGate(clientId)]);
+  const plans = gate.open ? all.filter((p) => p.slug !== REVIEW_PLAN_SLUG) : [];
 
   return (
     <div style={{ maxWidth: 980, margin: "0 auto", padding: "40px 24px 72px" }}>
@@ -26,6 +30,16 @@ export default async function PurchasePage() {
         Payment is handled securely by Stripe — your card details never reach ThriveSphere. Sessions
         appear in your account as soon as payment clears.
       </p>
+
+      {!gate.open && (
+        <div className="card" style={{ padding: 32 }}>
+          <h2 style={{ margin: "0 0 8px", fontSize: 19, color: "var(--navy)" }}>Next steps</h2>
+          <p style={{ margin: "0 0 18px", fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>{gate.message}</p>
+          <Link href="/portal/messages" className="pill pill-teal" style={{ padding: "12px 24px", fontSize: 14.5 }}>
+            Message us
+          </Link>
+        </div>
+      )}
 
       <div className="prog-grid" style={{ display: "grid", gridTemplateColumns: `repeat(${Math.max(plans.length, 1)},1fr)`, gap: 16 }}>
         {plans.map((p) => (

@@ -10,15 +10,19 @@ import {
   practitionerSettings,
   pricePlans,
   remindersSent,
+  suitabilityDecisions,
   users,
 } from "@/db/schema";
 import {
   REVIEW_PLAN_SLUG,
   isOverlapViolation,
+  nextKindFrom,
   rankPractitioners,
   selectPackage,
+  type AppointmentKind,
   type BookingKind,
 } from "./allocation";
+import { sessionGate, type SessionGate, type SuitabilityOutcome } from "./suitability-rules";
 import { getPooledSlots } from "./queries/availability";
 import { expireCheckoutSession, retrieveCheckoutSession } from "./stripe";
 import { sendEmail } from "./email";
@@ -54,19 +58,34 @@ export async function getClientCredits(clientId: string) {
 }
 
 /**
- * What the client's next booking is. Their first appointment that went ahead
- * or is still booked is the review (see `appointmentKinds`), so a cancelled
- * one leaves the review still to book.
+ * What the client's next booking is: the review until their initial
+ * consultation is booked or done, then sessions (see `nextKindFrom`).
  */
 export async function nextBookingKind(clientId: string): Promise<BookingKind> {
-  const [live] = await getDb()
-    .select({ id: appointments.id })
+  const rows = await getDb()
+    .select({ kind: appointments.kind, status: appointments.status })
     .from(appointments)
-    .where(
-      and(eq(appointments.clientId, clientId), inArray(appointments.status, ["scheduled", "completed", "no_show"]))
-    )
+    .where(and(eq(appointments.clientId, clientId), eq(appointments.kind, "initial")));
+  return nextKindFrom(rows);
+}
+
+/** The client's latest suitability decision, or null if none is recorded. */
+export async function latestSuitability(clientId: string): Promise<SuitabilityOutcome | null> {
+  const [row] = await getDb()
+    .select({ outcome: suitabilityDecisions.outcome })
+    .from(suitabilityDecisions)
+    .where(eq(suitabilityDecisions.clientId, clientId))
+    .orderBy(desc(suitabilityDecisions.decidedAt))
     .limit(1);
-  return live ? "session" : "review";
+  return row?.outcome ?? null;
+}
+
+/**
+ * Whether the client may book or buy ongoing sessions: only after their
+ * practitioner records Suitable (IT handover §13.1).
+ */
+export async function getSessionGate(clientId: string): Promise<SessionGate> {
+  return sessionGate(await latestSuitability(clientId));
 }
 
 /**
@@ -137,6 +156,7 @@ export type PlaceResult =
 export async function placeBooking({
   clientId,
   startsAt,
+  kind,
   packageId,
   preferPractitionerId,
   onlyPractitionerId,
@@ -146,6 +166,8 @@ export async function placeBooking({
 }: {
   clientId: string;
   startsAt: Date;
+  /** The initial consultation or an ongoing session. */
+  kind: AppointmentKind;
   packageId: string | null;
   preferPractitionerId?: string | null;
   /** The practitioner the client chose. */
@@ -214,6 +236,7 @@ export async function placeBooking({
           startsAt: slot.startsAt,
           endsAt: slot.endsAt,
           status: hold ? "pending_payment" : "scheduled",
+          kind,
           packageId,
           orderId: hold?.orderId ?? null,
           holdExpiresAt: hold?.expiresAt ?? null,

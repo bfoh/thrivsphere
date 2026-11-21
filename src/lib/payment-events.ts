@@ -242,7 +242,13 @@ async function rebookPaidTime(
   packageId: string,
   booking: { startsAt: Date; practitionerId: string | null }
 ): Promise<ConfirmedHold | null> {
-  const placed = await placeBooking({ clientId, startsAt: booking.startsAt, packageId, preferPractitionerId: booking.practitionerId });
+  const placed = await placeBooking({
+    clientId,
+    startsAt: booking.startsAt,
+    kind: "initial",
+    packageId,
+    preferPractitionerId: booking.practitionerId,
+  });
   if (!placed.ok) return null;
   const db = getDb();
   await db.batch([
