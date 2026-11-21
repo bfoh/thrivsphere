@@ -115,6 +115,8 @@ the pages, so they always need a redeploy.
 - [ ] Set `EMAIL_FROM_NAME` to `ThriveSphere Wellbeing`.
 - [ ] Rename the application in Clerk (Dashboard → Settings) and re-run
       `npx dotenv -e .env.local -- npx tsx scripts/brand-clerk-emails.ts`.
+      The script needs a paid Clerk plan; on the current plan Clerk refuses
+      it (see `docs/email-provider.md`).
 - [ ] Patience adds her name under *Manage account → Profile* and her default
       meeting room under **Availability**.
 - [ ] Invite Lucy at **Staff**. She then completes the same two steps.

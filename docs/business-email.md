@@ -19,8 +19,8 @@ The checklist asks for:
   address until she confirms a domain address. It is `brand.email` in
   `src/data/site.ts`.
 - Website enquiries are delivered to the address in `ENQUIRY_TO_EMAIL`, or to
-  `brand.email` when that variable is not set. The handover says enquiries go
-  to `patbarning@yahoo.co.uk`.
+  `brand.email` when that variable is not set. It is a Gmail inbox, which the
+  business decided on 21 November 2026 to keep for enquiries.
 - Sending is already set up. Brevo sends the website's emails from
   `no-reply@thrivsphere.org`, and its SPF, DKIM and DMARC records are
   published. Nothing below may remove them.

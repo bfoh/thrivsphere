@@ -87,6 +87,12 @@ npx dotenv -e .env.local -- npx tsx scripts/brand-clerk-emails.ts
 an instance, so a new one starts with Clerk's defaults and every account email
 reverts to generic Clerk branding.
 
+**Not applied yet (checked 21 November 2026).** The production instance refuses
+every template change with `402 Unsupported plan features`: custom email
+templates need a paid Clerk plan. Until the plan is upgraded, Clerk sends its
+default emails, using the application name set in the Clerk dashboard. Run the
+script again after upgrading.
+
 Clerk validates required variables per template — `password_changed` must
 contain `{{primary_email_address}}`, for example — and rejects the update with
 a 422 naming the missing variable if one is dropped.
