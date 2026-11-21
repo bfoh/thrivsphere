@@ -6,6 +6,7 @@ import { and, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { clients, consents, orders, pricePlans } from "@/db/schema";
 import { getCurrentActor } from "@/lib/session";
+import { recordAttribution } from "@/lib/lead-attribution";
 import { recordAudit } from "@/lib/audit";
 import { createCheckoutSession } from "@/lib/stripe";
 import {
@@ -304,6 +305,7 @@ export async function startBookingCheckout(_prev: PaymentState, formData: FormDa
   if (offer.pricePence === 0) {
     // Nothing to pay: credit the consultation and book it straight away.
     const { order } = await settleFreeOrder(clientId, plan, offer);
+    await recordAttribution({ orderId: order.id }, formData, h.get("host"));
     const packageId = await reserveSession(clientId, "review", now);
     const placed = await placeBooking({
       clientId,
@@ -349,6 +351,9 @@ export async function startBookingCheckout(_prev: PaymentState, formData: FormDa
       ...discountFields(offer),
     })
     .returning();
+
+  // How they found us, if they said. Counted only once the order is paid.
+  await recordAttribution({ orderId: order.id }, formData, h.get("host"));
 
   const placed = await placeBooking({
     clientId,

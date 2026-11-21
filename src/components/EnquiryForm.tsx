@@ -7,6 +7,7 @@ import { submitEnquiry } from "@/app/actions/enquiry";
 import { initialEnquiryState } from "@/lib/enquiry-state";
 import { CONTACT_CATEGORIES } from "@/lib/enquiry-rules";
 import {
+  AttributionFields,
   ContactMethodField,
   FormAlert,
   Honeypot,
@@ -83,6 +84,8 @@ export function EnquiryForm() {
           </p>
         )}
       </div>
+
+      <AttributionFields defaultValue={v.heardVia} defaultDetail={v.heardViaDetail} />
 
       <Honeypot />
       <PrivacyAcknowledgement error={fe.privacy} />

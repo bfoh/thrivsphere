@@ -11,6 +11,7 @@ import { sendEmail } from "@/lib/email";
 import { callbackAcknowledgement, enquiryAcknowledgement, enquiryStaffNotice } from "@/lib/email-templates";
 import { makeReference, parseEnquiry, type EnquiryForm } from "@/lib/enquiry-rules";
 import { recordAudit } from "@/lib/audit";
+import { recordAttribution } from "@/lib/lead-attribution";
 
 /**
  * Very small in-memory rate limit.
@@ -47,7 +48,7 @@ export async function requestCallback(_prev: EnquiryState, formData: FormData): 
 }
 
 /** Returned to the form with its errors. Checkboxes are left unticked. */
-const TYPED_FIELDS = ["category", "name", "email", "country", "phone", "preferredContact", "subject", "message", "preferredTimes"];
+const TYPED_FIELDS = ["category", "name", "email", "country", "phone", "preferredContact", "subject", "message", "preferredTimes", "heardVia", "heardViaDetail"];
 
 const CONFIRMATION: Record<EnquiryForm, string> = {
   // §16.5, word for word.
@@ -136,6 +137,9 @@ async function receive(form: EnquiryForm, formData: FormData): Promise<EnquirySt
     console.error("[enquiry] not stored", err);
     return failed;
   }
+
+  // How they found us, if they said or arrived by a tagged link.
+  await recordAttribution({ enquiryId: row.id }, formData, hdrs.get("host"));
 
   const ack = form === "callback" ? callbackAcknowledgement(row.reference) : enquiryAcknowledgement(row.reference);
   const notice = enquiryStaffNotice({ id: row.id, reference: row.reference, category: v.category });

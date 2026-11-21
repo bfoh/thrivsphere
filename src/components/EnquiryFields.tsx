@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { Icon } from "./icons";
 import { CONTACT_METHODS } from "@/lib/enquiry-rules";
+import { HEARD_VIA, UTM_FIELDS } from "@/lib/attribution";
 
 /**
  * The pieces the public enquiry and callback forms share: labelled fields
@@ -168,6 +169,74 @@ export function PrivacyAcknowledgement({ error }: { error?: string }) {
       </Link>{" "}
       about how ThriveSphere handles enquiries.
     </Checkbox>
+  );
+}
+
+/**
+ * "How did you hear about us?" (optional), plus the tracking tags on the link
+ * the visitor arrived by, read from this page's address. Nothing is stored on
+ * their device. Controlled, so the answer survives a form sent back with errors.
+ */
+export function AttributionFields({ defaultValue, defaultDetail }: { defaultValue?: string; defaultDetail?: string }) {
+  const [heard, setHeard] = React.useState(defaultValue ?? "");
+  const [detail, setDetail] = React.useState(defaultDetail ?? "");
+  const [tags, setTags] = React.useState<Record<string, string>>({});
+  const selectRef = React.useRef<HTMLSelectElement>(null);
+  const heardRef = React.useRef(heard);
+
+  React.useEffect(() => {
+    heardRef.current = heard;
+  }, [heard]);
+
+  // React resets a form after its action runs. Text inputs come back with
+  // their value, but a controlled <select> shows its first option again, so
+  // put the answer back once the reset has happened.
+  React.useEffect(() => {
+    const select = selectRef.current;
+    const form = select?.form;
+    if (!select || !form) return;
+    const restore = () => requestAnimationFrame(() => (select.value = heardRef.current));
+    form.addEventListener("reset", restore);
+    return () => form.removeEventListener("reset", restore);
+  }, []);
+
+  React.useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const found: Record<string, string> = { landingPath: window.location.pathname, referrer: document.referrer };
+    for (const f of UTM_FIELDS) found[f] = q.get(f) ?? "";
+    // Read once, when the form appears: the browser's address is the source.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTags(found);
+  }, []);
+
+  return (
+    <div style={fieldBox}>
+      <label htmlFor="heardVia" style={labelStyle}>
+        How did you hear about us? (optional)
+      </label>
+      <select ref={selectRef} id="heardVia" name="heardVia" value={heard} onChange={(e) => setHeard(e.target.value)} style={inputStyle}>
+        <option value="">Choose if you&apos;d like to tell us…</option>
+        {HEARD_VIA.map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
+      {heard === "other" && (
+        <input
+          aria-label="Where did you hear about us?"
+          name="heardViaDetail"
+          value={detail}
+          onChange={(e) => setDetail(e.target.value)}
+          maxLength={80}
+          placeholder="Where? (optional)"
+          style={inputStyle}
+        />
+      )}
+      {Object.entries(tags).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
+    </div>
   );
 }
 

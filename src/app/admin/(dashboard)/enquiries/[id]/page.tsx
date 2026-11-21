@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { asc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
-import { enquiries, enquiryEvents, users } from "@/db/schema";
+import { enquiries, enquiryEvents, leadAttributions, users } from "@/db/schema";
+import { describeAttribution } from "@/lib/attribution";
 import { requireCapability } from "@/lib/guard";
 import { Section, Field, Empty } from "@/components/admin/RecordUI";
 import { BackLink } from "@/components/admin/BackLink";
@@ -37,7 +38,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
   await requireCapability("enquiry:manage", { entity: "enquiries", entityId: id, action: "view", detail: "opened an enquiry" });
 
   const db = getDb();
-  const [[enquiry], history, staff, bookable] = await Promise.all([
+  const [[enquiry], history, staff, bookable, [attribution]] = await Promise.all([
     db.select().from(enquiries).where(eq(enquiries.id, id)).limit(1),
     db
       .select({
@@ -54,6 +55,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
       .orderBy(asc(enquiryEvents.createdAt)),
     getActiveStaff(),
     getBookablePractitioners(),
+    db.select().from(leadAttributions).where(eq(leadAttributions.enquiryId, id)).limit(1),
   ]);
   if (!enquiry) notFound();
 
@@ -93,6 +95,9 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
         </div>
         <div style={{ marginTop: 16 }}>
           <Field label={callback ? "Accessibility or communication needs" : "Message"} value={enquiry.message} />
+        </div>
+        <div style={{ marginTop: 16 }}>
+          <Field label="How they found us" value={describeAttribution(attribution) ?? "Not said"} small />
         </div>
       </Section>
 

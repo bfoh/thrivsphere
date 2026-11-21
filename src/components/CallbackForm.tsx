@@ -6,6 +6,7 @@ import { PillButton } from "./PillButton";
 import { requestCallback } from "@/app/actions/enquiry";
 import { initialEnquiryState } from "@/lib/enquiry-state";
 import {
+  AttributionFields,
   Checkbox,
   ContactMethodField,
   FormAlert,
@@ -78,6 +79,8 @@ export function CallbackForm({ price }: { price: string }) {
           your consultation.
         </p>
       </div>
+
+      <AttributionFields defaultValue={v.heardVia} defaultDetail={v.heardViaDetail} />
 
       <Honeypot />
       <Checkbox name="confirmAdult" error={fe.confirmAdult}>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { bookAppointment } from "@/app/actions/booking";
 import { rescheduleOwnAppointment } from "@/app/actions/appointments";
 import { startBookingCheckout } from "@/app/actions/payments";
+import { AttributionFields } from "@/components/EnquiryFields";
 import { checkDiscountCode } from "@/app/actions/discounts";
 import { initialBookingState, type BookingState } from "@/lib/booking-state";
 import { initialCodeCheckState } from "@/lib/discount-state";
@@ -247,6 +248,9 @@ export function SlotPicker({
               )}
             </div>
           ) : null}
+          <div style={{ margin: "0 0 14px", maxWidth: 420 }}>
+            <AttributionFields />
+          </div>
           <label htmlFor="bookingTerms" style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13.5, lineHeight: 1.55, color: "var(--ink)" }}>
             {/* Never ticked in advance (handover §15.1, §19). */}
             <input id="bookingTerms" name="bookingTerms" type="checkbox" style={{ marginTop: 3 }} />

@@ -54,6 +54,13 @@ const FROM3 = "2026-11-21";
 const V4 = "1.3.0";
 const FROM4 = "2026-11-21";
 
+/**
+ * "How did you hear about us?" and campaign links on the enquiry, callback
+ * and booking forms (21 November 2026).
+ */
+const V5 = "1.4.0";
+const FROM5 = "2026-11-21";
+
 /** "ThriveSphere Wellbeing is a trading name of …", with the registered office. */
 const whoWeAre = `${legal.statement} Registered office: ${legal.registeredOffice}.`;
 
@@ -61,8 +68,8 @@ export const policies: Record<string, Policy> = {
   privacy: {
     slug: "privacy",
     requiresConsent: true,
-    version: V4,
-    effectiveFrom: FROM4,
+    version: V5,
+    effectiveFrom: FROM5,
     audience: "public",
     title: "Privacy Policy",
     eyebrow: "Privacy · UK GDPR",
@@ -73,11 +80,11 @@ export const policies: Record<string, Policy> = {
       {
         heading: "What we collect",
         body: ["We only collect information you choose to share with us, which may include:"],
-        bullets: ["Your name and contact details", "Information you provide in our enquiry form — please keep this brief and avoid detailed health information", "The registration details, consents and session records kept in your secure ThriveSphere account", "Payment confirmations (card details are handled by our payment provider and never reach us)", "Messages you send us by email or WhatsApp", "If you comment on a blog post: the name you give, your email address and your comment", "Website analytics data (only with your consent)"],
+        bullets: ["Your name and contact details", "Information you provide in our enquiry form — please keep this brief and avoid detailed health information", "The registration details, consents and session records kept in your secure ThriveSphere account", "Payment confirmations (card details are handled by our payment provider and never reach us)", "Messages you send us by email or WhatsApp", "If you comment on a blog post: the name you give, your email address and your comment", "How you heard about us, if you choose to tell us, and the campaign name in a link you followed to one of our forms (this is read from the link itself; no cookie is used)", "Website analytics data (only with your consent)"],
       },
       {
         heading: "How we use your information",
-        bullets: ["To respond to your enquiry and arrange your sessions", "To provide wellbeing support and education", "To send appointment confirmations, reminders and payment confirmations (you can turn appointment emails off in your account)", "To meet our safeguarding and legal responsibilities"],
+        bullets: ["To respond to your enquiry and arrange your sessions", "To provide wellbeing support and education", "To send appointment confirmations, reminders and payment confirmations (you can turn appointment emails off in your account)", "To meet our safeguarding and legal responsibilities", "To understand, in overall numbers, how people find ThriveSphere, so we can improve the information we share"],
       },
       { heading: "Lawful basis", body: ["We process your data on the basis of your consent, our legitimate interest in providing wellbeing services, and to meet legal obligations. Special category (health) data is processed only with your explicit consent or where necessary for the provision of care."] },
       { heading: "How we protect it", body: ["Your data is stored securely, access is restricted to those who need it, and we use reputable, GDPR-compliant service providers. We never sell your data."] },

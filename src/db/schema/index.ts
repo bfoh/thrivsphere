@@ -21,3 +21,4 @@ export * from "./safeguarding";
 export * from "./organisation";
 export * from "./resources";
 export * from "./blog";
+export * from "./marketing";

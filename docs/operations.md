@@ -122,6 +122,13 @@ a member who can be removed.
     emailed: read them soon and follow the safeguarding procedure (the
     reader's email is shown there). Never publish a comment that identifies
     someone or gives personal or health details.
+- **How people found us:** the enquiry, callback and booking forms ask
+  "How did you hear about us?" (optional). Links shared in posts, emails or
+  leaflets can carry tracking tags, e.g.
+  `https://thrivsphere.org/book?utm_source=instagram&utm_medium=social&utm_campaign=spring-calm`;
+  point them straight at `/book` or `/contact`, because the tags are read
+  from the form page's address (no cookies). The answer shows on each
+  enquiry under *How they found us*. See `docs/marketing.md`.
 - **Prices and service descriptions:** **Services & prices**
   (`/admin/catalogue`). A price change reaches the pricing page, the client's
   *Buy sessions* page and card checkout together. Service wording shows on the
@@ -205,3 +212,6 @@ the pages, so they always need a redeploy.
       articles stay live, marked not yet reviewed, for Patience to review.
 - [ ] Patience reviews the four imported articles in **Blog**, and names any
       colleague who should approve posts on **Staff** (*Blog reviewer*).
+- [x] Apply migration `0015_lead_attribution` ("How did you hear about us?"
+      and campaign tags on enquiries, callbacks and paid consultations).
+      Applied 21 November 2026.
