@@ -7,7 +7,7 @@ import { appointments } from "@/db/schema";
 import { getCurrentActor } from "@/lib/session";
 import { requireClientAccess } from "@/lib/guard";
 import { ForbiddenError, UnauthenticatedError } from "@/lib/authz";
-import { RESCHEDULED_REASON, canReschedule, cancellationOutcome } from "@/lib/allocation";
+import { NOTICE_PERIOD, RESCHEDULED_REASON, canReschedule, cancellationOutcome } from "@/lib/allocation";
 import { notifyClient, notifyPractitioner, placeBooking, releaseSession } from "@/lib/booking-engine";
 import { appointmentMoved } from "@/lib/email-templates";
 import type { BookingState } from "@/lib/booking-state";
@@ -15,7 +15,7 @@ import type { BookingState } from "@/lib/booking-state";
 /**
  * A client cancelling or moving their own appointment (checklist §7).
  *
- * Both follow the Cancellation and Refund Policy: with 24 hours' notice or more
+ * Both follow the Cancellation and Refund Policy: with 72 hours' notice or more
  * a cancelled session goes back to the client's package; with less it counts
  * as used. Moving a session keeps it, so it needs the full notice.
  */
@@ -76,7 +76,7 @@ export async function cancelOwnAppointment(
     .set({
       status: "cancelled_by_client",
       cancelledAt: now,
-      cancellationReason: outcome.late ? "Cancelled by client with less than 24 hours' notice" : "Cancelled by client",
+      cancellationReason: outcome.late ? `Cancelled by client with less than ${NOTICE_PERIOD}' notice` : "Cancelled by client",
       chargedToPackage: outcome.late && !!appt.packageId,
       updatedAt: now,
     })
@@ -91,7 +91,7 @@ export async function cancelOwnAppointment(
   return {
     status: "ok",
     message: outcome.late
-      ? "Your appointment is cancelled. As it was less than 24 hours away, the session counts as used."
+      ? `Your appointment is cancelled. As it was less than ${NOTICE_PERIOD} away, the session counts as used.`
       : appt.packageId
         ? "Your appointment is cancelled and the session is back in your account."
         : "Your appointment is cancelled.",
@@ -122,7 +122,7 @@ export async function rescheduleOwnAppointment(
   if (!canReschedule({ startsAt: appt.startsAt, status: appt.status, now })) {
     return {
       status: "error",
-      message: "Appointments can be moved up to 24 hours beforehand. Please message us if you need help.",
+      message: `Appointments can be moved up to ${NOTICE_PERIOD} beforehand. Please message us if you need help.`,
     };
   }
 

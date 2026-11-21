@@ -17,6 +17,7 @@
  */
 
 import { legal } from "@/data/site";
+import { NOTICE_PERIOD } from "@/lib/allocation";
 
 const NAVY = "#1f3a5f";
 const TEAL = "#3d8a8a";
@@ -235,8 +236,9 @@ export function reminder24h(startsAt: Date): Email {
       body: `
         <p style="margin:0 0 14px;">This is a reminder of your appointment:</p>
         <p style="margin:0 0 18px;font-size:17px;font-weight:bold;color:${NAVY};">${w}</p>
-        <p style="margin:0;">If you need to rearrange, please let us know as soon as you can —
-        at least 24 hours' notice means there is no charge.</p>`,
+        <p style="margin:0;">If you can no longer attend, please let us know as soon as you can.
+        As it is less than ${NOTICE_PERIOD} away, the session counts as used if cancelled, but if
+        something urgent has come up, message us and we will be fair.</p>`,
       cta: { label: "View my appointment", href: `${siteUrl()}/portal` },
       footerNote: "You can turn these reminders off at any time in your account settings.",
     }),
@@ -244,8 +246,9 @@ export function reminder24h(startsAt: Date): Email {
       [
         `This is a reminder of your appointment on ${w}.`,
         "",
-        "If you need to rearrange, please let us know as soon as you can —",
-        "at least 24 hours' notice means there is no charge.",
+        "If you can no longer attend, please let us know as soon as you can.",
+        `As it is less than ${NOTICE_PERIOD} away, the session counts as used if cancelled, but if`,
+        "something urgent has come up, message us and we will be fair.",
         "",
         `Your account: ${siteUrl()}/portal`,
       ],
@@ -284,7 +287,7 @@ export function reminder1h(startsAt: Date): Email {
 /**
  * An appointment was cancelled.
  *
- * `late` follows the Cancellation and Refund Policy: with less than 24 hours'
+ * `late` follows the Cancellation and Refund Policy: with less than 72 hours'
  * notice the session counts as used, and the client is told so plainly rather
  * than finding out from their balance.
  */
@@ -294,7 +297,7 @@ export function appointmentCancelled(startsAt: Date, o: { by: "client" | "servic
     o.by === "service"
       ? "We're sorry for the change. Any session it used has been returned to your account."
       : o.late
-        ? "As it was cancelled with less than 24 hours' notice, the session counts as used, in line with our Cancellation and Refund Policy."
+        ? `As it was cancelled with less than ${NOTICE_PERIOD}' notice, the session counts as used, in line with our Cancellation and Refund Policy.`
         : "Any session it used has been returned to your account.";
   const lead = o.by === "service" ? "We have had to cancel your appointment on:" : "Your appointment has been cancelled:";
   return {

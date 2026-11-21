@@ -9,7 +9,7 @@ import { initialBookingState } from "@/lib/booking-state";
  * Cancel one appointment.
  *
  * Two steps, so the consequence is read before anything happens: the warning
- * is worked out on the server from the same 24-hour rule the action applies,
+ * is worked out on the server from the same notice rule the action applies,
  * so what the client is told is what will happen.
  */
 export function CancelAppointment({ appointmentId, warning }: { appointmentId: string; warning: string }) {

@@ -46,9 +46,10 @@ So the sending address is chosen here, in `EMAIL_FROM_ADDRESS`, not in Brevo.
 Changing it to `bookings@thrivsphere.org` or anything else at the same domain
 needs no Brevo change at all.
 
-`no-reply@` does not receive mail. Replies are directed to `hello@thrivsphere.org`
-by the `replyTo` field, so a client who hits reply still reaches a real inbox —
-worth checking that mailbox exists and is monitored.
+`no-reply@` does not receive mail. Replies are directed to `brand.email` in
+`src/data/site.ts` (currently `patbarning@yahoo.co.uk`, the owner's approved
+contact address) by the `replyTo` field, so a client who hits reply still
+reaches a real inbox.
 
 ## Behaviour when unconfigured
 

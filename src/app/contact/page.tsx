@@ -6,7 +6,7 @@ import { EnquiryForm } from "@/components/EnquiryForm";
 import { Icon } from "@/components/icons";
 import { WhatsAppLink } from "@/components/WhatsAppLink";
 import Link from "next/link";
-import { bookCta, brand } from "@/data/site";
+import { bookCta, brand, legal } from "@/data/site";
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -20,7 +20,7 @@ export default function ContactPage() {
       eyebrow="Contact Us"
       watermark="Contact"
       title="Get in touch, in confidence"
-      intro="Send us a general enquiry and we'll be in touch. We usually reply within two working days. Please don't include detailed health information in your message — we'll talk about that privately."
+      intro="Send us a general enquiry and we'll be in touch. Please don't include detailed health information in your message — we'll talk about that privately."
     >
       <NotCrisisNotice style={{ marginBottom: 34 }} />
 
@@ -76,6 +76,16 @@ export default function ContactPage() {
             </h2>
             <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.6, color: "var(--ink)" }}>
               {brand.audienceLine} We do not currently provide services to under-18s.
+            </p>
+          </div>
+
+          <div className="card" style={{ padding: 24 }}>
+            <h2 style={{ margin: "0 0 10px", fontSize: 18, color: "var(--navy)", display: "flex", alignItems: "center", gap: 8 }}>
+              <Icon name="shield" size={20} stroke="var(--teal)" /> Who we are
+            </h2>
+            <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.6, color: "var(--ink)" }}>
+              {brand.name} is a trading name of {legal.companyName}, registered in{" "}
+              {legal.jurisdiction}, company number {legal.companyNumber}.
             </p>
           </div>
         </div>

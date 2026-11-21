@@ -2,7 +2,12 @@ export const brand = {
   name: "ThriveSphere Wellbeing",
   short: "ThriveSphere",
   tagline: "Supporting Your Wellbeing. Strengthening Your Resilience.",
-  email: "hello@thrivsphere.org",
+  /**
+   * The owner's approved contact address (IT handover, 15 November 2026,
+   * §16.1). It is also the Reply-To on every email. A thrivsphere.org address
+   * replaces it only once a mailbox exists and the owner confirms it.
+   */
+  email: "patbarning@yahoo.co.uk",
   location: "United Kingdom · Online wellbeing support",
   /** One-line positioning. Non-clinical — see `scopeOfPractice` below. */
   positioning:

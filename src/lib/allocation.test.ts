@@ -2,11 +2,14 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   INITIAL_REVIEW,
+  NOTICE_HOURS,
+  NOTICE_PERIOD,
   SUPPORT_SESSION,
   appointmentKinds,
   canReschedule,
   cancellationOutcome,
   isOverlapViolation,
+  noticeDeadline,
   poolSlots,
   rankPractitioners,
   selectPackage,
@@ -171,8 +174,13 @@ describe("appointmentKinds", () => {
 describe("cancellationOutcome", () => {
   const now = at("2026-11-01T12:00:00Z");
 
-  it("returns the session with 24 hours' notice or more", () => {
-    assert.deepEqual(cancellationOutcome({ startsAt: at("2026-11-02T12:00:00Z"), status: "scheduled", now }), {
+  it("asks for the 72 hours' notice the owner confirmed", () => {
+    assert.equal(NOTICE_HOURS, 72);
+    assert.equal(NOTICE_PERIOD, "72 hours");
+  });
+
+  it("returns the session with 72 hours' notice or more", () => {
+    assert.deepEqual(cancellationOutcome({ startsAt: at("2026-11-04T12:00:00Z"), status: "scheduled", now }), {
       allowed: true,
       late: false,
       returnsSession: true,
@@ -180,11 +188,18 @@ describe("cancellationOutcome", () => {
   });
 
   it("counts the session as used with less notice", () => {
-    assert.deepEqual(cancellationOutcome({ startsAt: at("2026-11-02T11:59:00Z"), status: "scheduled", now }), {
+    assert.deepEqual(cancellationOutcome({ startsAt: at("2026-11-04T11:59:00Z"), status: "scheduled", now }), {
       allowed: true,
       late: true,
       returnsSession: false,
     });
+    // A day's notice was enough under the old 24-hour rule; it no longer is.
+    const dayAhead = cancellationOutcome({ startsAt: at("2026-11-02T12:00:00Z"), status: "scheduled", now });
+    assert.ok(dayAhead.allowed && dayAhead.late);
+  });
+
+  it("names the last moment to cancel or move free of charge", () => {
+    assert.equal(noticeDeadline(at("2026-11-04T12:00:00Z")).toISOString(), "2026-11-01T12:00:00.000Z");
   });
 
   it("refuses once the session has started or is no longer booked", () => {
@@ -193,8 +208,9 @@ describe("cancellationOutcome", () => {
   });
 
   it("allows rescheduling only with the full notice period", () => {
-    assert.equal(canReschedule({ startsAt: at("2026-11-02T12:00:00Z"), status: "scheduled", now }), true);
-    assert.equal(canReschedule({ startsAt: at("2026-11-02T11:00:00Z"), status: "scheduled", now }), false);
+    assert.equal(canReschedule({ startsAt: at("2026-11-04T12:00:00Z"), status: "scheduled", now }), true);
+    assert.equal(canReschedule({ startsAt: at("2026-11-04T11:00:00Z"), status: "scheduled", now }), false);
+    assert.equal(canReschedule({ startsAt: at("2026-11-02T12:00:00Z"), status: "scheduled", now }), false);
     assert.equal(canReschedule({ startsAt: at("2026-11-09T11:00:00Z"), status: "cancelled_by_client", now }), false);
   });
 });

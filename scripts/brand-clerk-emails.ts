@@ -163,7 +163,7 @@ const TEMPLATES: TemplateSpec[] = [
     // can see which account the notice is about.
     body:
       `<p style="margin:0 0 16px;">The password for <strong>{{primary_email_address}}</strong> has just been changed.</p>` +
-      `<p style="margin:0;"><strong>If this wasn't you</strong>, reset your password now and contact us at <a href="mailto:hello@thrivsphere.org" style="color:${TEAL};">hello@thrivsphere.org</a>.</p>`,
+      `<p style="margin:0;"><strong>If this wasn't you</strong>, reset your password now and contact us at <a href="mailto:${brand.email}" style="color:${TEAL};">${brand.email}</a>.</p>`,
   },
   {
     slug: "new_device_sign_in",
@@ -172,7 +172,7 @@ const TEMPLATES: TemplateSpec[] = [
     body:
       `<p style="margin:0 0 16px;">Someone signed in to your ThriveSphere account from a new device.</p>` +
       `<p style="margin:0 0 16px;color:${MUTED};font-size:14px;">{{requested_from}}{{#if requested_at}} &middot; {{requested_at}}{{/if}}</p>` +
-      `<p style="margin:0;"><strong>If this wasn't you</strong>, change your password and contact us at <a href="mailto:hello@thrivsphere.org" style="color:${TEAL};">hello@thrivsphere.org</a>.</p>`,
+      `<p style="margin:0;"><strong>If this wasn't you</strong>, change your password and contact us at <a href="mailto:${brand.email}" style="color:${TEAL};">${brand.email}</a>.</p>`,
   },
   {
     slug: "account_locked",
@@ -180,7 +180,7 @@ const TEMPLATES: TemplateSpec[] = [
     heading: "Your account is temporarily locked",
     body:
       `<p style="margin:0 0 16px;">Too many sign-in attempts, so your account has been locked for a short time to keep it safe.</p>` +
-      `<p style="margin:0;">You can try again shortly. If you're stuck, email <a href="mailto:hello@thrivsphere.org" style="color:${TEAL};">hello@thrivsphere.org</a> and we'll help.</p>`,
+      `<p style="margin:0;">You can try again shortly. If you're stuck, email <a href="mailto:${brand.email}" style="color:${TEAL};">${brand.email}</a> and we'll help.</p>`,
   },
 ];
 

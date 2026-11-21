@@ -86,8 +86,8 @@ export function BookingForm() {
           Thank you — we&apos;ve got your request
         </h2>
         <p style={{ margin: "10px auto 0", maxWidth: 440, fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>
-          We&apos;ll reply privately, usually within 2 working days, to arrange your session. If you
-          need urgent help before then, please use the emergency contacts above.
+          We&apos;ll reply privately to arrange your session. If you need urgent help, please use
+          the emergency contacts above.
         </p>
       </div>
     );

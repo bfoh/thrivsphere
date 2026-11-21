@@ -7,10 +7,12 @@ import { getDb } from "@/db";
 import { appointments, packages, users } from "@/db/schema";
 import { decryptSecret } from "@/lib/crypto";
 import {
+  NOTICE_PERIOD,
   RESCHEDULED_REASON,
   appointmentKinds,
   canReschedule,
   cancellationOutcome,
+  noticeDeadline,
   sessionsRemaining,
 } from "@/lib/allocation";
 import { formatAppointment } from "@/lib/slot-groups";
@@ -41,11 +43,11 @@ function joinLink(encrypted: string | null): string | null {
 function cancelWarning(startsAt: Date, hasPackage: boolean, now: Date): string {
   const outcome = cancellationOutcome({ startsAt, status: "scheduled", now });
   if (outcome.allowed && outcome.late) {
-    return "This appointment is less than 24 hours away, so if you cancel now the session counts as used. If this is an emergency, please message us first — we will be fair.";
+    return `This appointment is less than ${NOTICE_PERIOD} away, so if you cancel now the session counts as used. If this is an emergency, please message us first — we will be fair.`;
   }
   return hasPackage
-    ? "With 24 hours' notice or more there is no charge — the session goes back to your account to use again."
-    : "With 24 hours' notice or more there is no charge.";
+    ? `With ${NOTICE_PERIOD}' notice or more there is no charge — the session goes back to your account to use again.`
+    : `With ${NOTICE_PERIOD}' notice or more there is no charge.`;
 }
 
 export default async function AppointmentsPage() {
@@ -119,6 +121,11 @@ export default async function AppointmentsPage() {
                   <div style={{ marginTop: 3, fontSize: 13.5, color: "var(--navy-soft)" }}>
                     {kinds.get(a.id)} · with {a.practitioner ?? "your practitioner"} · online
                   </div>
+                  {movable && (
+                    <div style={{ marginTop: 3, fontSize: 13, color: "var(--navy-soft)" }}>
+                      Free to cancel or move until {formatAppointment(noticeDeadline(a.startsAt))}
+                    </div>
+                  )}
 
                   <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                     {link ? (
@@ -137,7 +144,7 @@ export default async function AppointmentsPage() {
                     ) : (
                       !started && (
                         <span style={{ fontSize: 13, color: "var(--navy-soft)" }}>
-                          Less than 24 hours away —{" "}
+                          Less than {NOTICE_PERIOD} away —{" "}
                           <Link href="/portal/messages" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>message us</Link>{" "}
                           to change it.
                         </span>

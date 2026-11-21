@@ -17,8 +17,8 @@ export default async function MessagesPage() {
         Messages
       </h1>
       <p style={{ margin: "0 0 26px", fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>
-        A private way to reach us between sessions. We usually reply within two working days — this
-        is not monitored around the clock, so please use the emergency numbers if you need help now.
+        A private way to reach us between sessions. Messages are not monitored around the clock, so
+        please use the emergency numbers if you need help now.
       </p>
       <MessageThread
         clientId={state.clientId}

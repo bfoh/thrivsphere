@@ -166,8 +166,19 @@ export function appointmentKinds(
 /** Recorded on the old booking when a client moves an appointment. */
 export const RESCHEDULED_REASON = "Rescheduled by client";
 
-/** The notice the cancellation policy asks for. */
-export const NOTICE_HOURS = 24;
+/**
+ * The notice the Cancellation and Refund Policy asks for, to cancel or move an
+ * appointment without the session counting as used. The owner confirmed 72
+ * hours in the IT handover of 15 November 2026. Wording that states the rule
+ * uses NOTICE_PERIOD, so the policy, emails and portal always match it.
+ */
+export const NOTICE_HOURS = 72;
+export const NOTICE_PERIOD = `${NOTICE_HOURS} hours`;
+
+/** The last moment an appointment can be cancelled or moved free of charge. */
+export function noticeDeadline(startsAt: Date): Date {
+  return new Date(startsAt.getTime() - NOTICE_HOURS * HOUR);
+}
 
 export type CancellationOutcome =
   | { allowed: false; reason: string }
@@ -176,7 +187,7 @@ export type CancellationOutcome =
 /**
  * What happens when a client cancels.
  *
- * With 24 hours' notice or more the session goes back to their package. With
+ * With 72 hours' notice or more the session goes back to their package. With
  * less, the session counts as used, as the Cancellation and Refund Policy says.
  * A session that has started can no longer be cancelled from the account.
  */

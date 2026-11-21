@@ -6,7 +6,9 @@ import { Icon } from "./icons";
  *
  * The brief requires this to be unmissable, so it is a solid navy block with
  * the numbers as tappable `tel:` links rather than a quiet footnote. Used on
- * Home, Contact and Book.
+ * Home, Contact and Book. The wording follows the owner's IT handover §16.1:
+ * not continuously monitored, the NHS 111 mental health option in England, and
+ * local services for international visitors.
  */
 export function NotCrisisNotice({ style }: { style?: React.CSSProperties }) {
   return (
@@ -36,8 +38,9 @@ export function NotCrisisNotice({ style }: { style?: React.CSSProperties }) {
       </h2>
       <p style={{ margin: "0 0 14px", fontSize: 14.5, lineHeight: 1.6, maxWidth: 620 }}>
         We are a non-clinical wellbeing, education and support service. We do not provide crisis,
-        emergency or out-of-hours care, and we cannot respond to urgent messages between sessions.
-        If you need help right now, please use one of these — they are free and staffed 24/7.
+        emergency or out-of-hours care, and our enquiries and messages are not continuously
+        monitored. If you need help right now, please use one of these — they are free and staffed
+        24/7.
       </p>
       <ul
         style={{
@@ -54,8 +57,11 @@ export function NotCrisisNotice({ style }: { style?: React.CSSProperties }) {
         <CrisisItem label="Samaritans, 24/7" value="116 123" href="tel:116123" />
         <CrisisItem label="Domestic abuse" value="0808 2000 247" href="tel:08082000247" />
         <CrisisItem label="Men's Advice Line" value="0808 8010 327" href="tel:08088010327" />
-        <CrisisItem label="Urgent NHS mental health" value="111" href="tel:111" />
+        <CrisisItem label="NHS 111, mental health option (England)" value="111" href="tel:111" />
       </ul>
+      <p style={{ margin: "14px 0 0", fontSize: 13.5, lineHeight: 1.55, color: "#c9d6e8" }}>
+        Outside the UK? Please contact your local emergency or crisis services.
+      </p>
     </aside>
   );
 }

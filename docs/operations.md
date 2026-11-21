@@ -74,7 +74,7 @@ the pages, so they always need a redeploy.
 | `CLERK_SECRET_KEY`, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_WEBHOOK_SECRET` | Sign-in, and keeping staff and client accounts in step |
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Payments; **live** keys in production |
 | `BREVO_API_KEY`, `EMAIL_FROM_ADDRESS`, `EMAIL_FROM_NAME`, `EMAIL_FROM_NAME_DISCREET` | Sending email (`docs/email-provider.md`) |
-| `ENQUIRY_TO_EMAIL` | Where website enquiries are delivered |
+| `ENQUIRY_TO_EMAIL` | Where website enquiries are delivered. Optional: without it they go to the contact address, `patbarning@yahoo.co.uk` |
 | `APP_ENCRYPTION_KEY` | Encrypts meeting links and other secrets. **Never change or lose it:** links saved under the old key can no longer be read |
 | `CRON_SECRET` | Lets only Vercel run the reminder job |
 | `BLOB_READ_WRITE_TOKEN` | Client documents and receipts storage |

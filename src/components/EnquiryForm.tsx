@@ -74,7 +74,7 @@ export function EnquiryForm() {
       <div>
         <h2 style={{ margin: "0 0 4px", fontSize: 20, color: "var(--navy)" }}>Send us a message</h2>
         <p style={{ margin: 0, fontSize: 13.5, color: "var(--navy-soft)" }}>
-          Confidential · usually answered within 2 working days
+          Confidential · not monitored for emergencies
         </p>
       </div>
 

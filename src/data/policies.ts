@@ -22,7 +22,8 @@ export type Policy = {
   sections: PolicySection[];
 };
 
-import { legal } from "./site";
+import { brand, legal } from "./site";
+import { NOTICE_PERIOD } from "../lib/allocation";
 
 const updated = "Last reviewed: July 2026";
 const V = "1.0.0";
@@ -37,6 +38,14 @@ const FROM = "2026-07-01";
 const revised = "Last reviewed: November 2026";
 const V2 = "1.1.0";
 const FROM2 = "2026-11-01";
+
+/**
+ * The owner's IT handover of 15 November 2026 confirmed 72 hours' notice to
+ * cancel or reschedule. Only the policies that state the notice period carry
+ * this version.
+ */
+const V3 = "1.2.0";
+const FROM3 = "2026-11-21";
 
 /** "ThriveSphere Wellbeing is a trading name of …", with the registered office. */
 const whoWeAre = `${legal.statement} Registered office: ${legal.registeredOffice}.`;
@@ -53,7 +62,7 @@ export const policies: Record<string, Policy> = {
     intro:
       "This policy explains how ThriveSphere Wellbeing collects, uses and protects your personal information in line with UK GDPR and the Data Protection Act 2018.",
     sections: [
-      { heading: "Who we are", body: [`${whoWeAre} ${legal.companyName} is the data controller for the information you provide. You can contact us at hello@thrivsphere.org. ${revised}.`] },
+      { heading: "Who we are", body: [`${whoWeAre} ${legal.companyName} is the data controller for the information you provide. You can contact us at ${brand.email}. ${revised}.`] },
       {
         heading: "What we collect",
         body: ["We only collect information you choose to share with us, which may include:"],
@@ -66,7 +75,7 @@ export const policies: Record<string, Policy> = {
       { heading: "Lawful basis", body: ["We process your data on the basis of your consent, our legitimate interest in providing wellbeing services, and to meet legal obligations. Special category (health) data is processed only with your explicit consent or where necessary for the provision of care."] },
       { heading: "How we protect it", body: ["Your data is stored securely, access is restricted to those who need it, and we use reputable, GDPR-compliant service providers. We never sell your data."] },
       { heading: "WhatsApp", body: ["If you contact us on WhatsApp, your messages are also handled by WhatsApp (Meta). WhatsApp is for general enquiries and arranging appointments — please do not share personal health information there. Anything personal is best shared inside your secure ThriveSphere account."] },
-      { heading: "Your rights", body: ["You have the right to access, correct, delete or restrict your data, to withdraw consent, and to complain to the Information Commissioner's Office (ICO). To exercise any right, email hello@thrivsphere.org."] },
+      { heading: "Your rights", body: [`You have the right to access, correct, delete or restrict your data, to withdraw consent, and to complain to the Information Commissioner's Office (ICO). To exercise any right, email ${brand.email}.`] },
       { heading: "Retention", body: ["We keep personal data only as long as necessary for the purposes above and in line with our Records Retention Policy, after which it is securely deleted."] },
     ],
   },
@@ -85,7 +94,7 @@ export const policies: Record<string, Policy> = {
         bullets: ["Essential cookies — required for the site to work and to remember your cookie choice.", "Analytics cookies (optional) — help us understand how the site is used so we can improve it. These are only set if you accept."],
       },
       { heading: "Managing cookies", body: ["When you first visit, you can choose 'Accept all' or 'Essential only'. You can change your mind at any time by clearing your browser storage, and you can control cookies through your browser settings."] },
-      { heading: "Contact", body: [`If you have questions about our use of cookies, email hello@thrivsphere.org. ${updated}.`] },
+      { heading: "Contact", body: [`If you have questions about our use of cookies, email ${brand.email}. ${updated}.`] },
     ],
   },
   safeguarding: {
@@ -104,7 +113,7 @@ export const policies: Record<string, Policy> = {
       },
       { heading: "Confidentiality and its limits", body: ["We keep your information confidential. However, where we believe there is a serious risk of harm to you or another person, we may need to share information with appropriate services. Wherever possible we will discuss this with you first."] },
       { heading: "In an emergency", body: ["If you or someone else is in immediate danger, call 999. For urgent emotional support, contact Samaritans on 116 123 (free, 24/7). For domestic abuse, call the National Domestic Abuse Helpline on 0808 2000 247."] },
-      { heading: "Raising a concern", body: [`If you have a safeguarding concern, please contact our Designated Safeguarding Lead at hello@thrivsphere.org. ${updated}.`] },
+      { heading: "Raising a concern", body: [`If you have a safeguarding concern, please contact our Designated Safeguarding Lead at ${brand.email}. ${updated}.`] },
     ],
   },
   confidentiality: {
@@ -140,7 +149,7 @@ export const policies: Record<string, Policy> = {
         heading: "What we do",
         bullets: ["Clear, readable typography and strong colour contrast", "Keyboard-navigable pages and descriptive links", "Responsive design that works on phones, tablets and computers", "Plain, compassionate language"],
       },
-      { heading: "Need something in a different format?", body: [`If you have difficulty accessing any part of our site or services, please contact hello@thrivsphere.org and we will do our best to help. ${updated}.`] },
+      { heading: "Need something in a different format?", body: [`If you have difficulty accessing any part of our site or services, please contact ${brand.email} and we will do our best to help. ${updated}.`] },
     ],
   },
   consent: {
@@ -158,7 +167,7 @@ export const policies: Record<string, Policy> = {
         heading: "What we ask you to confirm",
         bullets: ["That you are aged 18 or over", "That you understand ThriveSphere is a non-clinical wellbeing service and not a crisis, medical or therapy service", "That you understand the limits of confidentiality where there is a risk of serious harm", "That you agree to our Privacy Policy and how we handle your data", "That you accept our Terms & Conditions and Client Agreement"],
       },
-      { heading: "Withdrawing consent", body: ["You can withdraw your consent at any time, for any reason, without having to explain yourself. Email hello@thrivsphere.org and we will stop processing your data for that purpose. Withdrawing consent does not affect anything lawfully done beforehand, and we may still need to keep certain records where the law or our safeguarding duties require it."] },
+      { heading: "Withdrawing consent", body: [`You can withdraw your consent at any time, for any reason, without having to explain yourself. Email ${brand.email} and we will stop processing your data for that purpose. Withdrawing consent does not affect anything lawfully done beforehand, and we may still need to keep certain records where the law or our safeguarding duties require it.`] },
       { heading: "Capacity", body: ["We assume you have the capacity to consent unless there is clear reason to think otherwise. If we have concerns about capacity, we will pause, discuss it with you, and follow our Safeguarding Policy."] },
       { heading: "If you change your mind", body: [`You may stop using our services at any point. Please see our Cancellation and Refund Policy for how this affects any sessions you have already paid for. ${updated}.`] },
     ],
@@ -236,7 +245,7 @@ export const policies: Record<string, Policy> = {
     eyebrow: "Complaints",
     intro: "If something has gone wrong, we want to know. Telling us will not affect the support you receive.",
     sections: [
-      { heading: "How to raise something", body: ["Email hello@thrivsphere.org with the heading 'Complaint' or 'Feedback'. Tell us what happened, when, and what you would like to see put right. If writing it down is difficult, say so and we will find another way."] },
+      { heading: "How to raise something", body: [`Email ${brand.email} with the heading 'Complaint' or 'Feedback'. Tell us what happened, when, and what you would like to see put right. If writing it down is difficult, say so and we will find another way.`] },
       {
         heading: "What happens next",
         bullets: ["We acknowledge your complaint within 5 working days", "We look into it properly and fairly", "We respond in full within 20 working days, or explain why we need longer", "We tell you what we are changing as a result"],
@@ -259,13 +268,13 @@ export const policies: Record<string, Policy> = {
         heading: "What this means in practice",
         bullets: ["Services open to all adults aged 18 and over", "Language and forms that do not assume gender, family shape or background", "Accessible sessions and materials — see our Accessibility Statement", "Awareness of cultural context, including for the African diaspora communities we serve", "Willingness to be told when we get it wrong"],
       },
-      { heading: "Tell us what you need", body: [`If there is something that would make our service work better for you, please tell us at hello@thrivsphere.org. ${revised}.`] },
+      { heading: "Tell us what you need", body: [`If there is something that would make our service work better for you, please tell us at ${brand.email}. ${revised}.`] },
     ],
   },
   payments: {
     slug: "payments",
-    version: V2,
-    effectiveFrom: FROM2,
+    version: V3,
+    effectiveFrom: FROM3,
     audience: "public",
     title: "Cancellation and Refund Policy",
     eyebrow: "Cancellations & Refunds",
@@ -278,7 +287,7 @@ export const policies: Record<string, Policy> = {
       },
       {
         heading: "Cancelling or rearranging",
-        bullets: ["You can cancel or reschedule from your ThriveSphere account", "With at least 24 hours' notice there is no charge — the session is returned to your account to use again", "With less than 24 hours' notice the session is treated as used", "We understand emergencies happen — message us and we will be fair"],
+        bullets: ["You can cancel or reschedule from your ThriveSphere account", `With at least ${NOTICE_PERIOD}' notice there is no charge — the session is returned to your account to use again`, `With less than ${NOTICE_PERIOD}' notice the session is treated as used`, "We understand emergencies happen — message us and we will be fair"],
       },
       { heading: "No-shows", body: ["If you do not attend and have not told us, the session is treated as used. If you miss sessions repeatedly we will contact you to check you are alright and to talk about whether now is the right time for you."] },
       { heading: "If we cancel", body: ["If we have to cancel, you will be offered an alternative time or a full refund of that session — your choice."] },
@@ -288,8 +297,8 @@ export const policies: Record<string, Policy> = {
   terms: {
     slug: "terms",
     requiresConsent: true,
-    version: V2,
-    effectiveFrom: FROM2,
+    version: V3,
+    effectiveFrom: FROM3,
     audience: "public",
     title: "Terms & Conditions",
     eyebrow: "Terms & Conditions",
@@ -301,7 +310,7 @@ export const policies: Record<string, Policy> = {
       { heading: "Eligibility", body: ["Our services are available to adults aged 18 and over. You will be asked to confirm you are 18 or over when you register. We do not currently provide services to under-18s."] },
       {
         heading: "Bookings and payments",
-        bullets: ["Sessions are booked through your ThriveSphere account and confirmed automatically", "Sessions are delivered online by one of our practitioners", "Fees are shown on our Pricing page", "You can cancel or reschedule from your account; please give at least 24 hours' notice", "See our Cancellation and Refund Policy for full details"],
+        bullets: ["Sessions are booked through your ThriveSphere account and confirmed automatically", "Sessions are delivered online by one of our practitioners", "Fees are shown on our Pricing page", `You can cancel or reschedule from your account; please give at least ${NOTICE_PERIOD}' notice`, "See our Cancellation and Refund Policy for full details"],
       },
       { heading: "Your responsibilities", body: ["You agree to provide accurate information and to engage with our services respectfully. You remain responsible for your own decisions and wellbeing."] },
       { heading: "Website content", body: [`Content on this site is for general wellbeing information only and does not constitute medical or legal advice. ${revised}.`] },

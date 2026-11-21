@@ -12,11 +12,15 @@ The checklist asks for:
 ## Where things stand (checked 31 October 2026)
 
 - `thrivsphere.org` has **no MX record**, so no address at the domain can
-  receive mail yet. That includes `hello@thrivsphere.org`, which the website
-  shows as the contact address and which outgoing emails use as their reply-to
-  address.
-- Website enquiries are delivered to the address in `ENQUIRY_TO_EMAIL`, which
-  is currently a Gmail address.
+  receive mail yet, including `hello@thrivsphere.org`.
+- **Since 21 November 2026** the website shows `patbarning@yahoo.co.uk` as the
+  contact address, and outgoing emails use it as their reply-to address. The
+  owner's IT handover (15 November, §16.1) names it as the approved contact
+  address until she confirms a domain address. It is `brand.email` in
+  `src/data/site.ts`.
+- Website enquiries are delivered to the address in `ENQUIRY_TO_EMAIL`, or to
+  `brand.email` when that variable is not set. The handover says enquiries go
+  to `patbarning@yahoo.co.uk`.
 - Sending is already set up. Brevo sends the website's emails from
   `no-reply@thrivsphere.org`, and its SPF, DKIM and DMARC records are
   published. Nothing below may remove them.
@@ -40,8 +44,10 @@ access").
 1. **Users:** `patience@thrivsphere.org` and `lucy@thrivsphere.org` (or the
    addresses the owner confirms).
 2. **Shared mailbox:** `info@thrivsphere.org`. Give both users access.
-3. **Alias:** add `hello@thrivsphere.org` as an alias of `info@`, so the
-   address already on the website and in email replies starts working.
+3. **Alias:** add `hello@thrivsphere.org` as an alias of `info@`, so older
+   emails that still carry it as their reply-to address reach the business.
+   Once the owner confirms the domain address, change `brand.email` in
+   `src/data/site.ts`. The website, policies and email replies all follow it.
 4. **MFA:** turn on two-step verification and enforce it for every user in the
    admin console.
 5. **Admin:** keep the owner as the only super administrator. A developer, if

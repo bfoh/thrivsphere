@@ -102,6 +102,6 @@ export async function submitEnquiry(
 
   return {
     status: "ok",
-    message: "Thank you — your message is on its way. We'll reply privately, usually within 2 working days.",
+    message: "Thank you — your message is on its way and we'll reply privately. This form is not monitored for emergencies.",
   };
 }

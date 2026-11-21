@@ -190,7 +190,7 @@ export async function setAppointmentStatus(
 /**
  * Stop a late cancellation or missed session counting as used.
  *
- * The 24-hour rule is applied with discretion: illness, an emergency or it
+ * The notice rule is applied with discretion: illness, an emergency or it
  * not being safe to attend are reasons not to count a session, and the client
  * is never asked for evidence. The session goes back to the package it came
  * from. The record says only that circumstances were taken into account.

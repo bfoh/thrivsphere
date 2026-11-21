@@ -6,7 +6,7 @@ import { requirePortalClient } from "@/lib/portal-guard";
 import { requireClientAccess } from "@/lib/guard";
 import { getDb } from "@/db";
 import { appointments } from "@/db/schema";
-import { canReschedule } from "@/lib/allocation";
+import { NOTICE_PERIOD, canReschedule } from "@/lib/allocation";
 import { getPooledSlots } from "@/lib/queries/availability";
 import { formatAppointment, groupSlotsByDay } from "@/lib/slot-groups";
 import { SlotPicker } from "@/components/portal/SlotPicker";
@@ -50,7 +50,7 @@ export default async function ReschedulePage({ params }: { params: Promise<{ id:
         <div className="card" style={{ padding: 32 }}>
           <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>
             {appt.status === "scheduled"
-              ? "Appointments can be moved up to 24 hours beforehand. "
+              ? `Appointments can be moved up to ${NOTICE_PERIOD} beforehand. `
               : "This appointment is no longer booked. "}
             <Link href="/portal/messages" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
               Message us
