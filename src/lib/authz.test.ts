@@ -81,6 +81,15 @@ describe("can", () => {
     assert.equal(can(supervisor, "audit:read"), false);
   });
 
+  it("lets every staff role draft marketing, and only admins edit the brand kit", () => {
+    assert.equal(can(practitioner, "marketing:write"), true);
+    assert.equal(can(supervisor, "marketing:write"), true);
+    assert.equal(can(clientA, "marketing:write"), false);
+    assert.equal(can(practitioner, "brand:manage"), false);
+    assert.equal(can(admin, "brand:manage"), true);
+    assert.equal(can(admin, "analytics:read"), false);
+  });
+
   it("gives admins the administrative capabilities", () => {
     assert.equal(can(admin, "audit:read"), true);
     assert.equal(can(admin, "catalogue:manage"), true);

@@ -59,10 +59,50 @@ where possible:
   `src/lib/lead-attribution.ts`; form fields: `AttributionFields` in
   `src/components/EnquiryFields.tsx`.
 
+## Release 1: brand, library and graphics (live)
+
+Open **Marketing** in the back office (anyone who writes for the blog).
+
+- **Brand kit** (`/admin/marketing/brand`): identity, voice, words to use
+  and avoid, standard wording (including the crisis line), audiences,
+  content pillars with target shares, hashtags, calls to action, the logo's
+  colours, the AI image style, photo rules and saved replies for comments
+  and messages. Admins edit it; every save is a new version; **only the
+  founder approves**, and only the exact version she read (its fingerprint
+  is stored with the approval). Until the first approval, the website's own
+  wording stands in. Start it with *Start from the website's wording*.
+- **Photos & graphics** (`/admin/marketing/library`): photos staff add, with
+  whose they are (ours, a staff photo with written agreement, licensed) and
+  who is in them. There is no way to record a client. Each image has alt
+  text. Files are private; staff open and download them here. Archive hides
+  an image without deleting it.
+- **Make a graphic** (`/admin/marketing/graphics`): seven templates (tip
+  card, carousel slide, awareness day, service spotlight, talk or workshop,
+  photo with caption, blog post) in six sizes (Instagram square, portrait and
+  story; LinkedIn; Facebook; Google Business Profile) and four colour themes.
+  Only colour pairs that pass WCAG contrast for body text are used. Awareness
+  days always carry the crisis line. Stories keep text clear of Instagram's
+  own controls. Preview, then save to the library with alt text written from
+  the graphic's words. Only what was previewed can be saved.
+- **Link previews**: the website and each blog post now have a branded
+  picture when shared (`src/app/opengraph-image.tsx`,
+  `src/app/blog/[slug]/opengraph-image.tsx`), the post's cover included.
+- **AI usage** (founder only): spending this month against the limit
+  (`AI_MONTHLY_BUDGET_USD`, default $50), by feature and request. Empty until
+  AI help is switched on.
+- Code: `src/lib/brand-kit.ts` (rules, seed), `src/lib/brand-tokens.ts`
+  (colours, contrast; tested against `globals.css`), `src/lib/graphics/`
+  (spec, renderer, lookups), `src/lib/asset-rules.ts`,
+  `src/lib/image-upload.ts`. Fonts: Montserrat TTFs in `src/assets/fonts`
+  (SIL Open Font Licence, `OFL.txt`), deployed with the image routes by
+  `outputFileTracingIncludes` in `next.config.ts`.
+- Platform sizes were checked on 21 November 2026 (`SIZES` in
+  `src/lib/graphics/spec.ts`). Check them each quarter.
+
 ## Still to come
 
-1. Foundation: shared AI help (with a monthly spending cap), the Brand Kit,
-   the photo and graphics library, branded templates, social preview images.
+1. AI help: writing assistance in the blog and the hub, with the monthly
+   spending limit, once the business has an Anthropic account.
 2. Plan, write, approve and post: content packs for each channel, checks,
    AI drafting and images, calendar with awareness days, campaigns, posting
    packs and a morning reminder.

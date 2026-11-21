@@ -77,8 +77,16 @@ const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
 ];
 
+/** Files the branded-graphics renderer reads from disk at run time. */
+const GRAPHICS_FILES = ["./src/assets/fonts/*.ttf", "./public/images/emblem.png"];
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  outputFileTracingIncludes: {
+    "/api/admin/marketing/render": GRAPHICS_FILES,
+    "/opengraph-image": GRAPHICS_FILES,
+    "/blog/\\[slug\\]/opengraph-image*": GRAPHICS_FILES,
+  },
   experimental: {
     // Next 16.3 keeps Turbopack's build cache in .next/cache, and Vercel
     // restores that folder before each build. A restored cache once served

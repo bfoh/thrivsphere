@@ -129,6 +129,11 @@ a member who can be removed.
   point them straight at `/book` or `/contact`, because the tags are read
   from the form page's address (no cookies). The answer shows on each
   enquiry under *How they found us*. See `docs/marketing.md`.
+- **Brand and marketing:** **Marketing** (`/admin/marketing`). The Brand
+  Kit is edited by admins and approved by Patience; every graphic and, later,
+  every post follows the approved version. Photos added to the library must
+  be ours, licensed, or of staff who agreed in writing; never a client.
+  See `docs/marketing.md`.
 - **Prices and service descriptions:** **Services & prices**
   (`/admin/catalogue`). A price change reaches the pricing page, the client's
   *Buy sessions* page and card checkout together. Service wording shows on the
@@ -154,6 +159,9 @@ the pages, so they always need a redeploy.
 | `BLOB_READ_WRITE_TOKEN` | Client documents and receipts storage |
 | `NEXT_PUBLIC_SITE_URL` | The public address used in emails and links |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | The WhatsApp Business number, in any UK format. The WhatsApp button appears once this is set |
+| `ANTHROPIC_API_KEY` | AI help in the blog and marketing hub (not set yet). Use a key from an Anthropic account owned by the business, with a spending limit set there too |
+| `RECRAFT_API_KEY` | AI images in the marketing hub (not set yet) |
+| `AI_MONTHLY_BUDGET_USD` | The monthly limit on AI spending, in US dollars. Optional; $50 if not set. AI help pauses when it is reached |
 | `BOOKING_REQUIRES_PAYMENT` | `true` means clients must buy a session before choosing a time. Anything else (the default) lets them book and pay afterwards. The first appointment is the Initial Wellbeing Needs Review: Review credit pays only for it, and the Review can be bought once |
 
 ## Backups and recovery
@@ -215,3 +223,7 @@ the pages, so they always need a redeploy.
 - [x] Apply migration `0015_lead_attribution` ("How did you hear about us?"
       and campaign tags on enquiries, callbacks and paid consultations).
       Applied 21 November 2026.
+- [x] Apply migration `0016_marketing_foundation` (Brand Kit, marketing
+      library, AI usage record). Applied 21 November 2026.
+- [ ] Patience reads and approves Brand Kit version 1 (**Marketing → Brand
+      kit**), including the logo colours.

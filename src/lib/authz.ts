@@ -56,6 +56,10 @@ export type Capability =
   | "enquiry:manage"
   // Writing blog posts. Approving them is a separate rule (blog-rules).
   | "blog:write"
+  // The Brand & Marketing hub: drafting, the photo library, graphics, AI help.
+  | "marketing:write"
+  // Editing the Brand Kit. Only the founder approves it.
+  | "brand:manage"
   | "discount:manage"
   | "catalogue:manage"
   | "report:read"
@@ -109,6 +113,9 @@ const PRACTITIONER_CAPS: Capability[] = [
   // The founder and practitioners write blog posts; a reviewer approves each
   // one before it goes on the website (21 November 2026).
   "blog:write",
+  // The marketing hub: anyone who writes can draft; approval follows the
+  // blog's rule (owner's decision, 21 November 2026).
+  "marketing:write",
 ];
 
 const SUPERVISOR_CAPS: Capability[] = [
@@ -128,6 +135,7 @@ const ADMIN_CAPS: Capability[] = [
   "audit:read",
   "staff:read",
   "staff:remove",
+  "brand:manage",
 ];
 
 /**

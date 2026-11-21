@@ -24,7 +24,7 @@ import {
  * belongs in `authz.ts` so it stays in one reviewable place.
  */
 
-type GuardOptions = {
+export type GuardOptions = {
   /** Table the request concerns, e.g. "session_notes". */
   entity: string;
   entityId?: string | null;

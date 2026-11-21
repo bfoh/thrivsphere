@@ -39,6 +39,8 @@ export const ADMIN_NAV: NavItem[] = [
   { label: "Library", href: "/admin/library", capability: "library:read", group: "service" },
   // Writing, reviewing and publishing blog posts.
   { label: "Blog", href: "/admin/blog", capability: "blog:write", group: "service" },
+  // Brand kit, photos and graphics, social posts, newsletter (the marketing hub).
+  { label: "Marketing", href: "/admin/marketing", capability: "marketing:write", group: "service" },
   { label: "Reports", href: "/admin/reports", capability: "report:read", group: "service" },
 
   // Running the organisation.

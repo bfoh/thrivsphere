@@ -31,7 +31,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = await load(slug);
   if (!post) return { title: "Article" };
   const description = post.metaDescription || post.excerpt;
-  const image = post.coverImage ? `/blog/images/${post.coverImage}` : undefined;
   return {
     title: post.title,
     description,
@@ -44,9 +43,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       publishedTime: post.firstPublishedAt.toISOString(),
       modifiedTime: post.publishedAt.toISOString(),
       section: post.category,
-      ...(image ? { images: [{ url: image, alt: post.coverAlt ?? "" }] } : {}),
+      // The preview picture is drawn by opengraph-image.tsx, cover photo included.
     },
-    twitter: { card: image ? "summary_large_image" : "summary", title: post.title, description },
+    twitter: { card: "summary_large_image", title: post.title, description },
   };
 }
 
