@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
+import "./intro.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { CookieBanner } from "@/components/CookieBanner";
 import { Analytics } from "@/components/Analytics";
 import { CursorFX } from "@/components/CursorFX";
 import { brand } from "@/data/site";
+import { IntroCurtain, INTRO_HEAD_SCRIPT } from "@/components/IntroCurtain";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -72,8 +74,14 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="h-full">
+    // suppressHydrationWarning: the intro's head script sets data-intro on <html>
+    // before React hydrates.
+    <html lang="en" className="h-full" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: INTRO_HEAD_SCRIPT }} />
+      </head>
       <body className={montserrat.variable}>
+        <IntroCurtain />
         {/* Inside <body> rather than wrapping <html>, which is what Next 16
             cache components require.
 

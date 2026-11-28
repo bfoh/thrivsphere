@@ -1,0 +1,175 @@
+/*
+ * The logo intro (src/components/IntroCurtain.tsx).
+ *
+ * Hidden unless the inline head script set html[data-intro="play"]: once per
+ * browser session, public pages only, never with reduced motion. Pure CSS, so
+ * it ends by itself; the curtain finishes as visibility: hidden and can never
+ * block a click afterwards.
+ *
+ * Timeline (seconds from first paint):
+ *   0.05 trunk grows from the ground       0.50-0.82 leaves unfurl, left to right
+ *   0.40 head appears                      0.90 "ThriveSphere" writes on, left to right
+ *   1.25 "MENTAL WELLBEING" rises          1.95 logo lifts away, 2.05 curtain wipes up (gone by 2.75)
+ * Any tap, click, scroll or key sets html[data-intro-skip] and lifts it at once.
+ *
+ * The crisis bar (z-index 60) stays above the curtain the whole time.
+ */
+
+.ts-intro {
+  display: none;
+}
+
+html[data-intro="play"] .ts-intro {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px 0;
+  background:
+    radial-gradient(42% 38% at 50% 44%, rgba(124, 37, 193, 0.09) 0%, rgba(124, 37, 193, 0) 70%),
+    radial-gradient(36% 34% at 34% 62%, rgba(10, 143, 201, 0.08) 0%, rgba(10, 143, 201, 0) 70%),
+    radial-gradient(36% 34% at 66% 62%, rgba(229, 138, 5, 0.08) 0%, rgba(229, 138, 5, 0) 70%),
+    var(--warm-white);
+  animation: tsIntroLift 0.7s cubic-bezier(0.76, 0, 0.24, 1) 2.05s forwards;
+}
+
+html[data-intro="play"] .ts-intro__logo {
+  width: min(440px, 76vw);
+  height: auto;
+  overflow: visible;
+  animation: tsLogoOut 0.5s cubic-bezier(0.55, 0, 1, 0.45) 1.95s forwards;
+}
+
+html[data-intro="play"] .ts-intro__trunk {
+  animation: tsGrow 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+}
+
+html[data-intro="play"] .ts-intro__head {
+  transform-box: view-box;
+  animation: tsPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+}
+
+html[data-intro="play"] .ts-intro__leaf {
+  transform-box: view-box;
+  /* the delay is set per leaf, inline */
+  animation: tsUnfurl 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+html[data-intro="play"] .ts-intro__name {
+  animation: tsWrite 0.8s cubic-bezier(0.65, 0, 0.35, 1) 0.9s both;
+}
+
+html[data-intro="play"] .ts-intro__descriptor {
+  transform-box: view-box;
+  animation: tsRise 0.6s cubic-bezier(0.16, 1, 0.3, 1) 1.25s both;
+}
+
+/* The page's own entrance waits for the curtain, so it plays as it lifts. */
+html[data-intro="play"] .fadeUp {
+  animation-delay: 2.15s;
+}
+html[data-intro="play"] .cookie-banner {
+  animation: tsRise 0.5s cubic-bezier(0.16, 1, 0.3, 1) 2.7s both;
+}
+
+/* Skipped: new animation names, so they start from now. */
+html[data-intro-skip] .ts-intro {
+  animation: tsIntroLiftNow 0.55s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+html[data-intro-skip] .ts-intro__logo {
+  animation: tsLogoOutNow 0.35s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+html[data-intro-skip] .fadeUp {
+  animation-delay: 0.2s;
+}
+html[data-intro-skip] .cookie-banner {
+  animation-delay: 0.6s;
+}
+
+@keyframes tsIntroLift {
+  from {
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+  }
+}
+@keyframes tsIntroLiftNow {
+  from {
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+  }
+}
+@keyframes tsLogoOut {
+  to {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+}
+@keyframes tsLogoOutNow {
+  to {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+}
+@keyframes tsGrow {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes tsPop {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes tsUnfurl {
+  from {
+    opacity: 0;
+    transform: scale(0.15) rotate(-35deg);
+  }
+  35% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+@keyframes tsWrite {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes tsRise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-intro="play"] .ts-intro {
+    display: none;
+  }
+}

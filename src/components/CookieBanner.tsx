@@ -14,6 +14,7 @@ export function CookieBanner() {
     <div
       role="dialog"
       aria-label="Cookie consent"
+      className="cookie-banner"
       style={{
         position: "fixed",
         left: 16,
