@@ -375,8 +375,8 @@ export const team: TeamMember[] = [
     ],
   },
   {
-    slug: "lucy-johns",
-    name: "Lucy Johns",
+    slug: "lucy-john",
+    name: "Lucy John",
     role: "Wellbeing Consultant & Registered Mental Health Nurse",
     initials: "LJ",
     credentials: ["Registered Mental Health Nurse"],

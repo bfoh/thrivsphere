@@ -1,7 +1,7 @@
 import type { StaticImageData } from "next/image";
 
 import patiencePortrait from "@/assets/photos/patience-barning-t-portrait.jpg";
-import lucyPortrait from "@/assets/photos/lucy-johns-portrait.jpg";
+import lucyPortrait from "@/assets/photos/lucy-john-portrait.jpg";
 import patienceOnline from "@/assets/photos/patience-online-wellbeing-session.jpg";
 import lucyOnline from "@/assets/photos/lucy-online-wellbeing-session.jpg";
 import patienceOneToOne from "@/assets/photos/patience-one-to-one-online-session.jpg";
@@ -31,9 +31,9 @@ export const teamPhotos: Record<string, Photo> = {
     src: patiencePortrait,
     alt: "Patience Barning T, Founder and Lead Wellbeing Consultant at ThriveSphere Wellbeing, seated in a bright consulting room",
   },
-  "lucy-johns": {
+  "lucy-john": {
     src: lucyPortrait,
-    alt: "Lucy Johns, Wellbeing Consultant and Registered Mental Health Nurse at ThriveSphere Wellbeing, seated in a bright consulting room",
+    alt: "Lucy John, Wellbeing Consultant and Registered Mental Health Nurse at ThriveSphere Wellbeing, seated in a bright consulting room",
   },
 };
 
@@ -47,7 +47,7 @@ export const homeIntroPhoto: Photo = {
 export const servicePhotos: Partial<Record<string, Photo>> = {
   "emotional-wellbeing-support": {
     src: lucyOnline,
-    alt: "Lucy Johns, Registered Mental Health Nurse, offering one-to-one emotional wellbeing support on a video call",
+    alt: "Lucy John, Registered Mental Health Nurse, offering one-to-one emotional wellbeing support on a video call",
   },
   "psychoeducation-and-coping-skills": {
     src: patienceOneToOne,
@@ -65,5 +65,5 @@ export const servicePhotos: Partial<Record<string, Photo>> = {
  */
 export const whatToExpectPhoto: Photo = {
   src: lucyActionPlan,
-  alt: "Lucy Johns going through a My Wellbeing Action Plan worksheet with a man on a video call",
+  alt: "Lucy John going through a My Wellbeing Action Plan worksheet with a man on a video call",
 };
