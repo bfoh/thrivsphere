@@ -5,10 +5,7 @@ import { useActionState } from "react";
 import { updatePricePlan, updateService } from "@/app/actions/catalogue";
 import { initialBookingState } from "@/lib/booking-state";
 
-const input: React.CSSProperties = {
-  fontFamily: "inherit", fontSize: 14, padding: "9px 11px", borderRadius: 9,
-  border: "1px solid rgba(31,58,95,0.18)", background: "#fff", color: "var(--ink)", outline: "none", width: "100%",
-};
+const input: React.CSSProperties = { fontFamily: "inherit", width: "100%" };
 const lbl: React.CSSProperties = { fontSize: 12, fontWeight: 800, color: "var(--navy)", display: "block", marginBottom: 5 };
 
 export type EditablePlan = {

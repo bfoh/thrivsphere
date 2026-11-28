@@ -8,6 +8,7 @@ import { requireCapability } from "@/lib/guard";
 import { Section, Empty } from "@/components/admin/RecordUI";
 import { StatusButtons, MeetingLinkForm, ReassignForm, ReturnSessionButton } from "@/components/admin/AppointmentActions";
 import { getActiveStaff } from "@/lib/queries/availability";
+import { PageHeader, Tabs } from "@/components/admin/ui";
 
 export const metadata: Metadata = { title: "Appointments", robots: { index: false, follow: false } };
 
@@ -74,31 +75,24 @@ export default async function AppointmentsPage({
   ]);
 
   return (
-    <div style={{ maxWidth: 980, margin: "0 auto", padding: "36px 24px 72px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16, flexWrap: "wrap", marginBottom: 22 }}>
-        <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Appointments</h1>
-        <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-          <nav aria-label="Whose appointments" style={{ display: "flex", gap: 6 }}>
-            {[
-              { label: "All", href: "/admin/appointments", active: !mine },
-              { label: "Mine", href: "/admin/appointments?view=mine", active: mine },
-            ].map((v) => (
-              <Link
-                key={v.label}
-                href={v.href}
-                aria-current={v.active ? "page" : undefined}
-                className="chip"
-                style={{ fontSize: 13, fontWeight: 700, textDecoration: "none", background: v.active ? "var(--navy)" : undefined, color: v.active ? "#fff" : "var(--navy)" }}
-              >
-                {v.label}
-              </Link>
-            ))}
-          </nav>
-          <Link href="/admin/availability" style={{ fontSize: 14, fontWeight: 700, color: "var(--teal-deep)", textDecoration: "none" }}>
-            Manage availability →
-          </Link>
-        </div>
-      </div>
+    <div className="adm-page">
+      <PageHeader
+        title="Appointments"
+        actions={
+          <>
+            <Tabs
+              label="Whose appointments"
+              items={[
+                { label: "All", href: "/admin/appointments", active: !mine },
+                { label: "Mine", href: "/admin/appointments?view=mine", active: mine },
+              ]}
+            />
+            <Link href="/admin/availability" className="pill pill-ghost" style={{ padding: "0 14px", minHeight: 38, fontSize: 13.5 }}>
+              Manage availability
+            </Link>
+          </>
+        }
+      />
 
       <Section title="Upcoming" subtitle={`${upcoming.length} scheduled`}>
         {upcoming.length === 0 ? (

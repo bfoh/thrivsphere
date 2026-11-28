@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { practitionerSettings } from "@/db/schema";
@@ -7,6 +6,7 @@ import { can } from "@/lib/authz";
 import { requireCapability } from "@/lib/guard";
 import { getActiveStaff, getAvailability, getBookableSlots } from "@/lib/queries/availability";
 import { Section, Empty } from "@/components/admin/RecordUI";
+import { PageHeader, Tabs } from "@/components/admin/ui";
 import {
   AddRuleForm,
   BlockDateForm,
@@ -59,36 +59,28 @@ export default async function AvailabilityPage({
   const whose = subject && forOther ? `${subject.name}'s` : "Your";
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "36px 24px 72px" }}>
-      <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Availability</h1>
-      <p style={{ margin: "0 0 18px", fontSize: 14, color: "var(--navy-soft)" }}>
-        Times are London time and follow the clocks — 6pm stays 6pm through a BST change. Clients are offered
-        every practitioner&apos;s free times together, and each booking goes to whoever is free.
-      </p>
+    <div className="adm-page adm-page--narrow">
+      <PageHeader
+        title="Availability"
+        description={
+          <>
+            Times are London time and follow the clocks — 6pm stays 6pm through a BST change. Clients are offered every
+            practitioner&apos;s free times together, and each booking goes to whoever is free.
+          </>
+        }
+      />
 
       {manageAny && staff.length > 1 && (
-        <nav aria-label="Practitioner" style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
-          {staff.map((s) => {
-            const active = s.id === ownerId;
-            return (
-              <Link
-                key={s.id}
-                href={s.id === actor.userId ? "/admin/availability" : `/admin/availability?practitioner=${s.id}`}
-                aria-current={active ? "page" : undefined}
-                className="chip"
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  textDecoration: "none",
-                  background: active ? "var(--navy)" : undefined,
-                  color: active ? "#fff" : "var(--navy)",
-                }}
-              >
-                {s.id === actor.userId ? "You" : s.name}
-              </Link>
-            );
-          })}
-        </nav>
+        <div style={{ marginBottom: 24 }}>
+          <Tabs
+            label="Practitioner"
+            items={staff.map((s) => ({
+              label: s.id === actor.userId ? "You" : s.name,
+              href: s.id === actor.userId ? "/admin/availability" : `/admin/availability?practitioner=${s.id}`,
+              active: s.id === ownerId,
+            }))}
+          />
+        </div>
       )}
 
       <Section

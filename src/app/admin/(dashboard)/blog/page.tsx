@@ -31,10 +31,10 @@ export default async function BlogAdminPage({ searchParams }: { searchParams: Pr
   const canApprove = actor.role === "founder" || reviewer;
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 24px 72px" }}>
+    <div className="adm-page">
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
         <div>
-          <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Blog</h1>
+          <h1 className="adm-title" style={{ margin: "0 0 6px" }}>Blog</h1>
           <p style={{ margin: "0 0 24px", fontSize: 14, lineHeight: 1.6, color: "var(--navy-soft)", maxWidth: 640 }}>
             Write posts for the website&apos;s blog. Every post is reviewed before it goes live
             {canApprove ? ", and you are one of the reviewers" : " by Patience or a colleague she has named"}. Changing a

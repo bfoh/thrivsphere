@@ -14,17 +14,8 @@ import { QUEUE_STATUSES } from "@/lib/enquiry-rules";
 
 /** The staff controls on an enquiry record (IT handover §16.4, §19). */
 
-const input: React.CSSProperties = {
-  fontFamily: "inherit",
-  fontSize: 14,
-  padding: "9px 11px",
-  borderRadius: 10,
-  border: "1px solid rgba(31,58,95,0.18)",
-  background: "#fff",
-  width: "100%",
-  boxSizing: "border-box",
-};
-const labelStyle: React.CSSProperties = { fontSize: 12, fontWeight: 800, color: "var(--navy)", display: "block", marginBottom: 5 };
+const input: React.CSSProperties = { fontFamily: "inherit", width: "100%", boxSizing: "border-box" };
+const labelStyle: React.CSSProperties = { display: "block", marginBottom: 6, fontSize: "var(--fs-sm)", fontWeight: 700, color: "var(--navy)" };
 const row: React.CSSProperties = { display: "flex", gap: 10, alignItems: "flex-end", flexWrap: "wrap" };
 
 function Result({ state }: { state: EnquiryAdminState }) {

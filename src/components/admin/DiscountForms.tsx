@@ -14,16 +14,7 @@ import { CODE_MAX_PERCENT, DEFAULT_CONCESSION_LABEL, DISCOUNT_REASONS, type Plan
 
 /** The founder's and admins' discount controls: concessions, codes and free sessions. */
 
-const input: React.CSSProperties = {
-  fontFamily: "inherit",
-  fontSize: 14,
-  padding: "9px 11px",
-  borderRadius: 10,
-  border: "1px solid rgba(31,58,95,0.18)",
-  background: "#fff",
-  width: "100%",
-  boxSizing: "border-box",
-};
+const input: React.CSSProperties = { fontFamily: "inherit", width: "100%", boxSizing: "border-box" };
 const lbl: React.CSSProperties = { fontSize: 12, fontWeight: 800, color: "var(--navy)", display: "block", marginBottom: 5 };
 const hint: React.CSSProperties = { margin: "4px 0 0", fontSize: 12, color: "var(--muted)" };
 const errStyle: React.CSSProperties = { margin: "4px 0 0", fontSize: 12, fontWeight: 600, color: "#b4553f" };

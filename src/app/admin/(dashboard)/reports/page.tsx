@@ -28,9 +28,9 @@ export default async function ReportsPage({
   const report = await getReport(monthRange(monthsAgo));
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 24px 72px" }}>
+    <div className="adm-page">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16, flexWrap: "wrap", marginBottom: 8 }}>
-        <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Reports</h1>
+        <h1 className="adm-title">Reports</h1>
         <div style={{ display: "flex", gap: 12, fontSize: 13.5 }}>
           {monthsAgo < 23 && (
             <Link href={`/admin/reports?m=${monthsAgo + 1}`} style={{ color: "var(--teal-deep)", fontWeight: 700, textDecoration: "none" }}>

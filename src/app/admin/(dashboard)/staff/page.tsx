@@ -50,8 +50,8 @@ export default async function StaffPage() {
     }).allowed;
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 24px 72px" }}>
-      <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Staff</h1>
+    <div className="adm-page">
+      <h1 className="adm-title" style={{ margin: "0 0 6px" }}>Staff</h1>
       <p style={{ margin: "0 0 24px", fontSize: 14, color: "var(--navy-soft)" }}>
         Who has access to the back office, and what they can reach. Every change here is recorded
         in <strong>Activity</strong>.
@@ -68,7 +68,7 @@ export default async function StaffPage() {
           <Empty>No staff accounts yet.</Empty>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 900 }}>
+            <table className="adm-table" style={{ minWidth: 900 }}>
               <thead>
                 <tr>
                   {["Person", "Role", "Blog reviewer", "Deputy Safeguarding Lead", "Status", "Last seen", ""].map((h) => (
@@ -159,10 +159,5 @@ export default async function StaffPage() {
   );
 }
 
-const th: React.CSSProperties = {
-  textAlign: "left", padding: "8px 12px 10px", fontSize: 12, fontWeight: 800,
-  color: "var(--navy-soft)", borderBottom: "1px solid rgba(31,58,95,0.12)", whiteSpace: "nowrap",
-};
-const td: React.CSSProperties = {
-  padding: "12px", borderBottom: "1px solid rgba(31,58,95,0.07)", verticalAlign: "top",
-};
+const th: React.CSSProperties = { textAlign: "left" };
+const td: React.CSSProperties = { verticalAlign: "top" };

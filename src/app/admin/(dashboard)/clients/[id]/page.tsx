@@ -155,7 +155,7 @@ export default async function ClientRecordPage({
     .reduce((n, p) => n + (p.sessionsTotal - p.sessionsUsed), 0);
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "28px 24px 80px" }}>
+    <div className="adm-page">
       <Link
         href="/admin/clients"
         style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13.5, color: "var(--teal-deep)", fontWeight: 700, textDecoration: "none" }}
@@ -207,7 +207,7 @@ export default async function ClientRecordPage({
       )}
 
       <header style={{ marginTop: 20, marginBottom: 26 }}>
-        <h1 style={{ margin: "0 0 6px", fontSize: 30, fontWeight: 800, color: "var(--navy)" }}>
+        <h1 className="adm-title" style={{ margin: "0 0 6px" }}>
           {client.preferredName}
         </h1>
         <p style={{ margin: 0, fontSize: 14, color: "var(--navy-soft)" }}>

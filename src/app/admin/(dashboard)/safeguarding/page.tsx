@@ -55,8 +55,8 @@ export default async function SafeguardingPage() {
   ]);
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 24px 72px" }}>
-      <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Safeguarding</h1>
+    <div className="adm-page">
+      <h1 className="adm-title" style={{ margin: "0 0 6px" }}>Safeguarding</h1>
       <p style={{ margin: "0 0 24px", fontSize: 14, color: "var(--navy-soft)" }}>
         A Safeguarding Incident / Concern Record is completed from the client&apos;s record. Everything here is logged.
       </p>

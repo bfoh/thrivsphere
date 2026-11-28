@@ -21,10 +21,10 @@ export default async function WorksheetGuidePage({ params }: { params: Promise<{
   if (!template || !guide) notFound();
 
   return (
-    <div style={{ maxWidth: 820, margin: "0 auto", padding: "28px 24px 80px" }}>
+    <div className="adm-page adm-page--narrow">
       <BackLink href="/admin/resources" label="Resources" />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 14, flexWrap: "wrap", margin: "16px 0 4px" }}>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "var(--navy)" }}>{guide.title}</h1>
+        <h1 className="adm-title">{guide.title}</h1>
         <div className="no-print" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <Link href={`/admin/resources/worksheets/${key}/print`} className="pill pill-ghost" style={{ padding: "9px 18px", fontSize: 13.5 }}>
             Client&apos;s printable copy

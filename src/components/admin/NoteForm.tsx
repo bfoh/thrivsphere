@@ -5,19 +5,7 @@ import { useActionState } from "react";
 import { addSessionNote } from "@/app/actions/notes";
 import { initialNoteState } from "@/lib/note-state";
 
-const input: React.CSSProperties = {
-  fontFamily: "inherit",
-  fontSize: 14,
-  padding: "11px 13px",
-  borderRadius: 10,
-  border: "1px solid rgba(31,58,95,0.18)",
-  background: "#fff",
-  color: "var(--ink)",
-  outline: "none",
-  width: "100%",
-  boxSizing: "border-box",
-  resize: "vertical",
-};
+const input: React.CSSProperties = { fontFamily: "inherit", width: "100%", boxSizing: "border-box", resize: "vertical" };
 
 /**
  * Add a session note.

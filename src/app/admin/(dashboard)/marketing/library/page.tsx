@@ -5,7 +5,7 @@ import { Section, Empty } from "@/components/admin/RecordUI";
 import { listAssets } from "@/lib/queries/marketing";
 import { rightsLabel } from "@/lib/asset-rules";
 import { UploadForm } from "@/components/admin/marketing/LibraryForms";
-import { h1, lead, page } from "@/components/admin/marketing/ui";
+import { h1, lead } from "@/components/admin/marketing/ui";
 
 export const metadata: Metadata = { title: "Photos & graphics", robots: { index: false, follow: false } };
 
@@ -18,8 +18,8 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
   const rows = await listAssets({ archived });
 
   return (
-    <div style={page}>
-      <h1 style={h1}>Photos &amp; graphics</h1>
+    <div className="adm-page">
+      <h1 className="adm-title" style={h1}>Photos &amp; graphics</h1>
       <p style={lead}>
         Images for posts and the newsletter, each with who owns it and a description for people who can&apos;t see it. Files are
         private: only staff can open them here.

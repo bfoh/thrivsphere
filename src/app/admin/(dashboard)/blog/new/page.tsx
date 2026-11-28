@@ -9,9 +9,9 @@ export const metadata: Metadata = { title: "New blog post", robots: { index: fal
 export default async function NewBlogPostPage() {
   await requireCapability("blog:write", { entity: "blog_posts", action: "view", detail: "opened the new blog post form" });
   return (
-    <div style={{ maxWidth: 760, margin: "0 auto", padding: "36px 24px 72px" }}>
+    <div className="adm-page adm-page--narrow">
       <BackLink href="/admin/blog" label="Blog" />
-      <h1 style={{ margin: "12px 0 6px", fontSize: 26, fontWeight: 800, color: "var(--navy)" }}>New blog post</h1>
+      <h1 className="adm-title" style={{ margin: "12px 0 6px" }}>New blog post</h1>
       <p style={{ margin: "0 0 22px", fontSize: 14, lineHeight: 1.6, color: "var(--navy-soft)" }}>
         This starts a draft. Nothing is on the website until it has been reviewed and published.
       </p>

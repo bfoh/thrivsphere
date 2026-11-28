@@ -35,8 +35,8 @@ export default async function ResourcesPage() {
   const today = londonToday();
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "32px 24px 80px" }}>
-      <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Resources</h1>
+    <div className="adm-page">
+      <h1 className="adm-title" style={{ margin: "0 0 6px" }}>Resources</h1>
       <p style={{ margin: "0 0 24px", fontSize: 14.5, color: "var(--navy-soft)", maxWidth: 680, lineHeight: 1.55 }}>
         Supervision &amp; next-session planning, your preparation tasks, and the worksheets you can set for clients.
         Everything here is part of the client&apos;s record and every access is logged.

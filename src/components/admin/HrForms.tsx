@@ -6,13 +6,8 @@ import { recordAbsence, recordTraining, saveStaffProfile } from "@/app/actions/h
 import { initialHrState } from "@/lib/hr-state";
 import { absenceLabel, contractLabel } from "@/lib/hr-rules";
 
-const input: React.CSSProperties = {
-  fontFamily: "inherit", fontSize: 14, padding: "9px 12px", borderRadius: 10,
-  border: "1px solid rgba(31,58,95,0.18)", background: "#fff", width: "100%", boxSizing: "border-box",
-};
-const label: React.CSSProperties = {
-  fontSize: 12, fontWeight: 800, color: "var(--navy)", display: "block", marginBottom: 5,
-};
+const input: React.CSSProperties = { fontFamily: "inherit", width: "100%", boxSizing: "border-box" };
+const label: React.CSSProperties = { display: "block", marginBottom: 6, fontSize: "var(--fs-sm)", fontWeight: 700, color: "var(--navy)" };
 
 function Result({ state }: { state: { status: string; message: string } }) {
   if (state.status === "idle" || !state.message) return null;

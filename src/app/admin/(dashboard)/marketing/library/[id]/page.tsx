@@ -7,7 +7,7 @@ import { getAsset } from "@/lib/queries/marketing";
 import { setArchived } from "@/app/actions/marketing-assets";
 import { AssetDetailsForm } from "@/components/admin/marketing/LibraryForms";
 import { aiConfigured } from "@/lib/ai/run";
-import { h1, page } from "@/components/admin/marketing/ui";
+import { h1 } from "@/components/admin/marketing/ui";
 
 export const metadata: Metadata = { title: "Image", robots: { index: false, follow: false } };
 
@@ -22,9 +22,9 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
   const src = `/api/admin/marketing/assets/${asset.id}`;
 
   return (
-    <div style={page}>
+    <div className="adm-page">
       <Link href="/admin/marketing/library" style={{ fontSize: 13, fontWeight: 700 }}>← Photos &amp; graphics</Link>
-      <h1 style={{ ...h1, marginTop: 10 }}>{asset.title}</h1>
+      <h1 className="adm-title" style={{ ...h1, marginTop: 10 }}>{asset.title}</h1>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, alignItems: "start" }}>
         <div>
           <div className="card" style={{ padding: 12, marginBottom: 12 }}>

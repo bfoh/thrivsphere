@@ -7,6 +7,7 @@ import { enquiries, users } from "@/db/schema";
 import { requireCapability } from "@/lib/guard";
 import { Section, Empty } from "@/components/admin/RecordUI";
 import { OPEN_STATUSES, categoryLabel, statusLabel } from "@/lib/enquiry-rules";
+import { PageHeader, Tabs } from "@/components/admin/ui";
 
 export const metadata: Metadata = { title: "Enquiries", robots: { index: false, follow: false } };
 
@@ -49,21 +50,20 @@ export default async function EnquiriesPage({ searchParams }: { searchParams: Pr
     .limit(200);
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 24px 72px" }}>
-      <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Enquiries</h1>
-      <p style={{ margin: "0 0 24px", fontSize: 14, lineHeight: 1.6, color: "var(--navy-soft)" }}>
-        Messages from the contact form and callback requests from the Book page. The email ThriveSphere gets
-        for each one carries only its reference; the details are here. Everything here is logged.
-      </p>
-
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <Link href="/admin/enquiries" className={`pill ${showAll ? "pill-ghost" : "pill-teal"}`} style={{ padding: "8px 16px", fontSize: 13 }}>
-          Open
-        </Link>
-        <Link href="/admin/enquiries?show=all" className={`pill ${showAll ? "pill-teal" : "pill-ghost"}`} style={{ padding: "8px 16px", fontSize: 13 }}>
-          All
-        </Link>
-      </div>
+    <div className="adm-page">
+      <PageHeader
+        title="Enquiries"
+        description="Messages from the contact form and callback requests from the Book page. The email ThriveSphere gets for each one carries only its reference; the details are here. Everything here is logged."
+        actions={
+          <Tabs
+            label="Which enquiries"
+            items={[
+              { label: "Open", href: "/admin/enquiries", active: !showAll },
+              { label: "All", href: "/admin/enquiries?show=all", active: showAll },
+            ]}
+          />
+        }
+      />
 
       <Section title={showAll ? "All enquiries" : "Open enquiries"} subtitle={`${rows.length} ${showAll ? "shown, newest first" : "waiting on ThriveSphere or the enquirer"}`}>
         {rows.length === 0 ? (

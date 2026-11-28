@@ -102,8 +102,8 @@ export default async function ActivityPage({
   }
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "36px 24px 72px" }}>
-      <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Activity</h1>
+    <div className="adm-page">
+      <h1 className="adm-title" style={{ margin: "0 0 6px" }}>Activity</h1>
       <p style={{ margin: "0 0 24px", fontSize: 14, color: "var(--navy-soft)", maxWidth: 620, lineHeight: 1.6 }}>
         Who did what, and when. Entries cannot be edited or removed by anyone, including a founder.
         The log records that a record was opened — never what it contained.
@@ -169,7 +169,7 @@ export default async function ActivityPage({
           <Empty>No activity matches these filters.</Empty>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5, minWidth: 820 }}>
+            <table className="adm-table" style={{ minWidth: 820 }}>
               <thead>
                 <tr>
                   {["When", "Who", "Action", "Record", "Client", "From"].map((h) => (
@@ -276,10 +276,5 @@ function Chip({ href, active, children }: { href: string; active: boolean; child
 const linkStyle: React.CSSProperties = {
   fontSize: 13.5, fontWeight: 700, color: "var(--teal-deep)", textDecoration: "none",
 };
-const th: React.CSSProperties = {
-  textAlign: "left", padding: "8px 12px 10px", fontSize: 11.5, fontWeight: 800,
-  color: "var(--navy-soft)", borderBottom: "1px solid rgba(31,58,95,0.12)", whiteSpace: "nowrap",
-};
-const td: React.CSSProperties = {
-  padding: "11px 12px", borderBottom: "1px solid rgba(31,58,95,0.07)", verticalAlign: "top",
-};
+const th: React.CSSProperties = { textAlign: "left" };
+const td: React.CSSProperties = { verticalAlign: "top" };

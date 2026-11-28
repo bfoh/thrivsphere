@@ -25,9 +25,9 @@ export default async function BlogCommentsPage() {
   const { waiting, decided } = await getCommentQueue();
 
   return (
-    <div style={{ maxWidth: 960, margin: "0 auto", padding: "36px 24px 72px" }}>
+    <div className="adm-page">
       <BackLink href="/admin/blog" label="Blog" />
-      <h1 style={{ margin: "12px 0 6px", fontSize: 26, fontWeight: 800, color: "var(--navy)" }}>Readers&apos; comments</h1>
+      <h1 className="adm-title" style={{ margin: "12px 0 6px" }}>Readers&apos; comments</h1>
       <p style={{ margin: "0 0 22px", fontSize: 14, lineHeight: 1.6, color: "var(--navy-soft)", maxWidth: 680 }}>
         Approve a comment to put it on its post. Don&apos;t publish anything that identifies someone, gives personal or health
         details, or isn&apos;t safe for other readers. If a comment suggests someone may be at risk, follow the safeguarding

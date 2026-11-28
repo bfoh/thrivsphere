@@ -49,8 +49,8 @@ export default async function CataloguePage() {
   const hidden = offered.filter((s) => !s.active);
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "36px 24px 72px" }}>
-      <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Services &amp; prices</h1>
+    <div className="adm-page">
+      <h1 className="adm-title" style={{ margin: "0 0 6px" }}>Services &amp; prices</h1>
       <p style={lead}>
         What the website offers and charges. Changes show on the website straight away and are recorded in Activity.
       </p>

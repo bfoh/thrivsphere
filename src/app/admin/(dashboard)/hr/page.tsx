@@ -83,8 +83,8 @@ export default async function HrPage() {
   const needsAttention = rows.filter((r) => r.overall === "overdue" || r.overall === "due_soon");
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 24px 72px" }}>
-      <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Staff register</h1>
+    <div className="adm-page">
+      <h1 className="adm-title" style={{ margin: "0 0 6px" }}>Staff register</h1>
       <p style={{ margin: "0 0 24px", fontSize: 14, color: "var(--navy-soft)", maxWidth: 640, lineHeight: 1.6 }}>
         DBS status, supervision, training and absence. This is a register, not a payroll system —
         no salary or bank details are held here.
@@ -202,7 +202,7 @@ export default async function HrPage() {
           {allAbsences.length === 0 ? (
             <Empty>No absence recorded.</Empty>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
+            <table className="adm-table">
               <thead>
                 <tr>{["Person", "Type", "From", "To", "Days", "Notes"].map((h) => <th key={h} style={th}>{h}</th>)}</tr>
               </thead>
@@ -267,10 +267,5 @@ function Detail({
   );
 }
 
-const th: React.CSSProperties = {
-  textAlign: "left", padding: "8px 12px 10px", fontSize: 11.5, fontWeight: 800,
-  color: "var(--navy-soft)", borderBottom: "1px solid rgba(31,58,95,0.12)",
-};
-const td: React.CSSProperties = {
-  padding: "10px 12px", borderBottom: "1px solid rgba(31,58,95,0.07)",
-};
+const th: React.CSSProperties = { textAlign: "left" };
+const td: React.CSSProperties = {};

@@ -24,11 +24,7 @@ import {
 } from "@/lib/safeguarding-rules";
 import { Icon } from "@/components/icons";
 
-const input: React.CSSProperties = {
-  fontFamily: "inherit", fontSize: 14, padding: "10px 12px", borderRadius: 10,
-  border: "1px solid rgba(31,58,95,0.18)", background: "#fff", color: "var(--ink)",
-  outline: "none", width: "100%", boxSizing: "border-box",
-};
+const input: React.CSSProperties = { fontFamily: "inherit", width: "100%", boxSizing: "border-box" };
 const errStyle: React.CSSProperties = { margin: "4px 0 0", fontSize: 12, fontWeight: 600, color: "#b4553f" };
 
 function Status({ state }: { state: { status: string; message: string } }) {

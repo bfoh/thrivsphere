@@ -30,8 +30,8 @@ export default async function DiscountsPage() {
   const concessions = rows.filter((r) => r.kind === "client");
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 24px 72px" }}>
-      <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Discounts</h1>
+    <div className="adm-page">
+      <h1 className="adm-title" style={{ margin: "0 0 6px" }}>Discounts</h1>
       <p style={{ margin: "0 0 24px", fontSize: 14, lineHeight: 1.6, color: "var(--navy-soft)" }}>
         Codes anyone who has them can enter before paying, and the concessions given to individual clients. To give a
         client a concession or free sessions, open their record under Clients. Discounts never stack: the client pays the

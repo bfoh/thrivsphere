@@ -20,10 +20,10 @@ export default async function PrintableWorksheetPage({ params }: { params: Promi
   if (!template) notFound();
 
   return (
-    <div style={{ maxWidth: 820, margin: "0 auto", padding: "28px 24px 80px" }}>
+    <div className="adm-page adm-page--narrow">
       <BackLink href="/admin/resources" label="Resources" />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 14, flexWrap: "wrap", margin: "16px 0 6px" }}>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "var(--navy)" }}>{template.title}</h1>
+        <h1 className="adm-title">{template.title}</h1>
         <PrintButton label="Print" />
       </div>
       <p className="no-print" style={{ margin: "0 0 20px", fontSize: 14, color: "var(--navy-soft)", lineHeight: 1.55 }}>

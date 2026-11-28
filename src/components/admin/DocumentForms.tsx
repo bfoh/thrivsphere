@@ -6,10 +6,7 @@ import { deleteDocument, uploadDocument } from "@/app/actions/documents";
 import { initialDocumentState } from "@/lib/document-state";
 import { DOCUMENT_CATEGORIES, MAX_UPLOAD_BYTES } from "@/lib/upload-rules";
 
-const input: React.CSSProperties = {
-  fontFamily: "inherit", fontSize: 14, padding: "10px 12px", borderRadius: 10,
-  border: "1px solid rgba(31,58,95,0.18)", background: "#fff", boxSizing: "border-box",
-};
+const input: React.CSSProperties = { fontFamily: "inherit", boxSizing: "border-box" };
 
 export function UploadDocumentForm({ clientId }: { clientId: string }) {
   const [state, action, pending] = useActionState(uploadDocument, initialDocumentState);

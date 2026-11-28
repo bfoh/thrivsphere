@@ -44,10 +44,10 @@ export default async function SupervisionSheetPage({
     const [sessions, staff] = await Promise.all([listSessionsForSheet(id), getActiveStaff()]);
     const staffList = staff.map((s) => ({ id: s.id, name: s.name }));
     return (
-      <div style={{ maxWidth: 860, margin: "0 auto", padding: "28px 24px 40px" }}>
+      <div className="adm-page adm-page--narrow">
         <BackLink href={`/admin/clients/${id}`} label={client.preferredName} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 14, flexWrap: "wrap", margin: "16px 0 4px" }}>
-          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "var(--navy)" }}>{template.title}</h1>
+          <h1 className="adm-title">{template.title}</h1>
           <span style={draftChip}>Draft</span>
         </div>
         <p style={{ margin: "0 0 20px", fontSize: 14, color: "var(--navy-soft)" }}>
@@ -86,11 +86,11 @@ export default async function SupervisionSheetPage({
   const openTasks = tasks.filter((t) => !t.doneAt).length;
 
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto", padding: "28px 24px 80px" }}>
+    <div className="adm-page adm-page--narrow">
       <BackLink href={`/admin/clients/${id}`} label={client.preferredName} />
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 14, flexWrap: "wrap", margin: "16px 0 6px" }}>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "var(--navy)" }}>{template.title}</h1>
+        <h1 className="adm-title">{template.title}</h1>
         <PrintButton label="Print" onPrint={recordSupervisionPrint.bind(null, recordId)} />
       </div>
 

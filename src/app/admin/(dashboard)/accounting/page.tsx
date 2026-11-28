@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Section, Empty } from "@/components/admin/RecordUI";
 import { getLedger, quarterRange } from "@/lib/queries/accounting";
 import { categoryLabel, withRunningBalance } from "@/lib/accounting";
 import { formatPence } from "@/lib/revenue";
 import { ExpenseForm } from "@/components/admin/ExpenseForm";
+import { PageHeader, Tabs } from "@/components/admin/ui";
 
 export const metadata: Metadata = { title: "Accounting", robots: { index: false, follow: false } };
 
@@ -34,40 +34,29 @@ export default async function AccountingPage({
   const rows = withRunningBalance(ledger.entries).reverse();
 
   return (
-    <div style={{ maxWidth: 1050, margin: "0 auto", padding: "36px 24px 72px" }}>
-      <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Accounting</h1>
-      <p style={{ margin: "0 0 22px", fontSize: 14, color: "var(--navy-soft)", maxWidth: 660, lineHeight: 1.6 }}>
-        A ledger to hand to an accountant, not a replacement for one. Nothing here is statutory
-        bookkeeping. Income is read from settled payments and never typed in twice.
-      </p>
+    <div className="adm-page">
+      <PageHeader
+        title="Accounting"
+        description="A ledger to hand to an accountant, not a replacement for one. Nothing here is statutory bookkeeping. Income is read from settled payments and never typed in twice."
+        actions={
+          <a href={`/admin/accounting/export?q=${offset}`} className="pill pill-ghost" style={{ padding: "0 16px", minHeight: 38, fontSize: 13.5 }}>
+            Export CSV
+          </a>
+        }
+      />
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24, alignItems: "center" }}>
-        {QUARTERS.map((q) => {
-          const r = quarterRange(q);
-          return (
-            <Link
-              key={q}
-              href={q === 0 ? "/admin/accounting" : `/admin/accounting?q=${q}`}
-              style={{
-                fontSize: 12.5, fontWeight: 700, padding: "6px 13px", borderRadius: 999,
-                textDecoration: "none", border: "1px solid",
-                borderColor: offset === q ? "var(--teal-deep)" : "rgba(31,58,95,0.16)",
-                background: offset === q ? "var(--teal-deep)" : "#fff",
-                color: offset === q ? "#fff" : "var(--navy)",
-              }}
-            >
-              {r.from.toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" })}–
-              {r.to.toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" })}
-            </Link>
-          );
-        })}
-        <a
-          href={`/admin/accounting/export?q=${offset}`}
-          className="pill pill-ghost"
-          style={{ padding: "8px 17px", fontSize: 12.5, marginLeft: "auto" }}
-        >
-          Export CSV
-        </a>
+      <div style={{ marginBottom: 24 }}>
+        <Tabs
+          label="Quarter"
+          items={QUARTERS.map((q) => {
+            const r = quarterRange(q);
+            return {
+              label: `${r.from.toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" })}–${r.to.toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" })}`,
+              href: q === 0 ? "/admin/accounting" : `/admin/accounting?q=${q}`,
+              active: offset === q,
+            };
+          })}
+        />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 30 }}>
@@ -90,7 +79,7 @@ export default async function AccountingPage({
           <Empty>Nothing recorded in this period.</Empty>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5, minWidth: 760 }}>
+            <table className="adm-table" style={{ minWidth: 760 }}>
               <thead>
                 <tr>
                   <th style={th}>Date</th>
@@ -147,14 +136,7 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: "go
   );
 }
 
-const th: React.CSSProperties = {
-  textAlign: "left", padding: "8px 12px 10px", fontSize: 11.5, fontWeight: 800,
-  color: "var(--navy-soft)", borderBottom: "1px solid rgba(31,58,95,0.12)",
-};
-const thNum: React.CSSProperties = { ...th, textAlign: "right" };
-const td: React.CSSProperties = {
-  padding: "11px 12px", borderBottom: "1px solid rgba(31,58,95,0.07)",
-};
-const num: React.CSSProperties = {
-  ...td, textAlign: "right", fontVariantNumeric: "tabular-nums", color: "var(--navy)", whiteSpace: "nowrap",
-};
+const th: React.CSSProperties = { textAlign: "left" };
+const thNum: React.CSSProperties = { textAlign: "right" };
+const td: React.CSSProperties = {};
+const num: React.CSSProperties = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: "var(--navy)" };

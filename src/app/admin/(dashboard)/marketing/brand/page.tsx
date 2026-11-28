@@ -7,7 +7,7 @@ import { getKitHistory, getKitVersion } from "@/lib/queries/marketing";
 import { canApproveKit, changedSections, seedKit } from "@/lib/brand-kit";
 import { KitView } from "@/components/admin/marketing/KitView";
 import { ApproveKitForm, StartKitButton } from "@/components/admin/marketing/KitForms";
-import { h1, lead, page } from "@/components/admin/marketing/ui";
+import { h1, lead } from "@/components/admin/marketing/ui";
 
 export const metadata: Metadata = { title: "Brand kit", robots: { index: false, follow: false } };
 
@@ -31,10 +31,10 @@ export default async function BrandKitPage({ searchParams }: { searchParams: Pro
   const approvalOf = (id: string) => approvals.find((a) => a.versionId === id && versions.find((x) => x.id === id)?.contentHash === a.contentHash);
 
   return (
-    <div style={page}>
+    <div className="adm-page">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
         <div>
-          <h1 style={h1}>Brand kit</h1>
+          <h1 className="adm-title" style={h1}>Brand kit</h1>
           <p style={lead}>
             How ThriveSphere looks and sounds. Every graphic, post and AI suggestion follows the approved version.
             {editor ? " You can edit it; Patience approves each new version." : " Admins edit it and Patience approves it."}

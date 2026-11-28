@@ -53,9 +53,9 @@ export default async function NewSupervisionSheetPage({
   const template = supervisionTemplate();
 
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto", padding: "28px 24px 40px" }}>
+    <div className="adm-page adm-page--narrow">
       <BackLink href={`/admin/clients/${id}`} label={client.preferredName} />
-      <h1 style={{ margin: "16px 0 4px", fontSize: 26, fontWeight: 800, color: "var(--navy)" }}>{template.title}</h1>
+      <h1 className="adm-title" style={{ margin: "16px 0 4px" }}>{template.title}</h1>
       <p style={{ margin: "0 0 20px", fontSize: 14.5, color: "var(--navy-soft)" }}>New sheet for {client.preferredName}</p>
 
       <FormRenderer

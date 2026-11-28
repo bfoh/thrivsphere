@@ -14,12 +14,12 @@ export function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="card" style={{ padding: "22px 24px", marginBottom: 18, scrollMarginTop: 16 }}>
-      <div style={{ marginBottom: 16 }}>
-        <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "var(--navy)" }}>{title}</h2>
-        {subtitle && (
-          <p style={{ margin: "3px 0 0", fontSize: 12.5, color: "var(--navy-soft)" }}>{subtitle}</p>
-        )}
+    <section id={id} className="adm-card">
+      <div className="adm-card-head">
+        <div>
+          <h2 className="adm-card-title">{title}</h2>
+          {subtitle && <p className="adm-card-sub">{subtitle}</p>}
+        </div>
       </div>
       {children}
     </section>
@@ -47,19 +47,19 @@ export function Field({
     <div>
       <div
         style={{
-          fontSize: 11.5,
-          letterSpacing: "0.05em",
+          fontSize: "var(--fs-xs)",
+          letterSpacing: "0.04em",
           textTransform: "uppercase",
           color: "var(--navy-soft)",
-          fontWeight: 800,
-          marginBottom: 3,
+          fontWeight: 700,
+          marginBottom: 4,
         }}
       >
         {label}
       </div>
       <div
         style={{
-          fontSize: small ? 13.5 : 14.5,
+          fontSize: small ? "var(--fs-sm)" : "var(--fs-base)",
           lineHeight: 1.5,
           color: emphasis ? "#a1421c" : value ? "var(--ink)" : "var(--navy-soft)",
           fontWeight: emphasis ? 700 : 400,
@@ -74,8 +74,6 @@ export function Field({
 
 export function Empty({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{ margin: 0, fontSize: 14, color: "var(--navy-soft)", fontStyle: "italic" }}>
-      {children}
-    </p>
+    <p className="adm-empty">{children}</p>
   );
 }

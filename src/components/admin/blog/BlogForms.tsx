@@ -26,17 +26,7 @@ import {
 
 type Action = (prev: BlogFormState, fd: FormData) => Promise<BlogFormState>;
 
-export const input: React.CSSProperties = {
-  fontFamily: "inherit",
-  fontSize: 14.5,
-  padding: "10px 12px",
-  borderRadius: 10,
-  border: "1px solid rgba(31,58,95,0.18)",
-  background: "#fff",
-  width: "100%",
-  boxSizing: "border-box",
-  color: "var(--ink)",
-};
+export const input: React.CSSProperties = { fontFamily: "inherit", width: "100%", boxSizing: "border-box" };
 const lbl: React.CSSProperties = { fontSize: 12.5, fontWeight: 800, color: "var(--navy)", display: "block", marginBottom: 5 };
 const hint: React.CSSProperties = { margin: "5px 0 0", fontSize: 12, color: "var(--navy-soft)", lineHeight: 1.45 };
 const linkButton: React.CSSProperties = { background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "inherit", fontWeight: 700, textDecoration: "underline" };

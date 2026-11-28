@@ -11,10 +11,7 @@ import {
 } from "@/app/actions/booking";
 import { initialBookingState } from "@/lib/booking-state";
 
-const input: React.CSSProperties = {
-  fontFamily: "inherit", fontSize: 14, padding: "10px 12px", borderRadius: 10,
-  border: "1px solid rgba(31,58,95,0.18)", background: "#fff", color: "var(--ink)", outline: "none",
-};
+const input: React.CSSProperties = { fontFamily: "inherit" };
 const lbl: React.CSSProperties = { fontSize: 12, fontWeight: 800, color: "var(--navy)", display: "block", marginBottom: 5 };
 
 export const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];

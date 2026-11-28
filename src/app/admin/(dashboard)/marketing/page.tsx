@@ -4,7 +4,7 @@ import { requireCapability } from "@/lib/guard";
 import { can } from "@/lib/authz";
 import { Section } from "@/components/admin/RecordUI";
 import { assetCounts, getKitHistory } from "@/lib/queries/marketing";
-import { h1, lead, page } from "@/components/admin/marketing/ui";
+import { h1, lead } from "@/components/admin/marketing/ui";
 
 export const metadata: Metadata = { title: "Marketing", robots: { index: false, follow: false } };
 
@@ -53,8 +53,8 @@ export default async function MarketingOverview() {
   ];
 
   return (
-    <div style={page}>
-      <h1 style={h1}>Brand &amp; Marketing</h1>
+    <div className="adm-page">
+      <h1 className="adm-title" style={h1}>Brand &amp; Marketing</h1>
       <p style={lead}>
         Where ThriveSphere&apos;s marketing is planned, written and checked. Everything follows the Brand Kit, and nothing is
         posted automatically: the hub prepares it, a reviewer approves it, and staff post it by hand.

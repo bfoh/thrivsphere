@@ -44,11 +44,11 @@ export default async function StaffWorksheetPage({
   const name = (uid: string | null) => (uid ? (names.get(uid) ?? "A former colleague") : "—");
 
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto", padding: "28px 24px 60px" }}>
+    <div className="adm-page adm-page--narrow">
       <BackLink href={`/admin/clients/${id}`} label={client.preferredName} />
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 14, flexWrap: "wrap", margin: "16px 0 6px" }}>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "var(--navy)" }}>{template.title}</h1>
+        <h1 className="adm-title">{template.title}</h1>
         {sent && <PrintButton label="Print" onPrint={recordWorksheetPrint.bind(null, assignmentId)} />}
       </div>
       <p className="no-print" style={{ margin: "0 0 18px", fontSize: 14, color: "var(--navy-soft)" }}>

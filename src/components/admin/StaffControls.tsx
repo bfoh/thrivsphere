@@ -15,10 +15,7 @@ import { initialStaffState } from "@/lib/staff-state";
 import type { Role } from "@/lib/authz";
 import { roleLabel } from "@/lib/staff-rules";
 
-const input: React.CSSProperties = {
-  fontFamily: "inherit", fontSize: 14, padding: "9px 12px", borderRadius: 10,
-  border: "1px solid rgba(31,58,95,0.18)", background: "#fff", boxSizing: "border-box",
-};
+const input: React.CSSProperties = { fontFamily: "inherit", boxSizing: "border-box" };
 
 /** Shows the outcome of a staff action. Refusals are the common case here. */
 function Result({ state }: { state: { status: string; message: string } }) {
@@ -180,9 +177,7 @@ export function CancelInvitationControl({ invitationId, email }: { invitationId:
   );
 }
 
-const label: React.CSSProperties = {
-  fontSize: 12, fontWeight: 800, color: "var(--navy)", display: "block", marginBottom: 5,
-};
+const label: React.CSSProperties = { display: "block", marginBottom: 6, fontSize: "var(--fs-sm)", fontWeight: 700, color: "var(--navy)" };
 
 /** Founder only: let a colleague approve other people's blog posts. */
 export function BlogReviewerControl({ userId, reviewer }: { userId: string; reviewer: boolean }) {

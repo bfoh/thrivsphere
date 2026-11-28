@@ -85,10 +85,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
   const minSchedule = `${formatZonedDate(now, "Europe/London")}T00:00`;
 
   return (
-    <div style={{ maxWidth: 960, margin: "0 auto", padding: "36px 24px 72px" }}>
+    <div className="adm-page adm-page--narrow">
       <BackLink href="/admin/blog" label="Blog" />
       <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap", margin: "12px 0 4px" }}>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "var(--navy)" }}>{content.title || "Untitled"}</h1>
+        <h1 className="adm-title">{content.title || "Untitled"}</h1>
         <StatusBadge status={post.status} />
       </div>
       <p style={{ margin: "0 0 22px", fontSize: 14, color: "var(--navy-soft)" }}>

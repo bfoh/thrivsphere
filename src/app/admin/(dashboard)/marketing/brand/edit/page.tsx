@@ -4,7 +4,7 @@ import { requireCapability } from "@/lib/guard";
 import { getKitHistory, getKitVersion } from "@/lib/queries/marketing";
 import { kitFormValues, seedKit } from "@/lib/brand-kit";
 import { KitEditor } from "@/components/admin/marketing/KitForms";
-import { h1, page } from "@/components/admin/marketing/ui";
+import { h1 } from "@/components/admin/marketing/ui";
 
 export const metadata: Metadata = { title: "Edit brand kit", robots: { index: false, follow: false } };
 
@@ -14,9 +14,9 @@ export default async function EditBrandKitPage() {
   const { status } = await getKitHistory();
   const latest = status.latest ? await getKitVersion(status.latest.id) : null;
   return (
-    <div style={{ ...page, maxWidth: 860 }}>
+    <div className="adm-page adm-page--narrow">
       <Link href="/admin/marketing/brand" style={{ fontSize: 13, fontWeight: 700 }}>← Brand kit</Link>
-      <h1 style={{ ...h1, marginTop: 10 }}>Edit the brand kit</h1>
+      <h1 className="adm-title" style={{ ...h1, marginTop: 10 }}>Edit the brand kit</h1>
       <KitEditor values={kitFormValues(latest?.content ?? seedKit())} basedOn={latest ? `version ${latest.number}` : "the website's wording"} />
     </div>
   );

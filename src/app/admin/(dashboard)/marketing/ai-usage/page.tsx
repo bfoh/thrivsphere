@@ -3,7 +3,7 @@ import { requireCapability } from "@/lib/guard";
 import { Section, Empty } from "@/components/admin/RecordUI";
 import { aiSpendThisMonth, aiUsageReport } from "@/lib/queries/marketing";
 import { monthlyBudgetUsd, usd } from "@/lib/ai/budget-rules";
-import { h1, lead, page } from "@/components/admin/marketing/ui";
+import { h1, lead } from "@/components/admin/marketing/ui";
 import { TASKS, isTaskKey } from "@/lib/ai/tasks";
 
 const featureLabel = (f: string) => (isTaskKey(f) ? TASKS[f].label : f);
@@ -21,8 +21,8 @@ export default async function AiUsagePage() {
   const on = !!process.env.ANTHROPIC_API_KEY;
 
   return (
-    <div style={page}>
-      <h1 style={h1}>AI usage</h1>
+    <div className="adm-page">
+      <h1 className="adm-title" style={h1}>AI usage</h1>
       <p style={lead}>
         Every request for AI help is recorded here with what it cost (in US dollars, as the AI companies charge). When this
         month&apos;s spending reaches the limit, AI help pauses until the 1st. What people typed and what the AI wrote are not kept here.

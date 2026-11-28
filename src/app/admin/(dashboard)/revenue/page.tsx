@@ -24,8 +24,8 @@ export default async function RevenuePage() {
   const peak = Math.max(1, ...r.months.map((m) => m.incomePence));
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "36px 24px 72px" }}>
-      <h1 style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>Revenue</h1>
+    <div className="adm-page">
+      <h1 className="adm-title" style={{ margin: "0 0 6px" }}>Revenue</h1>
       <p style={{ margin: "0 0 26px", fontSize: 14, color: "var(--navy-soft)", maxWidth: 640, lineHeight: 1.6 }}>
         Settled payments over the last twelve months. Income counts from the date the money
         arrived, not the date the order was raised.
@@ -75,7 +75,7 @@ export default async function RevenuePage() {
         {r.byPlan.length === 0 ? (
           <Empty>Nothing sold yet.</Empty>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+          <table className="adm-table">
             <thead>
               <tr>{["Plan", "Sold", "Income", "Share"].map((h, i) => <th key={h} style={i === 0 ? th : thNum}>{h}</th>)}</tr>
             </thead>
@@ -97,7 +97,7 @@ export default async function RevenuePage() {
         {r.byClient.length === 0 ? (
           <Empty>No paying clients yet.</Empty>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+          <table className="adm-table">
             <thead>
               <tr>{["Client", "Payments", "Income", "Share"].map((h, i) => <th key={h} style={i === 0 ? th : thNum}>{h}</th>)}</tr>
             </thead>
@@ -168,14 +168,7 @@ function Stat({ label, value, note }: { label: string; value: string; note?: str
   );
 }
 
-const th: React.CSSProperties = {
-  textAlign: "left", padding: "8px 12px 10px", fontSize: 11.5, fontWeight: 800,
-  color: "var(--navy-soft)", borderBottom: "1px solid rgba(31,58,95,0.12)",
-};
-const thNum: React.CSSProperties = { ...th, textAlign: "right" };
-const td: React.CSSProperties = {
-  padding: "11px 12px", borderBottom: "1px solid rgba(31,58,95,0.07)",
-};
-const num: React.CSSProperties = {
-  ...td, textAlign: "right", fontVariantNumeric: "tabular-nums", color: "var(--navy)",
-};
+const th: React.CSSProperties = { textAlign: "left" };
+const thNum: React.CSSProperties = { textAlign: "right" };
+const td: React.CSSProperties = {};
+const num: React.CSSProperties = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: "var(--navy)" };

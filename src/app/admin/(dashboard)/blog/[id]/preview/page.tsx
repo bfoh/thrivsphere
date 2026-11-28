@@ -28,7 +28,7 @@ export default async function BlogPreviewPage({ params, searchParams }: { params
   const approval = data.reviews.find((r) => r.versionId === entry.version.id && r.decision === "approved");
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "28px 24px 72px" }}>
+    <div className="adm-page adm-page--narrow">
       <BackLink href={`/admin/blog/${id}`} label="Back to the post" />
       <p
         role="status"

@@ -63,9 +63,9 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
   const practitioners = bookable.filter((p) => p.displayName).map((p) => ({ id: p.id, name: p.displayName! }));
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "36px 24px 72px" }}>
+    <div className="adm-page adm-page--narrow">
       <BackLink href="/admin/enquiries" label="Enquiries" />
-      <h1 style={{ margin: "12px 0 4px", fontSize: 26, fontWeight: 800, color: "var(--navy)" }}>
+      <h1 className="adm-title" style={{ margin: "12px 0 4px" }}>
         {enquiry.reference} · {enquiry.name}
       </h1>
       <p style={{ margin: "0 0 22px", fontSize: 14, color: "var(--navy-soft)" }}>

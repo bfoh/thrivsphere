@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { ADMIN_NAV, navFor } from "./admin-nav";
+import { ADMIN_NAV, NAV_GROUPS, activeNavHref, navFor, navGroupsFor } from "./admin-nav";
 import { can, type Actor, type Role } from "./authz";
 
 const actor = (role: Role): Actor => ({ userId: "u", role, status: "active" });
@@ -23,7 +23,7 @@ describe("navFor", () => {
 
   it("gives a practitioner service pages only", () => {
     const l = labels("practitioner");
-    assert.deepEqual(l, ["Dashboard", "Clients", "Enquiries", "Appointments", "Availability", "Safeguarding", "Resources", "Library", "Blog", "Marketing"]);
+    assert.deepEqual(l, ["Dashboard", "Appointments", "Availability", "Enquiries", "Clients", "Safeguarding", "Resources", "Library", "Blog", "Marketing"]);
     for (const forbidden of ["Staff", "Activity", "Services & prices", "Discounts", "Revenue", "HR", "Accounting", "Reports"]) {
       assert.ok(!l.includes(forbidden), `practitioner must not see ${forbidden}`);
     }
@@ -71,8 +71,21 @@ describe("ADMIN_NAV", () => {
   });
 
   it("separates running the organisation from delivering the service", () => {
-    const org = ADMIN_NAV.filter((i) => i.group === "organisation").map((i) => i.label);
-    assert.deepEqual(org, ["Staff", "Activity", "Services & prices", "Discounts", "Revenue", "HR", "Accounting"]);
+    const org = ADMIN_NAV.filter((i) => i.group === "business" || i.group === "team").map((i) => i.label);
+    assert.deepEqual(org, ["Services & prices", "Discounts", "Revenue", "Accounting", "Reports", "Staff", "HR", "Activity"]);
+  });
+
+  it("keeps each section's entries together, in the order the sections are shown", () => {
+    // The sidebar renders section by section; an entry out of place would
+    // silently move in the menu.
+    const order = NAV_GROUPS.map((g) => g.key);
+    const seen = ADMIN_NAV.map((i) => order.indexOf(i.group));
+    assert.ok(seen.every((n) => n >= 0), "every entry belongs to a known section");
+    assert.deepEqual(seen, [...seen].sort((a, b) => a - b));
+  });
+
+  it("gives every entry an icon", () => {
+    for (const item of ADMIN_NAV) assert.ok(item.icon, `${item.label} has no icon`);
   });
 
   it("every destination is a page that exists", () => {
@@ -84,5 +97,38 @@ describe("ADMIN_NAV", () => {
       const file = join(process.cwd(), "src/app/admin/(dashboard)", route, "page.tsx");
       assert.ok(existsSync(file), `no page for ${item.href} (looked for ${file})`);
     }
+  });
+});
+
+describe("navGroupsFor", () => {
+  it("leaves out sections the person has nothing in", () => {
+    const g = navGroupsFor(actor("practitioner")).map((x) => x.label);
+    assert.deepEqual(g, ["Today", "Client care", "Content"]);
+  });
+
+  it("shows a founder every section", () => {
+    assert.deepEqual(navGroupsFor(actor("founder")).map((x) => x.label), NAV_GROUPS.map((x) => x.label));
+  });
+
+  it("gives a client no sections", () => {
+    assert.deepEqual(navGroupsFor(actor("client")), []);
+  });
+});
+
+describe("activeNavHref", () => {
+  const hrefs = ADMIN_NAV.map((i) => i.href);
+
+  it("lights up the dashboard only on the dashboard", () => {
+    assert.equal(activeNavHref("/admin", hrefs), "/admin");
+    assert.equal(activeNavHref("/admin/unknown", hrefs), null);
+  });
+
+  it("lights up the section a record page sits under", () => {
+    assert.equal(activeNavHref("/admin/clients/8a1b/supervision/new", hrefs), "/admin/clients");
+    assert.equal(activeNavHref("/admin/blog/81fc/preview", hrefs), "/admin/blog");
+  });
+
+  it("does not confuse a page with another that shares its first letters", () => {
+    assert.equal(activeNavHref("/admin/staffing", ["/admin/staff"]), null);
   });
 });
