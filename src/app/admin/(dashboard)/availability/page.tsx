@@ -7,7 +7,7 @@ import { requireCapability } from "@/lib/guard";
 import { getActiveStaff, getAvailability, getBookableSlots } from "@/lib/queries/availability";
 import { Section, Empty } from "@/components/admin/RecordUI";
 import { PageHeader, Tabs } from "@/components/admin/ui";
-import { blockPosition, hourMarks, shortDate, trackRange, WEEK_ORDER } from "@/lib/availability-view";
+import { blockPosition, DAY_NAMES, hourMarks, shortDate, trackRange, WEEK_ORDER } from "@/lib/availability-view";
 import { clock, dayHeading, ukDate } from "@/lib/dashboard";
 import {
   AddRuleForm,
@@ -16,7 +16,6 @@ import {
   OpenHoursForm,
   RemoveExceptionButton,
   RemoveRuleButton,
-  DAYS,
 } from "@/components/admin/AvailabilityForms";
 
 export const metadata: Metadata = { title: "Availability", robots: { index: false, follow: false } };
@@ -202,7 +201,7 @@ function WeekGrid({ rules }: { rules: { id: string; dayOfWeek: number; startTime
           .sort((a, b) => a.startTime.localeCompare(b.startTime));
         return (
           <div key={dow} className="adm-weekgrid-row" data-empty={day.length === 0 || undefined}>
-            <span className="adm-weekgrid-day">{DAYS[dow].slice(0, 3)}</span>
+            <span className="adm-weekgrid-day">{DAY_NAMES[dow].slice(0, 3)}</span>
             <div className="adm-weekgrid-track" aria-hidden="true">
               {day.map((r) => {
                 const p = blockPosition(r.startTime, r.endTime, range);
@@ -216,13 +215,13 @@ function WeekGrid({ rules }: { rules: { id: string; dayOfWeek: number; startTime
             <ul className="adm-weekgrid-times">
               {day.length === 0 ? (
                 <li style={{ color: "var(--navy-soft)" }}>
-                  <span className="visually-hidden">{DAYS[dow]}: </span>Closed
+                  <span className="visually-hidden">{DAY_NAMES[dow]}: </span>Closed
                 </li>
               ) : (
                 day.map((r) => (
                   <li key={r.id}>
                     <span>
-                      <span className="visually-hidden">{DAYS[dow]} </span>
+                      <span className="visually-hidden">{DAY_NAMES[dow]} </span>
                       {r.startTime.slice(0, 5)}–{r.endTime.slice(0, 5)}
                       {r.timezone !== "Europe/London" && <small> {r.timezone}</small>}
                     </span>

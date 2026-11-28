@@ -3,6 +3,13 @@
  * be tested without a database or a browser.
  */
 
+/**
+ * Day names by `dayOfWeek` (0 = Sunday). Kept here, not taken from
+ * AvailabilityForms: that is a client module, and a server page importing a
+ * plain value from one gets a reference, not the array.
+ */
+export const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
+
 /** Monday first, as a UK diary reads. Values are `dayOfWeek` (0 = Sunday). */
 export const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
 

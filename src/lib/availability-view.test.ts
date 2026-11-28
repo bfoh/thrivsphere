@@ -1,10 +1,11 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { blockPosition, hourMarks, shortDate, toMinutes, trackRange, WEEK_ORDER } from "./availability-view";
+import { blockPosition, DAY_NAMES, hourMarks, shortDate, toMinutes, trackRange, WEEK_ORDER } from "./availability-view";
 
 describe("availability grid", () => {
   it("reads the week Monday to Sunday", () => {
     assert.deepEqual([...WEEK_ORDER], [1, 2, 3, 4, 5, 6, 0]);
+    assert.deepEqual(WEEK_ORDER.map((d) => DAY_NAMES[d].slice(0, 3)), ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
   });
 
   it("reads times with or without seconds", () => {

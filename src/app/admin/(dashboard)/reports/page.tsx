@@ -77,7 +77,7 @@ export default async function ReportsPage({
             }))}
           />
         ) : (
-          <p className="adm-empty">No sessions in these six months.</p>
+          <p className="adm-empty">No sessions marked as attended, missed or cancelled in these six months.</p>
         )}
       </Section>
 
