@@ -76,7 +76,7 @@ export function MeetingLinkForm({ appointmentId, hasLink }: { appointmentId: str
       <button className="pill pill-teal" disabled={pending} style={{ padding: "8px 16px", fontSize: 12.5, opacity: pending ? 0.6 : 1 }}>
         {pending ? "Saving…" : hasLink ? "Replace" : "Save link"}
       </button>
-      <span style={{ fontSize: 11.5, color: "var(--navy-soft)", flexBasis: "100%" }}>
+      <span style={{ fontSize: 12, color: "var(--navy-soft)", flexBasis: "100%" }}>
         Encrypted, and shown only in the client&apos;s account — never emailed.
       </span>
       {state.status !== "idle" && (

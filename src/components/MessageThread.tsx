@@ -79,11 +79,12 @@ export function MessageThread({
         <textarea
           name="body"
           rows={3}
+          aria-label="Your message"
           placeholder={placeholder}
           style={{
             fontFamily: "inherit", fontSize: 14.5, padding: "12px 14px", borderRadius: 12,
             border: "1px solid rgba(31,58,95,0.18)", background: "#fff", color: "var(--ink)",
-            outline: "none", resize: "vertical", width: "100%", boxSizing: "border-box",
+            resize: "vertical", width: "100%", boxSizing: "border-box",
           }}
         />
         <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>

@@ -254,7 +254,7 @@ function Detail({
 }: { label: string; value: string; note?: string; state?: ComplianceState }) {
   return (
     <div>
-      <div style={{ fontSize: 11, fontWeight: 800, color: "var(--navy-soft)", letterSpacing: "0.05em" }}>
+      <div style={{ fontSize: 12, fontWeight: 800, color: "var(--navy-soft)", letterSpacing: "0.05em" }}>
         {label.toUpperCase()}
       </div>
       <div style={{ fontSize: 13.5, color: "var(--navy)", marginTop: 3 }}>{value}</div>

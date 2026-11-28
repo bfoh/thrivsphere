@@ -5,7 +5,7 @@ import { Section } from "@/components/admin/RecordUI";
 import { Logo } from "@/components/icons";
 
 const list: React.CSSProperties = { margin: 0, paddingLeft: 20, fontSize: 14, lineHeight: 1.65 };
-const small: React.CSSProperties = { fontSize: 11.5, letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--navy-soft)", fontWeight: 800, margin: "0 0 4px" };
+const small: React.CSSProperties = { fontSize: 12, letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--navy-soft)", fontWeight: 800, margin: "0 0 4px" };
 
 /** The Brand Kit, laid out to read. */
 export function KitView({ kit }: { kit: BrandKit }) {

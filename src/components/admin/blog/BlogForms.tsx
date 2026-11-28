@@ -58,7 +58,7 @@ export function Result({ state }: { state: BlogFormState }) {
 
 function Count({ value, limit }: { value: string; limit: number }) {
   return (
-    <span style={{ fontSize: 11.5, fontWeight: 700, color: value.length > limit ? "#a1421c" : "var(--navy-soft)" }}>
+    <span style={{ fontSize: 12, fontWeight: 700, color: value.length > limit ? "#a1421c" : "var(--navy-soft)" }}>
       {value.length}/{limit}
     </span>
   );

@@ -137,7 +137,7 @@
 .adm-nav-heading {
   margin: 0 0 6px;
   padding: 0 10px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -204,7 +204,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   background: var(--a-brand);
@@ -758,7 +758,7 @@ a.adm-stat:hover {
   white-space: nowrap;
 }
 .adm-week-item small {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--a-muted);
 }
 .adm-week-item[data-status="completed"] {
@@ -794,7 +794,7 @@ a.adm-stat:hover {
   position: absolute;
   top: 0;
   transform: translateX(-50%);
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--a-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -831,7 +831,7 @@ a.adm-stat:hover {
   border-radius: 5px;
   background: var(--a-accent-soft);
   border-left: 3px solid var(--a-accent);
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: var(--a-accent);
   white-space: nowrap;
@@ -954,7 +954,7 @@ a.adm-stat:hover {
   position: absolute;
   right: calc(100% + 8px);
   top: -8px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   line-height: 16px;
   color: var(--a-muted);
   font-variant-numeric: tabular-nums;
@@ -1017,7 +1017,7 @@ a.adm-stat:hover {
   left: 50%;
   transform: translateX(-50%);
   font-style: normal;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: var(--a-brand);
   white-space: nowrap;
@@ -1027,7 +1027,7 @@ a.adm-stat:hover {
   height: 24px;
   line-height: 24px;
   text-align: center;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--a-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -1411,7 +1411,7 @@ a.adm-stat:hover {
   box-shadow: 0 1px 2px rgba(16, 32, 56, 0.1);
 }
 .adm-tab-count {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--a-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -1675,6 +1675,69 @@ a.adm-stat:hover {
   }
 }
 
+/*
+ * A table marked data-stack becomes one card per row on a phone: the first
+ * cell is the heading, the rest show their column name from data-label. The
+ * column headings stay in the page for screen readers.
+ */
+@media (max-width: 640px) {
+  .adm-table-wrap:has(> .adm-table[data-stack]) {
+    overflow: visible;
+  }
+  .adm-table[data-stack] thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .adm-table[data-stack],
+  .adm-table[data-stack] tbody,
+  .adm-table[data-stack] tr {
+    display: block;
+    width: 100%;
+  }
+  .adm-table[data-stack] tr {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--a-line);
+  }
+  .adm-table[data-stack] tr:last-child {
+    border-bottom: 0;
+  }
+  .adm-table[data-stack] td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 3px 0;
+    border: 0;
+    text-align: right;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .adm-table[data-stack] td:first-child {
+    justify-content: flex-start;
+    padding-bottom: 6px;
+    font-size: var(--fs-md);
+    text-align: left;
+  }
+  .adm-table[data-stack] td:last-child:not([data-label]) {
+    justify-content: flex-end;
+    padding-top: 6px;
+  }
+  .adm-table[data-stack] td[data-label]::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--a-muted);
+    text-align: left;
+  }
+}
+
 @media (max-width: 640px) {
   .adm-weekgrid-row {
     grid-template-columns: 48px minmax(0, 1fr);
@@ -1682,6 +1745,13 @@ a.adm-stat:hover {
   }
   .adm-weekgrid-times {
     grid-column: 2;
+  }
+  /* A closed day is one line, not an empty timeline with a word under it. */
+  .adm-weekgrid-row[data-empty] .adm-weekgrid-track {
+    display: none;
+  }
+  .adm-weekgrid-marks span:nth-child(even) {
+    display: none;
   }
   .adm-slotdays > div {
     grid-template-columns: minmax(0, 1fr);

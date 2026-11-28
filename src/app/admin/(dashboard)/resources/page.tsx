@@ -162,7 +162,7 @@ function StatusChip({ status }: { status: string }) {
   return (
     <span
       style={{
-        fontSize: 11.5,
+        fontSize: 12,
         fontWeight: 800,
         letterSpacing: "0.04em",
         textTransform: "uppercase",
@@ -180,7 +180,7 @@ function StatusChip({ status }: { status: string }) {
 const list: React.CSSProperties = { margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 12 };
 const subLink: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: "var(--teal-deep)", textDecoration: "none" };
 const flagChip: React.CSSProperties = {
-  fontSize: 11.5,
+  fontSize: 12,
   fontWeight: 800,
   padding: "3px 8px",
   borderRadius: 999,

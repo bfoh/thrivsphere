@@ -124,7 +124,7 @@ export default async function AccountingPage({
                     <td style={{ ...td, color: "var(--navy)" }}>
                       {r.description}
                       {r.reference === "receipt on file" && (
-                        <span style={{ fontSize: 11.5, color: "var(--navy-soft)" }}> · receipt on file</span>
+                        <span style={{ fontSize: 12, color: "var(--navy-soft)" }}> · receipt on file</span>
                       )}
                     </td>
                     <td style={{ ...td, color: "var(--navy-soft)" }}>{r.counterparty ?? "—"}</td>

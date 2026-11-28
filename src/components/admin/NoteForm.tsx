@@ -40,7 +40,7 @@ export function NoteForm({ clientId }: { clientId: string }) {
         Add a session note
       </label>
       <textarea id="body" name="body" rows={4} placeholder="What happened, what was discussed, how the person presented." style={input} />
-      <input name="agreedActions" placeholder="Agreed actions (optional)" style={input} />
+      <input name="agreedActions" aria-label="Agreed actions (optional)" placeholder="Agreed actions (optional)" style={input} />
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <button

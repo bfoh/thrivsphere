@@ -185,7 +185,7 @@ export default async function ActivityPage({
                       {r.actorEmail ? (
                         <>
                           <strong style={{ color: "var(--navy)" }}>{r.actorName || r.actorEmail}</strong>
-                          <div style={{ fontSize: 11.5, color: "var(--navy-soft)" }}>
+                          <div style={{ fontSize: 12, color: "var(--navy-soft)" }}>
                             {roleLabel(r.actorRole as Role)}
                           </div>
                         </>
@@ -244,7 +244,7 @@ export default async function ActivityPage({
 function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <div style={{ fontSize: 11.5, fontWeight: 800, color: "var(--navy-soft)", letterSpacing: "0.05em", marginBottom: 7 }}>
+      <div style={{ fontSize: 12, fontWeight: 800, color: "var(--navy-soft)", letterSpacing: "0.05em", marginBottom: 7 }}>
         {label.toUpperCase()}
       </div>
       <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>{children}</div>

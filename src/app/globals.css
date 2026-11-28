@@ -1139,6 +1139,18 @@ body {
   border: 0;
 }
 
+/*
+ * Form fields show where the keyboard is (WCAG 2.4.7). Inline styles used to
+ * set outline: none with nothing in its place. The back office has its own
+ * ring in admin.css.
+ */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--teal-deep);
+  outline-offset: 1px;
+}
+
 /* 0–10 ratings: large tap targets, with focus shown on the visible pill. */
 .rating-pill {
   position: relative;

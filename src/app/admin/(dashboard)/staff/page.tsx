@@ -84,7 +84,7 @@ export default async function StaffPage() {
                       <td style={td}>
                         <strong style={{ color: "var(--navy)" }}>{s.displayName || s.email}</strong>
                         {s.displayName && <div style={{ fontSize: 12.5, color: "var(--navy-soft)" }}>{s.email}</div>}
-                        {isSelf && <div style={{ fontSize: 11.5, fontWeight: 700, color: "var(--teal-deep)" }}>you</div>}
+                        {isSelf && <div style={{ fontSize: 12, fontWeight: 700, color: "var(--teal-deep)" }}>you</div>}
                       </td>
                       <td style={td}>
                         {/* Nobody edits their own access — the rules refuse it, so the

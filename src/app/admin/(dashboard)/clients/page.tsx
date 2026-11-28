@@ -51,7 +51,7 @@ export default async function ClientsPage({
         <p className="adm-empty">{q ? "No clients match that search." : "No client records yet."}</p>
       ) : (
         <TableWrap>
-          <table className="adm-table">
+          <table className="adm-table" data-stack>
             <thead>
               <tr>
                 <th scope="col">Name</th>
@@ -68,11 +68,11 @@ export default async function ClientsPage({
               {rows.map((r) => (
                 <tr key={r.id}>
                   <td style={{ fontWeight: 700, color: "var(--navy)" }}>{r.preferredName}</td>
-                  <td>{r.email}</td>
-                  <td>
+                  <td data-label="Email">{r.email}</td>
+                  <td data-label="Status">
                     <Badge tone={CLIENT_STATUS_TONE[r.status] ?? "neutral"}>{statusText(r.status)}</Badge>
                   </td>
-                  <td>
+                  <td data-label="Safeguarding">
                     {r.flagged ? <FlagBadge compact /> : <span style={{ color: "var(--navy-soft)" }}>—</span>}
                     {r.openConcerns > 0 && (
                       <span style={{ marginLeft: 8, fontSize: "var(--fs-xs)", fontWeight: 700, color: "var(--a-danger)" }}>
@@ -80,7 +80,7 @@ export default async function ClientsPage({
                       </span>
                     )}
                   </td>
-                  <td style={{ color: "var(--navy-soft)", whiteSpace: "nowrap" }}>
+                  <td data-label="Registered" style={{ color: "var(--navy-soft)", whiteSpace: "nowrap" }}>
                     {new Date(r.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                   </td>
                   <td style={{ textAlign: "right" }}>

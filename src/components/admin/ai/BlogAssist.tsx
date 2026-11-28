@@ -66,7 +66,7 @@ export function BlogAssist({
     <div style={box}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
         <p style={{ margin: 0, fontSize: 13.5, fontWeight: 800, color: "var(--teal-deep)" }}>AI help</p>
-        <p style={{ margin: 0, fontSize: 11.5, color: "var(--navy-soft)" }}>Suggestions only. Never include anything about a client.</p>
+        <p style={{ margin: 0, fontSize: 12, color: "var(--navy-soft)" }}>Suggestions only. Never include anything about a client.</p>
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
         <button type="button" className="pill pill-ghost" style={small} disabled={!!busy} onClick={() => run("blog-titles")}>{busy === "blog-titles" ? "Thinking…" : "Suggest titles"}</button>

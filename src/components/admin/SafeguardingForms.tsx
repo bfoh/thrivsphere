@@ -442,11 +442,11 @@ export function ReferralForm({ clientId }: { clientId: string }) {
     <form action={action} style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "flex-start", marginBottom: 14 }}>
       <input type="hidden" name="clientId" value={clientId} />
       <div style={{ flex: "1 1 200px" }}>
-        <input name="organisationName" placeholder="Service referred to" style={input} />
+        <input name="organisationName" aria-label="Service referred to" placeholder="Service referred to" style={input} />
         {fe.organisationName && <p style={errStyle}>{fe.organisationName}</p>}
       </div>
       <div style={{ flex: "2 1 260px" }}>
-        <input name="reason" placeholder="Reason for referral" style={input} />
+        <input name="reason" aria-label="Reason for referral" placeholder="Reason for referral" style={input} />
         {fe.reason && <p style={errStyle}>{fe.reason}</p>}
       </div>
       <button className="pill pill-teal" disabled={pending} style={{ padding: "10px 18px", fontSize: 13 }}>
@@ -480,7 +480,7 @@ export function AmendNoteForm({ noteId, clientId }: { noteId: string; clientId: 
       <input type="hidden" name="clientId" value={clientId} />
       <textarea name="body" rows={3} placeholder="The correction" style={{ ...input, resize: "vertical" }} />
       {fe.body && <p style={errStyle}>{fe.body}</p>}
-      <input name="reason" placeholder="Why this amendment is needed" style={input} />
+      <input name="reason" aria-label="Why this amendment is needed" placeholder="Why this amendment is needed" style={input} />
       {fe.reason && <p style={errStyle}>{fe.reason}</p>}
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
         <button className="pill pill-teal" disabled={pending} style={{ padding: "8px 16px", fontSize: 12.5 }}>

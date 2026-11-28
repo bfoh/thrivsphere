@@ -28,8 +28,8 @@ export function UploadDocumentForm({ clientId }: { clientId: string }) {
     >
       <input type="hidden" name="clientId" value={clientId} />
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-        <input type="file" name="file" style={{ ...input, flex: "1 1 240px" }} />
-        <select name="category" defaultValue="correspondence" style={input}>
+        <input type="file" name="file" aria-label="Document to upload" style={{ ...input, flex: "1 1 240px" }} />
+        <select name="category" aria-label="Type of document" defaultValue="correspondence" style={input}>
           {DOCUMENT_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
         <button className="pill pill-teal" disabled={pending} style={{ padding: "10px 20px", fontSize: 13.5, opacity: pending ? 0.6 : 1 }}>
@@ -42,7 +42,7 @@ export function UploadDocumentForm({ clientId }: { clientId: string }) {
         <span>Share this with the client in their portal.</span>
       </label>
 
-      <p style={{ margin: 0, fontSize: 11.5, color: "var(--navy-soft)", lineHeight: 1.5 }}>
+      <p style={{ margin: 0, fontSize: 12, color: "var(--navy-soft)", lineHeight: 1.5 }}>
         PDF, Word, JPG, PNG, WEBP, HEIC or TXT, up to {Math.floor(MAX_UPLOAD_BYTES / 1024 / 1024)} MB.
         Stored privately — never reachable by a public link.
       </p>

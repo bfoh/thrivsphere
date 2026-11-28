@@ -56,7 +56,7 @@ const dt = (d: Date | string | null) =>
     : "—";
 
 const chip = (draft: boolean): React.CSSProperties => ({
-  fontSize: 11.5,
+  fontSize: 12,
   fontWeight: 800,
   letterSpacing: "0.04em",
   textTransform: "uppercase",
@@ -467,7 +467,7 @@ export default async function ClientRecordPage({
                         <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.55, color: "var(--ink)", whiteSpace: "pre-wrap" }}>
                           {am.body}
                         </p>
-                        <p style={{ margin: "3px 0 0", fontSize: 11.5, color: "var(--navy-soft)" }}>
+                        <p style={{ margin: "3px 0 0", fontSize: 12, color: "var(--navy-soft)" }}>
                           Amendment · {am.reason} · {dt(am.createdAt)}
                         </p>
                       </div>
@@ -504,7 +504,7 @@ export default async function ClientRecordPage({
                 </Link>
                 <span style={{ color: "var(--navy-soft)" }}>{r.practitionerName ?? r.practitionerEmail ?? ""}</span>
                 {r.needsFollowUp && (
-                  <span style={{ fontSize: 11.5, fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: "#c853241a", color: "#8c2a1c" }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: "#c853241a", color: "#8c2a1c" }}>
                     Section 3 flag
                   </span>
                 )}

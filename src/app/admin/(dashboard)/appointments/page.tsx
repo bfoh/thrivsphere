@@ -291,7 +291,7 @@ export default async function AppointmentsPage({
           <Empty>Nothing yet.</Empty>
         ) : (
           <TableWrap>
-            <table className="adm-table">
+            <table className="adm-table" data-stack>
               <thead>
                 <tr>
                   <th scope="col">When</th>
@@ -310,7 +310,7 @@ export default async function AppointmentsPage({
                     <td style={{ whiteSpace: "nowrap", fontWeight: 600, color: "var(--navy)" }}>
                       {a.startsAt.toLocaleDateString("en-GB", { timeZone: LDN, day: "numeric", month: "short", year: "numeric" })}, {clock(a.startsAt)}
                     </td>
-                    <td>
+                    <td data-label="Client">
                       {a.clientId ? (
                         <Link href={`/admin/clients/${a.clientId}`} style={{ fontWeight: 700, color: "var(--navy)", textDecoration: "none" }}>
                           {a.clientName}
@@ -319,9 +319,9 @@ export default async function AppointmentsPage({
                         "—"
                       )}
                     </td>
-                    <td>{kindLabel(a.kind)}</td>
-                    <td>{withWhom(a.practitionerId)}</td>
-                    <td>
+                    <td data-label="Session">{kindLabel(a.kind)}</td>
+                    <td data-label="With">{withWhom(a.practitionerId)}</td>
+                    <td data-label="Outcome">
                       <Badge tone={STATUS[a.status]?.tone ?? "neutral"}>{STATUS[a.status]?.label ?? a.status.replace(/_/g, " ")}</Badge>
                       {a.chargedToPackage && (
                         <span style={{ display: "block", marginTop: 4, fontSize: 12, color: "var(--navy-soft)" }}>counted as used</span>

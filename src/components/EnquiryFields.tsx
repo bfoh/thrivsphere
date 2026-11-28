@@ -22,7 +22,6 @@ export const inputStyle: React.CSSProperties = {
   border: "1px solid rgba(31,58,95,0.18)",
   background: "#fff",
   color: "var(--ink)",
-  outline: "none",
   width: "100%",
   boxSizing: "border-box",
   maxWidth: "100%",
