@@ -1,22 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getReport, monthRange } from "@/lib/queries/reports";
+import { getOutcomeSeries, getReport, monthRange } from "@/lib/queries/reports";
 import { Section } from "@/components/admin/RecordUI";
+import { ColumnChart } from "@/components/admin/ColumnChart";
+import { PageHeader, Stat, Stats } from "@/components/admin/ui";
 
 export const metadata: Metadata = { title: "Reports", robots: { index: false, follow: false } };
 
 const money = (pence: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(pence / 100);
 
-function Tile({ label, value, note }: { label: string; value: string | number; note?: string }) {
-  return (
-    <div className="card" style={{ padding: "18px 20px" }}>
-      <div style={{ fontSize: 28, fontWeight: 800, color: "var(--teal-deep)" }}>{value}</div>
-      <div style={{ fontSize: 13, color: "var(--navy)", fontWeight: 700, marginTop: 3 }}>{label}</div>
-      {note && <div style={{ fontSize: 11.5, color: "var(--navy-soft)", marginTop: 3, lineHeight: 1.45 }}>{note}</div>}
-    </div>
-  );
-}
+const step = { minHeight: 38, padding: "0 14px", fontSize: 13.5 } as const;
 
 export default async function ReportsPage({
   searchParams,
@@ -25,58 +19,84 @@ export default async function ReportsPage({
 }) {
   const { m } = await searchParams;
   const monthsAgo = Math.min(Math.max(Number(m ?? 0) || 0, 0), 23);
+  // The report first: it checks access and writes the audit row for the page.
   const report = await getReport(monthRange(monthsAgo));
+  const outcomes = await getOutcomeSeries(monthsAgo, 6);
+  const anySessions = outcomes.some((o) => o.attended + o.noShows + o.cancelled > 0);
 
   return (
     <div className="adm-page">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16, flexWrap: "wrap", marginBottom: 8 }}>
-        <h1 className="adm-title">Reports</h1>
-        <div style={{ display: "flex", gap: 12, fontSize: 13.5 }}>
-          {monthsAgo < 23 && (
-            <Link href={`/admin/reports?m=${monthsAgo + 1}`} style={{ color: "var(--teal-deep)", fontWeight: 700, textDecoration: "none" }}>
-              ← Earlier
-            </Link>
-          )}
-          {monthsAgo > 0 && (
-            <Link href={`/admin/reports?m=${monthsAgo - 1}`} style={{ color: "var(--teal-deep)", fontWeight: 700, textDecoration: "none" }}>
-              Later →
-            </Link>
-          )}
-        </div>
-      </div>
-      <p style={{ margin: "0 0 24px", fontSize: 14, color: "var(--navy-soft)" }}>
-        {report.range.label} · totals only, so producing a report never requires opening a client record.
-      </p>
+      <PageHeader
+        title="Reports"
+        description={`${report.range.label} · totals only, so producing a report never requires opening a client record.`}
+        actions={
+          <>
+            {monthsAgo < 23 && (
+              <Link href={`/admin/reports?m=${monthsAgo + 1}`} className="pill pill-ghost" style={step}>
+                ← Earlier
+              </Link>
+            )}
+            {monthsAgo > 0 && (
+              <Link href={`/admin/reports?m=${monthsAgo - 1}`} className="pill pill-ghost" style={step}>
+                Later →
+              </Link>
+            )}
+          </>
+        }
+      />
 
       <Section title="Service activity">
-        <div className="impact-row" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
-          <Tile label="New clients" value={report.newClients} />
-          <Tile label="Active clients" value={report.activeClients} note="current, not period-based" />
-          <Tile label="Sessions delivered" value={report.sessionsDelivered} />
-          <Tile
+        <Stats>
+          <Stat label="New clients" value={report.newClients} />
+          <Stat label="Active clients" value={report.activeClients} hint="Now, not for the month" />
+          <Stat label="Sessions delivered" value={report.sessionsDelivered} />
+          <Stat
             label="Attendance"
             value={report.attendanceRate === null ? "—" : `${report.attendanceRate}%`}
-            note="delivered vs no-shows; cancellations excluded"
+            hint="Attended against no-shows; cancellations left out"
           />
-        </div>
+        </Stats>
+      </Section>
+
+      <Section title="Sessions by month" subtitle={`Six months to ${report.range.label}. Cancellations are in the tooltip and the figures.`}>
+        {anySessions ? (
+          <ColumnChart
+            label={`Attended and missed sessions, six months to ${report.range.label}`}
+            series={["Attended", "No-show"]}
+            extra={["Cancelled"]}
+            integer
+            format={String}
+            height={200}
+            columns={outcomes.map((o, i) => ({
+              key: o.key,
+              label: o.label.split(" ")[0].slice(0, 3),
+              fullLabel: o.label,
+              values: [o.attended, o.noShows],
+              extras: [o.cancelled],
+              current: i === outcomes.length - 1,
+            }))}
+          />
+        ) : (
+          <p className="adm-empty">No sessions in these six months.</p>
+        )}
       </Section>
 
       <Section title="Bookings & income">
-        <div className="impact-row" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
-          <Tile label="Sessions booked" value={report.sessionsBooked} />
-          <Tile label="Cancellations" value={report.cancellations} />
-          <Tile label="No-shows" value={report.noShows} />
-          <Tile label="Income" value={money(report.incomePence)} note="paid orders in period" />
-        </div>
+        <Stats>
+          <Stat label="Sessions booked" value={report.sessionsBooked} />
+          <Stat label="Cancellations" value={report.cancellations} />
+          <Stat label="No-shows" value={report.noShows} />
+          <Stat label="Income" value={money(report.incomePence)} hint="Paid orders in the month" />
+        </Stats>
       </Section>
 
       <Section title="Safeguarding & signposting">
-        <div className="impact-row" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
-          <Tile label="Concerns raised" value={report.concernsRaised} />
-          <Tile label="Of those, escalated" value={report.concernsEscalated} />
-          <Tile label="Referrals made" value={report.referralsMade} />
-          <Tile label="New enquiries" value={report.newEnquiries} />
-        </div>
+        <Stats>
+          <Stat label="Concerns raised" value={report.concernsRaised} />
+          <Stat label="Of those, escalated" value={report.concernsEscalated} />
+          <Stat label="Referrals made" value={report.referralsMade} />
+          <Stat label="New enquiries" value={report.newEnquiries} />
+        </Stats>
         <p style={{ margin: "16px 0 0", fontSize: 12.5, lineHeight: 1.6, color: "var(--navy-soft)" }}>
           These are counts for oversight and funding reports. Individual concerns are on the{" "}
           <Link href="/admin/safeguarding" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>

@@ -37,20 +37,20 @@ export function KitView({ kit }: { kit: BrandKit }) {
 
       <Section title="Words to use and avoid">
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
+          <table className="adm-table" style={{ minWidth: 560 }}>
             <thead>
               <tr>
                 {["Avoid", "Say instead", "Why"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "6px 8px", ...small }}>{h}</th>
+                  <th key={h} scope="col">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {kit.words.map((w) => (
-                <tr key={w.avoid} style={{ borderTop: "1px solid rgba(31,58,95,0.08)" }}>
-                  <td style={{ padding: "8px", fontWeight: 700, color: "#a1421c" }}>{w.avoid}</td>
-                  <td style={{ padding: "8px", fontWeight: 700, color: "var(--teal-deep)" }}>{w.instead}</td>
-                  <td style={{ padding: "8px", color: "var(--navy-soft)" }}>{w.why}</td>
+                <tr key={w.avoid}>
+                  <td style={{ fontWeight: 700, color: "#a1421c" }}>{w.avoid}</td>
+                  <td style={{ fontWeight: 700, color: "var(--teal-deep)" }}>{w.instead}</td>
+                  <td style={{ color: "var(--navy-soft)" }}>{w.why}</td>
                 </tr>
               ))}
             </tbody>

@@ -3,6 +3,9 @@ import Link from "next/link";
 import { Section, Empty } from "@/components/admin/RecordUI";
 import { getRevenue } from "@/lib/queries/revenue";
 import { formatPence, percentChange } from "@/lib/revenue";
+import { axisPounds } from "@/lib/chart";
+import { ColumnChart } from "@/components/admin/ColumnChart";
+import { PageHeader, Stat, Stats, TableWrap } from "@/components/admin/ui";
 
 export const metadata: Metadata = { title: "Revenue", robots: { index: false, follow: false } };
 
@@ -21,53 +24,41 @@ export default async function RevenuePage() {
   const change =
     thisMonth && lastMonth ? percentChange(thisMonth.incomePence, lastMonth.incomePence) : null;
 
-  const peak = Math.max(1, ...r.months.map((m) => m.incomePence));
-
   return (
     <div className="adm-page">
-      <h1 className="adm-title" style={{ margin: "0 0 6px" }}>Revenue</h1>
-      <p style={{ margin: "0 0 26px", fontSize: 14, color: "var(--navy-soft)", maxWidth: 640, lineHeight: 1.6 }}>
-        Settled payments over the last twelve months. Income counts from the date the money
-        arrived, not the date the order was raised.
-      </p>
+      <PageHeader
+        title="Revenue"
+        description="Settled payments over the last twelve months. Income counts from the date the money arrived, not the date the order was raised."
+      />
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14, marginBottom: 30 }}>
-        <Stat label="Settled, 12 months" value={formatPence(r.settledPence)} note={`${r.paidOrders} payment${r.paidOrders === 1 ? "" : "s"}`} />
+      <Stats>
+        <Stat label="Settled, 12 months" value={formatPence(r.settledPence)} hint={`${r.paidOrders} payment${r.paidOrders === 1 ? "" : "s"}`} />
         <Stat
           label="This month"
           value={formatPence(thisMonth?.incomePence ?? 0)}
-          note={change === null ? "no comparison yet" : `${change >= 0 ? "+" : ""}${change}% on last month`}
+          hint={change === null ? "No comparison yet" : `${change >= 0 ? "+" : ""}${change}% on last month`}
         />
-        <Stat label="Awaiting payment" value={formatPence(r.outstandingPence)} note={`${r.pendingOrders} unpaid order${r.pendingOrders === 1 ? "" : "s"}`} />
-        <Stat label="Average payment" value={formatPence(r.averageOrderPence)} note={`${r.payingClients} client${r.payingClients === 1 ? "" : "s"} have paid`} />
-      </div>
+        <Stat label="Awaiting payment" value={formatPence(r.outstandingPence)} hint={`${r.pendingOrders} unpaid order${r.pendingOrders === 1 ? "" : "s"}`} />
+        <Stat label="Average payment" value={formatPence(r.averageOrderPence)} hint={`${r.payingClients} client${r.payingClients === 1 ? "" : "s"} have paid`} />
+      </Stats>
 
       <Section title="By month" subtitle="Settled income">
         {r.settledPence === 0 ? (
           <Empty>No settled payments yet.</Empty>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {r.months.map((m) => (
-              <div key={m.key} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <span style={{ width: 78, flexShrink: 0, fontSize: 12.5, color: "var(--navy-soft)", fontVariantNumeric: "tabular-nums" }}>
-                  {m.label}
-                </span>
-                <span
-                  aria-hidden
-                  style={{
-                    height: 16,
-                    borderRadius: 4,
-                    background: m.incomePence > 0 ? "var(--teal-deep)" : "rgba(31,58,95,0.08)",
-                    width: `${Math.max(m.incomePence > 0 ? 2 : 1, (m.incomePence / peak) * 100)}%`,
-                    minWidth: 4,
-                  }}
-                />
-                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--navy)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
-                  {formatPence(m.incomePence)}
-                </span>
-              </div>
-            ))}
-          </div>
+          <ColumnChart
+            label="Settled income by month, last twelve months"
+            series={["Income"]}
+            format={formatPence}
+            axisFormat={axisPounds}
+            columns={r.months.map((m, i) => ({
+              key: m.key,
+              label: m.label.split(" ")[0],
+              fullLabel: m.label,
+              values: [m.incomePence],
+              current: i === r.months.length - 1,
+            }))}
+          />
         )}
       </Section>
 
@@ -75,6 +66,7 @@ export default async function RevenuePage() {
         {r.byPlan.length === 0 ? (
           <Empty>Nothing sold yet.</Empty>
         ) : (
+          <TableWrap>
           <table className="adm-table">
             <thead>
               <tr>{["Plan", "Sold", "Income", "Share"].map((h, i) => <th key={h} style={i === 0 ? th : thNum}>{h}</th>)}</tr>
@@ -90,6 +82,7 @@ export default async function RevenuePage() {
               ))}
             </tbody>
           </table>
+          </TableWrap>
         )}
       </Section>
 
@@ -97,6 +90,7 @@ export default async function RevenuePage() {
         {r.byClient.length === 0 ? (
           <Empty>No paying clients yet.</Empty>
         ) : (
+          <TableWrap>
           <table className="adm-table">
             <thead>
               <tr>{["Client", "Payments", "Income", "Share"].map((h, i) => <th key={h} style={i === 0 ? th : thNum}>{h}</th>)}</tr>
@@ -116,54 +110,41 @@ export default async function RevenuePage() {
               ))}
             </tbody>
           </table>
+          </TableWrap>
         )}
       </Section>
 
       <Section title="Delivery" subtitle="What the income represents in sessions">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14 }}>
-          <Stat label="Sessions delivered" value={String(r.sessionsDelivered)} note="completed appointments, all time" />
+        <Stats>
+          <Stat label="Sessions delivered" value={String(r.sessionsDelivered)} hint="Attended sessions, all time" />
           <Stat
             label="Sessions owed"
             value={String(r.sessionsRemaining)}
-            note="paid for, not yet delivered"
+            hint="Paid for, not yet delivered"
           />
           <Stat
             label="Sessions per client"
             value={r.averageSessionsPerClient === null ? "—" : String(r.averageSessionsPerClient)}
-            note="average, per paying client"
+            hint="Average, per paying client"
           />
-          <Stat label="Refunded" value={formatPence(r.refundedPence)} note="all time" />
+          <Stat label="Refunded" value={formatPence(r.refundedPence)} hint="All time" />
           <Stat
             label="Discounts given"
             value={formatPence(r.discountsGivenPence)}
-            note={`off ${r.discountedOrders} payment${r.discountedOrders === 1 ? "" : "s"}, 12 months`}
+            hint={`Off ${r.discountedOrders} payment${r.discountedOrders === 1 ? "" : "s"}, 12 months`}
           />
           <Stat
             label="Complimentary sessions"
             value={String(r.complimentarySessions)}
-            note={`worth ${formatPence(r.complimentaryValuePence)} at full price, 12 months`}
+            hint={`Worth ${formatPence(r.complimentaryValuePence)} at full price, 12 months`}
           />
-        </div>
+        </Stats>
         <p style={{ margin: "16px 0 0", fontSize: 13, lineHeight: 1.6, color: "var(--navy-soft)" }}>
           <strong style={{ color: "var(--navy)" }}>Sessions owed</strong> is money already received
           against work still to be delivered. It is a liability, not profit — worth remembering
           before treating the settled figure as available.
         </p>
       </Section>
-    </div>
-  );
-}
-
-function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
-  return (
-    <div style={{ padding: "16px 18px", borderRadius: 12, background: "#fff", border: "1px solid rgba(31,58,95,0.1)" }}>
-      <div style={{ fontSize: 11.5, fontWeight: 800, color: "var(--navy-soft)", letterSpacing: "0.05em" }}>
-        {label.toUpperCase()}
-      </div>
-      <div style={{ fontSize: 24, fontWeight: 800, color: "var(--navy)", margin: "7px 0 3px", fontVariantNumeric: "tabular-nums" }}>
-        {value}
-      </div>
-      {note && <div style={{ fontSize: 12.5, color: "var(--navy-soft)", lineHeight: 1.45 }}>{note}</div>}
     </div>
   );
 }

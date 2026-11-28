@@ -7,6 +7,8 @@ import { requireCapability } from "@/lib/guard";
 import { getActiveStaff, getAvailability, getBookableSlots } from "@/lib/queries/availability";
 import { Section, Empty } from "@/components/admin/RecordUI";
 import { PageHeader, Tabs } from "@/components/admin/ui";
+import { blockPosition, hourMarks, shortDate, trackRange, WEEK_ORDER } from "@/lib/availability-view";
+import { clock, dayHeading, ukDate } from "@/lib/dashboard";
 import {
   AddRuleForm,
   BlockDateForm,
@@ -58,6 +60,16 @@ export default async function AvailabilityPage({
   const blocked = current.filter((e) => e.blocked);
   const whose = subject && forOther ? `${subject.name}'s` : "Your";
 
+  // The next 14 days' slots, one row per day.
+  const now = new Date();
+  const slotDays: { date: string; times: Date[] }[] = [];
+  for (const slot of slots) {
+    const date = ukDate(slot.startsAt);
+    const last = slotDays.at(-1);
+    if (last?.date === date) last.times.push(slot.startsAt);
+    else slotDays.push({ date, times: [slot.startsAt] });
+  }
+
   return (
     <div className="adm-page adm-page--narrow">
       <PageHeader
@@ -96,16 +108,7 @@ export default async function AvailabilityPage({
           {rules.length === 0 ? (
             <Empty>No weekly hours set. Clients can only book extra hours opened below.</Empty>
           ) : (
-            <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 9 }}>
-              {rules.map((r) => (
-                <li key={r.id} style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 14.5, color: "var(--ink)" }}>
-                  <strong style={{ color: "var(--navy)", minWidth: 96 }}>{DAYS[r.dayOfWeek]}</strong>
-                  <span>{r.startTime.slice(0, 5)} – {r.endTime.slice(0, 5)}</span>
-                  <span style={{ color: "var(--navy-soft)", fontSize: 12.5 }}>{r.timezone}</span>
-                  <span style={{ marginLeft: "auto" }}><RemoveRuleButton ruleId={r.id} /></span>
-                </li>
-              ))}
-            </ul>
+            <WeekGrid rules={rules} />
           )}
         </div>
       </Section>
@@ -124,16 +127,20 @@ export default async function AvailabilityPage({
         {slots.length === 0 ? (
           <Empty>No bookable slots. Check the weekly pattern, extra hours and blocked time.</Empty>
         ) : (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {slots.slice(0, 40).map((s) => (
-              <span key={s.startsAt.toISOString()} className="chip" style={{ fontSize: 12.5 }}>
-                {s.startsAt.toLocaleString("en-GB", {
-                  timeZone: "Europe/London",
-                  weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
-                })}
-              </span>
+          <dl className="adm-slotdays">
+            {slotDays.map((d) => (
+              <div key={d.date}>
+                <dt>{dayHeading(d.date, now)}</dt>
+                <dd>
+                  {d.times.map((t) => (
+                    <span key={t.toISOString()} className="adm-slot">
+                      {clock(t)}
+                    </span>
+                  ))}
+                </dd>
+              </div>
             ))}
-          </div>
+          </dl>
         )}
       </Section>
     </div>
@@ -156,7 +163,7 @@ function ExceptionList({
           {entries.map((e) => (
             <li key={e.id} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--ink)" }}>
               <span>
-                <strong style={{ color: "var(--navy)" }}>{e.date}</strong>{" "}
+                <strong style={{ color: "var(--navy)" }}>{shortDate(e.date)}</strong>{" "}
                 {e.startTime ? `${e.startTime.slice(0, 5)}–${e.endTime?.slice(0, 5)}` : "all day"}
                 {e.reason && <span style={{ color: "var(--navy-soft)" }}> — {e.reason}</span>}
               </span>
@@ -165,6 +172,68 @@ function ExceptionList({
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+/**
+ * The weekly pattern as a diary: one row per day, Monday first, with each
+ * stretch of hours drawn on a timeline and written out beside it.
+ */
+function WeekGrid({ rules }: { rules: { id: string; dayOfWeek: number; startTime: string; endTime: string; timezone: string }[] }) {
+  const range = trackRange(rules);
+  const marks = hourMarks(range);
+  const at = (h: number) => ((h - range.from) / (range.to - range.from)) * 100;
+  return (
+    <div className="adm-weekgrid" style={{ ["--span" as string]: range.to - range.from }}>
+      <div className="adm-weekgrid-scale" aria-hidden="true">
+        <span />
+        <div className="adm-weekgrid-marks">
+          {marks.map((h) => (
+            <span key={h} style={{ left: `${at(h)}%` }}>
+              {String(h).padStart(2, "0")}:00
+            </span>
+          ))}
+        </div>
+      </div>
+      {WEEK_ORDER.map((dow) => {
+        const day = rules
+          .filter((r) => r.dayOfWeek === dow)
+          .sort((a, b) => a.startTime.localeCompare(b.startTime));
+        return (
+          <div key={dow} className="adm-weekgrid-row" data-empty={day.length === 0 || undefined}>
+            <span className="adm-weekgrid-day">{DAYS[dow].slice(0, 3)}</span>
+            <div className="adm-weekgrid-track" aria-hidden="true">
+              {day.map((r) => {
+                const p = blockPosition(r.startTime, r.endTime, range);
+                return (
+                  <span key={r.id} className="adm-weekgrid-block" style={{ left: `${p.left}%`, width: `${p.width}%` }}>
+                    {r.startTime.slice(0, 5)}–{r.endTime.slice(0, 5)}
+                  </span>
+                );
+              })}
+            </div>
+            <ul className="adm-weekgrid-times">
+              {day.length === 0 ? (
+                <li style={{ color: "var(--navy-soft)" }}>
+                  <span className="visually-hidden">{DAYS[dow]}: </span>Closed
+                </li>
+              ) : (
+                day.map((r) => (
+                  <li key={r.id}>
+                    <span>
+                      <span className="visually-hidden">{DAYS[dow]} </span>
+                      {r.startTime.slice(0, 5)}–{r.endTime.slice(0, 5)}
+                      {r.timezone !== "Europe/London" && <small> {r.timezone}</small>}
+                    </span>
+                    <RemoveRuleButton ruleId={r.id} />
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        );
+      })}
     </div>
   );
 }

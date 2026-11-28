@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { TableWrap } from "@/components/admin/ui";
 import { requireCapability } from "@/lib/guard";
 import { Section, Empty } from "@/components/admin/RecordUI";
 import { aiSpendThisMonth, aiUsageReport } from "@/lib/queries/marketing";
@@ -47,21 +48,23 @@ export default async function AiUsagePage() {
         {report.byFeature.length === 0 ? (
           <Empty>No AI requests this month.</Empty>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
+          <TableWrap>
+          <table className="adm-table">
             <thead>
-              <tr>{["Feature", "Requests", "Didn't work", "Cost"].map((h) => <th key={h} style={{ textAlign: "left", padding: "6px 8px", fontSize: 12, color: "var(--navy-soft)" }}>{h}</th>)}</tr>
+              <tr>{["Feature", "Requests", "Didn't work", "Cost"].map((h) => <th key={h} scope="col">{h}</th>)}</tr>
             </thead>
             <tbody>
               {report.byFeature.map((f) => (
-                <tr key={f.feature} style={{ borderTop: "1px solid rgba(31,58,95,0.08)" }}>
-                  <td style={{ padding: 8 }}>{featureLabel(f.feature)}</td>
-                  <td style={{ padding: 8 }}>{f.requests}</td>
-                  <td style={{ padding: 8 }}>{f.failed}</td>
-                  <td style={{ padding: 8, fontWeight: 700 }}>{usd(f.usd)}</td>
+                <tr key={f.feature}>
+                  <td>{featureLabel(f.feature)}</td>
+                  <td>{f.requests}</td>
+                  <td>{f.failed}</td>
+                  <td style={{ fontWeight: 700 }}>{usd(f.usd)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </TableWrap>
         )}
       </Section>
 
@@ -70,19 +73,19 @@ export default async function AiUsagePage() {
           <Empty>Nothing yet.</Empty>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <table className="adm-table" style={{ minWidth: 720 }}>
               <thead>
-                <tr>{["When", "Who", "Feature", "Result", "Tokens in / out", "Cost"].map((h) => <th key={h} style={{ textAlign: "left", padding: "6px 8px", fontSize: 12, color: "var(--navy-soft)" }}>{h}</th>)}</tr>
+                <tr>{["When", "Who", "Feature", "Result", "Tokens in / out", "Cost"].map((h) => <th key={h} scope="col">{h}</th>)}</tr>
               </thead>
               <tbody>
                 {report.recent.map(({ row, actorName }) => (
-                  <tr key={row.id} style={{ borderTop: "1px solid rgba(31,58,95,0.08)" }}>
-                    <td style={{ padding: 8, whiteSpace: "nowrap" }}>{dt(row.createdAt)}</td>
-                    <td style={{ padding: 8 }}>{actorName ?? "—"}</td>
-                    <td style={{ padding: 8 }}>{featureLabel(row.feature)}</td>
-                    <td style={{ padding: 8 }}>{row.outcome}</td>
-                    <td style={{ padding: 8 }}>{row.inputTokens.toLocaleString("en-GB")} / {row.outputTokens.toLocaleString("en-GB")}{row.images ? ` · ${row.images} image${row.images === 1 ? "" : "s"}` : ""}</td>
-                    <td style={{ padding: 8, fontWeight: 700 }}>{usd(row.costMicroUsd / 1_000_000)}</td>
+                  <tr key={row.id}>
+                    <td style={{ whiteSpace: "nowrap" }}>{dt(row.createdAt)}</td>
+                    <td>{actorName ?? "—"}</td>
+                    <td>{featureLabel(row.feature)}</td>
+                    <td>{row.outcome}</td>
+                    <td>{row.inputTokens.toLocaleString("en-GB")} / {row.outputTokens.toLocaleString("en-GB")}{row.images ? ` · ${row.images} image${row.images === 1 ? "" : "s"}` : ""}</td>
+                    <td style={{ fontWeight: 700 }}>{usd(row.costMicroUsd / 1_000_000)}</td>
                   </tr>
                 ))}
               </tbody>

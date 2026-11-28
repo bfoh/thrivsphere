@@ -447,6 +447,23 @@
   grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
   gap: 16px;
 }
+/* On the canvas the tiles lead into the cards below; inside a card they are
+   flat tiles, not cards within a card. */
+.adm-page > .adm-stats {
+  margin-bottom: 20px;
+}
+.adm-page > .adm-stats + .adm-today {
+  margin-top: 0;
+}
+.adm-card .adm-stats {
+  grid-template-columns: repeat(auto-fill, minmax(min(190px, 100%), 1fr));
+  gap: 12px;
+}
+.adm-card .adm-stat {
+  background: var(--a-subtle);
+  box-shadow: none;
+  padding: 14px 16px;
+}
 .adm-stat {
   display: flex;
   flex-direction: column;
@@ -755,6 +772,350 @@ a.adm-stat:hover {
   opacity: 0.75;
 }
 
+/* ── Availability ────────────────────────────────────────────────────────── */
+
+.adm-weekgrid {
+  --span: 12;
+  display: flex;
+  flex-direction: column;
+}
+.adm-weekgrid-scale,
+.adm-weekgrid-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 210px;
+  column-gap: 14px;
+  align-items: center;
+}
+.adm-weekgrid-marks {
+  position: relative;
+  height: 20px;
+}
+.adm-weekgrid-marks span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: var(--a-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.adm-weekgrid-row {
+  padding: 7px 0;
+  border-top: 1px solid var(--a-line);
+}
+.adm-weekgrid-day {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--a-brand);
+}
+.adm-weekgrid-row[data-empty] .adm-weekgrid-day {
+  color: var(--a-muted);
+  font-weight: 600;
+}
+.adm-weekgrid-track {
+  position: relative;
+  height: 30px;
+  border-radius: 6px;
+  background-color: var(--a-subtle);
+  background-image: linear-gradient(to right, var(--a-line) 1px, transparent 1px);
+  background-size: calc(100% / var(--span)) 100%;
+}
+.adm-weekgrid-block {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: var(--a-accent-soft);
+  border-left: 3px solid var(--a-accent);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--a-accent);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.adm-weekgrid-times {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+.adm-weekgrid-times li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.adm-slotdays {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.adm-slotdays > div {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--a-line);
+}
+.adm-slotdays > div:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.adm-slotdays dt {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--a-brand);
+}
+.adm-slotdays dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.adm-slot {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: 6px;
+  background: var(--a-accent-soft);
+  color: var(--a-accent);
+  font-size: 12.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Charts ──────────────────────────────────────────────────────────────── */
+/*
+ * Chart fills are their own palette, checked for colour-blind separation,
+ * chroma and contrast on white: the brand teal is too grey to carry a fill.
+ * Text on charts always uses the text colours, never these.
+ */
+
+.adm-chart {
+  --chart-1: #00908a;
+  --chart-2: #c27a2c;
+  --chart-gutter: 52px;
+  margin: 0;
+}
+.adm-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  font-size: var(--fs-sm);
+  color: var(--a-text);
+}
+.adm-chart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.adm-chart-key {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--chart-1);
+}
+.adm-chart-key[data-series="1"] {
+  background: var(--chart-2);
+}
+.adm-chart-plot {
+  position: relative;
+  box-sizing: border-box;
+  padding: 18px 0 0 var(--chart-gutter);
+}
+.adm-chart-axis {
+  position: absolute;
+  inset: 18px 0 24px 0;
+  pointer-events: none;
+}
+.adm-chart-tick {
+  position: absolute;
+  left: var(--chart-gutter);
+  right: 0;
+  height: 0;
+  border-top: 1px solid var(--a-line);
+}
+.adm-chart-tick:first-child {
+  border-top-color: var(--a-line-strong);
+}
+.adm-chart-tick span {
+  position: absolute;
+  right: calc(100% + 8px);
+  top: -8px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--a-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.adm-chart-cols {
+  position: relative;
+  display: grid;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.adm-chart-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: 6px;
+  outline: none;
+  cursor: default;
+}
+.adm-chart-col:hover,
+.adm-chart-col:focus-visible {
+  background: rgba(31, 58, 95, 0.045);
+}
+.adm-chart-col:focus-visible {
+  box-shadow: var(--a-ring);
+}
+.adm-chart-bars {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+}
+.adm-chart-bar {
+  position: relative;
+  width: 24px;
+  max-width: 42%;
+  min-height: 2px;
+  border-radius: 4px 4px 0 0;
+  background: var(--chart-1);
+  transition: filter 0.15s ease;
+}
+.adm-chart-bar[data-series="1"] {
+  background: var(--chart-2);
+}
+.adm-chart-bar[data-zero] {
+  min-height: 0;
+}
+.adm-chart-col:hover .adm-chart-bar,
+.adm-chart-col:focus-visible .adm-chart-bar {
+  filter: brightness(1.1);
+}
+.adm-chart-cap {
+  position: absolute;
+  bottom: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-style: normal;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--a-brand);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.adm-chart-xl {
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--a-muted);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.adm-chart-col[data-current] .adm-chart-xl {
+  color: var(--a-brand);
+  font-weight: 700;
+}
+.adm-chart-tip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  z-index: 5;
+  margin-bottom: 6px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 120px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid var(--a-line);
+  box-shadow: 0 6px 20px rgba(16, 32, 56, 0.14);
+  font-size: var(--fs-sm);
+  color: var(--a-text);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+.adm-chart-col[data-edge="start"] .adm-chart-tip {
+  left: 0;
+  transform: none;
+}
+.adm-chart-col[data-edge="end"] .adm-chart-tip {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+.adm-chart-col:hover .adm-chart-tip,
+.adm-chart-col:focus-visible .adm-chart-tip {
+  opacity: 1;
+  visibility: visible;
+}
+.adm-chart-tip-head {
+  font-size: var(--fs-xs);
+  color: var(--a-muted);
+}
+.adm-chart-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.adm-chart-tip-row strong {
+  color: var(--a-brand);
+  font-variant-numeric: tabular-nums;
+}
+.adm-chart-tip-key {
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--chart-1);
+}
+.adm-chart-tip-key[data-series="1"] {
+  background: var(--chart-2);
+}
+.adm-chart-tip-key[data-extra] {
+  background: transparent;
+}
+.adm-chart-tip-row[data-extra] strong {
+  color: var(--a-muted);
+}
+.adm-chart-table {
+  margin-top: 14px;
+}
+.adm-chart-table > summary {
+  display: inline-flex;
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--a-accent);
+}
+.adm-chart-table[open] > summary {
+  margin-bottom: 10px;
+}
+
 /* ── Today (dashboard) ───────────────────────────────────────────────────── */
 
 .adm-today {
@@ -907,6 +1268,12 @@ a.adm-stat:hover {
   border: 1px solid var(--a-line);
   border-radius: var(--a-radius);
   background: var(--a-surface);
+}
+/* Inside a card the card is the frame. */
+.adm-card .adm-table-wrap {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 .adm-table {
   width: 100%;
@@ -1293,6 +1660,32 @@ a.adm-stat:hover {
 @media (max-width: 1180px) {
   .adm-today {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .adm-chart {
+    --chart-gutter: 40px;
+  }
+  .adm-chart[data-dense] .adm-chart-col:nth-child(even) .adm-chart-xl {
+    visibility: hidden;
+  }
+  .adm-chart[data-dense] .adm-chart-cap {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .adm-weekgrid-row {
+    grid-template-columns: 48px minmax(0, 1fr);
+    row-gap: 6px;
+  }
+  .adm-weekgrid-times {
+    grid-column: 2;
+  }
+  .adm-slotdays > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
   }
 }
 

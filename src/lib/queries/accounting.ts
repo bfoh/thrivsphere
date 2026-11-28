@@ -4,6 +4,8 @@ import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { clients, expenses, orders } from "@/db/schema";
 import { requireCapability } from "@/lib/guard";
+import { getCurrentActor } from "@/lib/session";
+import { can } from "@/lib/authz";
 import { totals, type LedgerEntry, type LedgerTotals } from "@/lib/accounting";
 
 /**
@@ -93,3 +95,48 @@ export async function getLedger(from: Date, to: Date, forExport = false): Promis
 }
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
+
+export type QuarterTotal = { key: string; from: Date; to: Date; incomePence: number; expensePence: number };
+
+/**
+ * Income and expenses for the last `count` calendar quarters, oldest first:
+ * the chart on the Accounting page. Same rules as the ledger — settled,
+ * non-complimentary orders by the date the money arrived; expenses by the
+ * date incurred — in two grouped queries.
+ *
+ * Call it after `getLedger`, which checks the capability and writes the audit
+ * row for the page; this checks again without writing a second one.
+ */
+export async function getQuarterTotals(count = 4, now = new Date()): Promise<QuarterTotal[]> {
+  const actor = await getCurrentActor();
+  if (!actor || !can(actor, "accounting:read")) throw new Error("Not allowed to read the ledger.");
+
+  const oldest = quarterRange(count - 1, now);
+  const newest = quarterRange(0, now);
+  const incomeQuarter = sql<string>`to_char(date_trunc('quarter', ${settledAt} at time zone 'UTC'), 'YYYY-MM')`;
+  const expenseQuarter = sql<string>`to_char(date_trunc('quarter', ${expenses.incurredOn}), 'YYYY-MM')`;
+  const db = getDb();
+
+  const [income, spend] = await Promise.all([
+    db
+      .select({ q: incomeQuarter, pence: sql<number>`coalesce(sum(${orders.amountPence}), 0)`.mapWith(Number) })
+      .from(orders)
+      .where(and(eq(orders.status, "paid"), eq(orders.complimentary, false), gte(settledAt, oldest.from), lte(settledAt, newest.to)))
+      .groupBy(incomeQuarter),
+    db
+      .select({ q: expenseQuarter, pence: sql<number>`coalesce(sum(${expenses.amountPence}), 0)`.mapWith(Number) })
+      .from(expenses)
+      .where(and(gte(expenses.incurredOn, iso(oldest.from)), lte(expenses.incurredOn, iso(newest.to))))
+      .groupBy(expenseQuarter),
+  ]);
+
+  const inc = new Map(income.map((r) => [r.q, r.pence]));
+  const exp = new Map(spend.map((r) => [r.q, r.pence]));
+  const out: QuarterTotal[] = [];
+  for (let i = count - 1; i >= 0; i--) {
+    const r = quarterRange(i, now);
+    const key = r.from.toISOString().slice(0, 7);
+    out.push({ key, from: r.from, to: r.to, incomePence: inc.get(key) ?? 0, expensePence: exp.get(key) ?? 0 });
+  }
+  return out;
+}

@@ -12,6 +12,8 @@ import {
   safeguardingConcerns,
 } from "@/db/schema";
 import { requireCapability } from "@/lib/guard";
+import { getCurrentActor } from "@/lib/session";
+import { can } from "@/lib/authz";
 
 export type ReportRange = { from: Date; to: Date; label: string };
 
@@ -122,4 +124,49 @@ export async function getReport(range: ReportRange) {
     referralsMade: referralsMade[0].n,
     newEnquiries: newEnquiries[0].n,
   };
+}
+
+export type OutcomeMonth = {
+  key: string;
+  label: string;
+  attended: number;
+  noShows: number;
+  cancelled: number;
+};
+
+/**
+ * Session outcomes for `count` calendar months ending `endMonthsAgo` months
+ * back: the chart on the Reports page. One grouped query, and months with no
+ * sessions still appear, as zeros.
+ *
+ * Call it after `getReport`, which checks the capability and writes the
+ * audit row for the page; this checks again without writing a second one.
+ */
+export async function getOutcomeSeries(endMonthsAgo: number, count = 6): Promise<OutcomeMonth[]> {
+  const actor = await getCurrentActor();
+  if (!actor || !can(actor, "report:read")) throw new Error("Not allowed to read reports.");
+
+  const end = monthRange(endMonthsAgo);
+  const start = monthRange(endMonthsAgo + count - 1);
+  const month = sql<string>`to_char(date_trunc('month', ${appointments.startsAt} at time zone 'UTC'), 'YYYY-MM')`;
+  const rows = await getDb()
+    .select({
+      month,
+      attended: sql<number>`count(*) filter (where ${appointments.status} = 'completed')`.mapWith(Number),
+      noShows: sql<number>`count(*) filter (where ${appointments.status} = 'no_show')`.mapWith(Number),
+      cancelled: sql<number>`count(*) filter (where ${appointments.status} in ('cancelled_by_client','cancelled_by_service'))`.mapWith(Number),
+    })
+    .from(appointments)
+    .where(and(gte(appointments.startsAt, start.from), lt(appointments.startsAt, end.to)))
+    .groupBy(month);
+
+  const byMonth = new Map(rows.map((r) => [r.month, r]));
+  const out: OutcomeMonth[] = [];
+  for (let i = endMonthsAgo + count - 1; i >= endMonthsAgo; i--) {
+    const r = monthRange(i);
+    const key = r.from.toISOString().slice(0, 7);
+    const row = byMonth.get(key);
+    out.push({ key, label: r.label, attended: row?.attended ?? 0, noShows: row?.noShows ?? 0, cancelled: row?.cancelled ?? 0 });
+  }
+  return out;
 }

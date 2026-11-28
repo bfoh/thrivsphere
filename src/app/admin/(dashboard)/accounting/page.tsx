@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Section, Empty } from "@/components/admin/RecordUI";
-import { getLedger, quarterRange } from "@/lib/queries/accounting";
+import { getLedger, getQuarterTotals, quarterRange } from "@/lib/queries/accounting";
 import { categoryLabel, withRunningBalance } from "@/lib/accounting";
 import { formatPence } from "@/lib/revenue";
 import { ExpenseForm } from "@/components/admin/ExpenseForm";
-import { PageHeader, Tabs } from "@/components/admin/ui";
+import { PageHeader, Stat, Stats, TableWrap, Tabs } from "@/components/admin/ui";
+import { ColumnChart } from "@/components/admin/ColumnChart";
+import { axisPounds } from "@/lib/chart";
 
 export const metadata: Metadata = { title: "Accounting", robots: { index: false, follow: false } };
 
@@ -30,7 +32,11 @@ export default async function AccountingPage({
   const offset = QUARTERS.includes(Number(raw)) ? Number(raw) : 0;
 
   const { from, to } = quarterRange(offset);
+  // The ledger first: it checks access and writes the audit row for the page.
   const ledger = await getLedger(from, to);
+  const quarters = await getQuarterTotals(QUARTERS.length);
+  const quarterName = (f: Date, t: Date) =>
+    `${f.toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" })}–${t.toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" })}`;
   const rows = withRunningBalance(ledger.entries).reverse();
 
   return (
@@ -51,7 +57,7 @@ export default async function AccountingPage({
           items={QUARTERS.map((q) => {
             const r = quarterRange(q);
             return {
-              label: `${r.from.toLocaleDateString("en-GB", { month: "short", timeZone: "UTC" })}–${r.to.toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" })}`,
+              label: quarterName(r.from, r.to),
               href: q === 0 ? "/admin/accounting" : `/admin/accounting?q=${q}`,
               active: offset === q,
             };
@@ -59,16 +65,36 @@ export default async function AccountingPage({
         />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 30 }}>
+      <Stats>
         <Stat label="Income" value={formatPence(ledger.totals.incomePence)} />
         <Stat label="Expenses" value={formatPence(ledger.totals.expensePence)} />
         <Stat
           label="Balance"
           value={formatPence(ledger.totals.balancePence)}
-          tone={ledger.totals.balancePence < 0 ? "bad" : "good"}
+          tone={ledger.totals.balancePence < 0 ? "danger" : undefined}
+          hint={ledger.totals.balancePence < 0 ? "More out than in this quarter" : undefined}
         />
         <Stat label="VAT on expenses" value={formatPence(ledger.totals.vatPence)} />
-      </div>
+      </Stats>
+
+      {quarters.some((q) => q.incomePence > 0 || q.expensePence > 0) && (
+        <Section title="Last four quarters" subtitle="Money in against money out">
+          <ColumnChart
+            label="Income and expenses for the last four quarters"
+            series={["Income", "Expenses"]}
+            format={formatPence}
+            axisFormat={axisPounds}
+            height={200}
+            columns={quarters.map((q, i) => ({
+              key: q.key,
+              label: quarterName(q.from, q.to).replace(/ \d{4}$/, ""),
+              fullLabel: quarterName(q.from, q.to),
+              values: [q.incomePence, q.expensePence],
+              current: QUARTERS.length - 1 - i === offset,
+            }))}
+          />
+        </Section>
+      )}
 
       <Section id="record-expense" title="Record an expense" subtitle="Attach the receipt where there is one — it is stored privately.">
         <ExpenseForm />
@@ -78,7 +104,7 @@ export default async function AccountingPage({
         {rows.length === 0 ? (
           <Empty>Nothing recorded in this period.</Empty>
         ) : (
-          <div style={{ overflowX: "auto" }}>
+          <TableWrap>
             <table className="adm-table" style={{ minWidth: 760 }}>
               <thead>
                 <tr>
@@ -111,27 +137,9 @@ export default async function AccountingPage({
                 ))}
               </tbody>
             </table>
-          </div>
+          </TableWrap>
         )}
       </Section>
-    </div>
-  );
-}
-
-function Stat({ label, value, tone }: { label: string; value: string; tone?: "good" | "bad" }) {
-  return (
-    <div style={{ padding: "16px 18px", borderRadius: 12, background: "#fff", border: "1px solid rgba(31,58,95,0.1)" }}>
-      <div style={{ fontSize: 11.5, fontWeight: 800, color: "var(--navy-soft)", letterSpacing: "0.05em" }}>
-        {label.toUpperCase()}
-      </div>
-      <div
-        style={{
-          fontSize: 24, fontWeight: 800, marginTop: 7, fontVariantNumeric: "tabular-nums",
-          color: tone === "bad" ? "#b4553f" : tone === "good" ? "var(--teal-deep)" : "var(--navy)",
-        }}
-      >
-        {value}
-      </div>
     </div>
   );
 }
