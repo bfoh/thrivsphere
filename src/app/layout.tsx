@@ -94,6 +94,12 @@ export default function RootLayout({
           appearance={{
             variables: { colorPrimary: "#3d8a8a", borderRadius: "0.625rem" },
             /*
+             * The logo uploaded in the Clerk Dashboard is for Clerk's own emails.
+             * Our sign-in and sign-up pages already show the logo above the box,
+             * so it is not repeated inside it.
+             */
+            options: { logoPlacement: "none" },
+            /*
              * Social sign-in is hidden until it is actually configured.
              *
              * The production instance was cloned from development, which had
