@@ -51,7 +51,7 @@ export default async function AdminPage() {
     <Page>
       <PageHeader
         title={name ? `${greeting(now)}, ${name}` : greeting(now)}
-        description={`${longDate(now)} · Every record opened from here is written to the access log.`}
+        description={`${longDate(now)} · Everything opened here is logged.`}
         actions={quick.map((q) => (
           <Link key={q.href} href={q.href} className="pill pill-ghost" style={{ minHeight: 38, padding: "0 14px", fontSize: 13.5, gap: 6 }}>
             <NavIcon name="plus" size={15} />
@@ -67,7 +67,7 @@ export default async function AdminPage() {
           href="/admin/clients"
           icon={<NavIcon name="users" />}
           hint={f.newClients[0] > 0 ? `${f.newClients[0]} new this month` : undefined}
-          trend={trend(f.newClients[0], f.newClients[1], (n) => `${n} new`)}
+          trend={trend(f.newClients[0], f.newClients[1], String, ["new client", "new clients"])}
         />
         <Stat
           label="Bookings this month"

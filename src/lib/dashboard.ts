@@ -41,12 +41,19 @@ export type Trend = { text: string; direction: "up" | "down" | "flat" };
  * a practice this size, one booking against none would read as "+100%" or
  * "∞", which says nothing true.
  */
-export function trend(current: number, previous: number, format: (n: number) => string = String): Trend | null {
+export function trend(
+  current: number,
+  previous: number,
+  format: (n: number) => string = String,
+  unit?: [one: string, many: string]
+): Trend | null {
   if (current === 0 && previous === 0) return null;
   const diff = current - previous;
   if (diff === 0) return { text: "Same as this time last month", direction: "flat" };
+  const n = Math.abs(diff);
+  const what = unit ? ` ${n === 1 ? unit[0] : unit[1]}` : "";
   return {
-    text: `${format(Math.abs(diff))} ${diff > 0 ? "more" : "fewer"} than this time last month`,
+    text: `${format(n)} ${diff > 0 ? "more" : "fewer"}${what} than this time last month`,
     direction: diff > 0 ? "up" : "down",
   };
 }

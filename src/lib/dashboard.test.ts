@@ -50,6 +50,11 @@ describe("trend", () => {
     assert.deepEqual(trend(4, 4), { text: "Same as this time last month", direction: "flat" });
   });
 
+  it("names what is counted when asked", () => {
+    assert.equal(trend(3, 2, String, ["new client", "new clients"])?.text, "1 more new client than this time last month");
+    assert.equal(trend(0, 2, String, ["new client", "new clients"])?.text, "2 fewer new clients than this time last month");
+  });
+
   it("formats money when asked", () => {
     assert.equal(trend(4000, 1000, (p) => `£${p / 100}`)?.text, "£30 more than this time last month");
   });
