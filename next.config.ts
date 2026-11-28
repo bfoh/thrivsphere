@@ -78,7 +78,7 @@ const securityHeaders = [
 ];
 
 /** Files the branded-graphics renderer reads from disk at run time. */
-const GRAPHICS_FILES = ["./src/assets/fonts/*.ttf", "./public/images/emblem.png"];
+const GRAPHICS_FILES = ["./src/assets/fonts/*.ttf", "./public/images/logo/thrivesphere-logo.png"];
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,

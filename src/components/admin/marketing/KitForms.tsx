@@ -157,7 +157,7 @@ export function KitEditor({ values, basedOn }: { values: Record<string, string>;
             </div>
           ))}
         </div>
-        <p style={{ ...hint, marginTop: -6 }}>The logo&apos;s colours as the website shows them. Emails use slightly different ones; choose the right ones here.</p>
+        <p style={{ ...hint, marginTop: -6 }}>The logo&apos;s type colours: &ldquo;Thrive&rdquo; and &ldquo;Sphere&rdquo; are the name (navy), &ldquo;Wellbeing&rdquo; is the &ldquo;MENTAL WELLBEING&rdquo; line (purple).</p>
         <Area name="imageStyle" title="Image style" help="What AI images should look like. They never show people or words." rows={4} values={values} />
         <Area name="photoRules" title="Photo rules" help="One per line." rows={5} values={values} />
       </Group>

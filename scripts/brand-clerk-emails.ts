@@ -28,12 +28,13 @@ const MUTED = "#5d7089";
 const GROUND = "#f2f5f4";
 const RULE = "#e2e7ea";
 
-const PURPLE = "#5a2d82";
-const GOLD = "#bd951f";
+/** The logo's own colours: the "ThriveSphere" navy and the "MENTAL WELLBEING" purple. */
+const LOGO_NAVY = "#0b1e4a";
+const LOGO_PURPLE = "#560d86";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thrivsphere.org";
-// The emblem only — the full logo artwork carries an outdated name, so the
-// wordmark is set as text, matching src/lib/email-templates.ts.
+// The logo's symbol only; the name is live text beneath it, matching
+// src/lib/email-templates.ts.
 const LOGO = `${SITE}/images/email/emblem.png`;
 const BRAND = brand.name;
 const LEGAL_LINE = `${legal.statement} Registered office: ${legal.registeredOffice}.`;
@@ -70,8 +71,8 @@ function shell({ heading, body, showCrisis = true }: Section): string {
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;max-width:600px;background:#ffffff;border-radius:14px;overflow:hidden;">
       <tr><td align="center" style="padding:30px 32px 10px;">
         <img src="${LOGO}" width="72" height="72" alt="" style="display:block;width:72px;max-width:72px;height:auto;border:0;">
-        <p style="margin:10px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:21px;font-weight:bold;line-height:1;"><span style="color:${PURPLE};">Thrive</span><span style="color:${TEAL};">Sphere</span></p>
-        <p style="margin:6px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:bold;letter-spacing:3px;color:${GOLD};">WELLBEING</p>
+        <p style="margin:10px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:25px;font-weight:bold;line-height:1;color:${LOGO_NAVY};">ThriveSphere</p>
+        <p style="margin:7px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:bold;letter-spacing:3px;color:${LOGO_PURPLE};">MENTAL WELLBEING</p>
       </td></tr>
       <tr><td style="padding:14px 32px 0;">
         <h1 style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:23px;line-height:1.25;font-weight:bold;color:${NAVY};">${heading}</h1>

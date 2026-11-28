@@ -12,7 +12,7 @@ import { SIZES, fitFontSize, isLandscape, scaleFor, themeColours, type GraphicIn
  * Draws a template as a PNG with the brand's fonts and colours.
  *
  * The renderer understands flexbox only, so every box with more than one
- * child says `display: flex`. Fonts and the emblem are read from disk once
+ * child says `display: flex`. Fonts and the logo are read from disk once
  * (next.config.ts makes sure they are deployed with the routes that use them).
  */
 
@@ -26,7 +26,7 @@ const FONT_FILES: [string, Font["weight"]][] = [
 ];
 
 let fonts: Promise<Font[]> | null = null;
-let emblem: Promise<string> | null = null;
+let logoImage: Promise<string> | null = null;
 
 const toArrayBuffer = (b: Buffer) => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) as ArrayBuffer;
 
@@ -42,10 +42,13 @@ export function brandFonts(): Promise<Font[]> {
   return fonts;
 }
 
-export function emblemDataUrl(): Promise<string> {
-  emblem ??= readFile(join(process.cwd(), "public/images/emblem.png")).then((b) => `data:image/png;base64,${b.toString("base64")}`);
-  return emblem;
+/** The full horizontal logo (symbol, "ThriveSphere", "MENTAL WELLBEING"), 2154 × 512. */
+export function logoDataUrl(): Promise<string> {
+  logoImage ??= readFile(join(process.cwd(), "public/images/logo/thrivesphere-logo.png")).then((b) => `data:image/png;base64,${b.toString("base64")}`);
+  return logoImage;
 }
+
+const LOGO_ASPECT = 2154 / 512;
 
 /** Everything a template needs, already looked up. */
 export type ResolvedGraphic = {
@@ -58,7 +61,7 @@ export type ResolvedGraphic = {
 
 export async function renderGraphic(r: ResolvedGraphic): Promise<Uint8Array> {
   const { width, height } = SIZES[r.input.size];
-  const [loaded, logo] = await Promise.all([brandFonts(), emblemDataUrl()]);
+  const [loaded, logo] = await Promise.all([brandFonts(), logoDataUrl()]);
   const response = new ImageResponse(<Graphic r={r} logo={logo} />, { width, height, fonts: loaded });
   // Drawing happens when the body is read, so errors surface here.
   return new Uint8Array(await response.arrayBuffer());
@@ -194,21 +197,14 @@ function Decor({ u, accent }: { u: number; accent: string }) {
   );
 }
 
-function Footer({ u, logo, kit, colour, compact = false, outline = false }: { u: number; logo: string; kit: BrandKit; colour: string; compact?: boolean; outline?: boolean }) {
-  const wm = kit.visual.wordmark;
+function Footer({ u, logo, colour, compact = false, outline = false }: { u: number; logo: string; kit: BrandKit; colour: string; compact?: boolean; outline?: boolean }) {
   const k = compact ? 0.85 : 1;
+  const h = 56 * u * k;
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 36 * u }}>
-      <div style={{ display: "flex", alignItems: "center", background: BRAND_COLOURS.white, borderRadius: 9999, padding: `${10 * u * k}px ${26 * u * k}px ${10 * u * k}px ${12 * u * k}px`, border: outline ? `${1.5 * u}px solid rgba(31,58,95,0.14)` : "none" }}>
+      <div style={{ display: "flex", alignItems: "center", background: BRAND_COLOURS.white, borderRadius: 9999, padding: `${12 * u * k}px ${28 * u * k}px ${12 * u * k}px ${20 * u * k}px`, border: outline ? `${1.5 * u}px solid rgba(31,58,95,0.14)` : "none" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logo} alt="" width={56 * u * k} height={56 * u * k} />
-        <div style={{ display: "flex", flexDirection: "column", marginLeft: 12 * u * k }}>
-          <div style={{ display: "flex", fontSize: 27 * u * k, fontWeight: 800, lineHeight: 1 }}>
-            <span style={{ color: wm.thrive }}>Thrive</span>
-            <span style={{ color: wm.sphere }}>Sphere</span>
-          </div>
-          <div style={{ display: "flex", marginTop: 4 * u * k, fontSize: 12 * u * k, fontWeight: 700, letterSpacing: 3.5 * u * k, color: wm.wellbeing }}>WELLBEING</div>
-        </div>
+        <img src={logo} alt="" width={h * LOGO_ASPECT} height={h} />
       </div>
       {!compact && <div style={{ display: "flex", fontSize: 25 * u, fontWeight: 600, color: colour }}>thrivsphere.org</div>}
     </div>

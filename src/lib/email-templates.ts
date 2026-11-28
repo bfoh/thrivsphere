@@ -27,7 +27,9 @@ const MUTED = "#5d7089";
 const GROUND = "#f2f5f4";
 const SURFACE = "#ffffff";
 const RULE = "#e2e7ea";
-const PURPLE = "#5a2d82";
+/** The logo's own colours: the "ThriveSphere" navy and the "MENTAL WELLBEING" purple. */
+const LOGO_NAVY = "#0b1e4a";
+const LOGO_PURPLE = "#560d86";
 
 export type Email = { subject: string; html: string; text: string };
 
@@ -38,8 +40,8 @@ function siteUrl(): string {
 /**
  * Absolute URL — email clients cannot resolve relative paths.
  *
- * The emblem only: the full logo artwork carries an outdated name, so the
- * wordmark is set as text beneath it in the shell.
+ * The logo's symbol only. The name is set as live text beneath it, so the
+ * header still reads "ThriveSphere" when a mail client blocks images.
  */
 function logoUrl(): string {
   return `${siteUrl()}/images/email/emblem.png`;
@@ -128,11 +130,10 @@ function shell(o: ShellOptions): string {
             <td align="center" style="padding:30px 32px 10px;">
               <img src="${logoUrl()}" width="72" height="72" alt=""
                    style="display:block;width:72px;max-width:72px;height:auto;border:0;">
-              <p style="margin:10px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:21px;
-                        font-weight:bold;line-height:1;"><span style="color:${PURPLE};">Thrive</span><span
-                        style="color:${TEAL};">Sphere</span></p>
-              <p style="margin:6px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;
-                        font-weight:bold;letter-spacing:3px;color:${GOLD};">WELLBEING</p>
+              <p style="margin:10px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:25px;
+                        font-weight:bold;line-height:1;color:${LOGO_NAVY};">ThriveSphere</p>
+              <p style="margin:7px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;
+                        font-weight:bold;letter-spacing:3px;color:${LOGO_PURPLE};">MENTAL WELLBEING</p>
             </td>
           </tr>
 

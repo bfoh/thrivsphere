@@ -1009,6 +1009,14 @@ body {
   }
 }
 
+/* The header logo steps down on narrow screens so it never touches the
+   buttons beside it; it keeps its proportions (height follows width). */
+@media (max-width: 700px) {
+  .header-logo img {
+    width: 168px !important;
+  }
+}
+
 @media (max-width: 560px) {
   .services-grid,
   .prog-grid,

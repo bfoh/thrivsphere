@@ -2,6 +2,7 @@ import * as React from "react";
 import { BOILERPLATES, type BrandKit } from "@/lib/brand-kit";
 import { BRAND_COLOURS, CSS_VARIABLE, type BrandColour } from "@/lib/brand-tokens";
 import { Section } from "@/components/admin/RecordUI";
+import { Logo } from "@/components/icons";
 
 const list: React.CSSProperties = { margin: 0, paddingLeft: 20, fontSize: 14, lineHeight: 1.65 };
 const small: React.CSSProperties = { fontSize: 11.5, letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--navy-soft)", fontWeight: 800, margin: "0 0 4px" };
@@ -103,11 +104,19 @@ export function KitView({ kit }: { kit: BrandKit }) {
       </Section>
 
       <Section title="Look">
-        <p style={small}>Logo colours</p>
-        <p style={{ margin: "0 0 14px", fontSize: 26, fontWeight: 800 }}>
-          <span style={{ color: kit.visual.wordmark.thrive }}>Thrive</span>
-          <span style={{ color: kit.visual.wordmark.sphere }}>Sphere</span>{" "}
-          <span style={{ fontSize: 12, letterSpacing: "0.24em", color: kit.visual.wordmark.wellbeing }}>WELLBEING</span>
+        <p style={small}>Logo</p>
+        <div style={{ margin: "0 0 10px" }}>
+          <Logo height={56} />
+        </div>
+        <p style={{ margin: "0 0 14px", fontSize: 12.5, color: "var(--navy-soft)" }}>
+          Name <code>{kit.visual.wordmark.thrive}</code> · descriptor <code>{kit.visual.wordmark.wellbeing}</code> ·{" "}
+          <a href="/images/logo/thrivesphere-logo.svg" download>
+            SVG
+          </a>{" "}
+          ·{" "}
+          <a href="/images/logo/thrivesphere-logo.png" download>
+            PNG
+          </a>
         </p>
         <p style={small}>Website colours</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>

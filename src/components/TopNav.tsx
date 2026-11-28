@@ -31,6 +31,7 @@ export function TopNav() {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
+        gap: 12,
         padding: "0 28px",
       }}
     >
@@ -38,6 +39,7 @@ export function TopNav() {
         href="/"
         style={{ display: "flex", alignItems: "center" }}
         aria-label="ThriveSphere home"
+        className="header-logo"
       >
         <Logo height={50} />
       </Link>

@@ -48,11 +48,12 @@ export function PageShell({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: 12,
           padding: "0 28px",
           marginTop: 30,
         }}
       >
-        <Link href="/" style={{ display: "flex", alignItems: "center" }} aria-label="ThriveSphere home">
+        <Link href="/" style={{ display: "flex", alignItems: "center" }} aria-label="ThriveSphere home" className="header-logo">
           <Logo height={50} />
         </Link>
         <nav style={{ display: "flex", alignItems: "center", gap: 24 }} className="nav-links">

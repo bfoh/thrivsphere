@@ -46,11 +46,22 @@ export const BRAND_GRADIENTS = {
 } as const;
 
 /**
- * The wordmark as the website draws it beside the emblem (src/components/icons.tsx).
- * Emails currently use slightly different teal and gold; the owner confirms
- * the canonical values in the Brand Kit.
+ * The logo's type colours (public/images/logo/thrivesphere-logo.svg): "ThriveSphere"
+ * is one navy, "MENTAL WELLBEING" is purple. Kept as three keys because the
+ * Brand Kit stores them that way.
  */
-export const WORDMARK = { thrive: "#5a2d82", sphere: "#2f8a7e", wellbeing: "#b8860b" } as const;
+export const WORDMARK = { thrive: "#0b1e4a", sphere: "#0b1e4a", wellbeing: "#560d86" } as const;
+
+/** The five leaf colours, the trunk and the head of the logo's symbol. */
+export const LOGO_SYMBOL_COLOURS = {
+  blue: "#0a8fc9",
+  purple: "#7c25c1",
+  magenta: "#e02c6e",
+  orange: "#e58a05",
+  green: "#58a628",
+  trunk: "#05575b",
+  head: "#d99a0a",
+} as const;
 
 export const BRAND_FONT = "Montserrat";
 
