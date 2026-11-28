@@ -25,6 +25,27 @@ A reviewer can instead *Request changes* (`changes_requested`), with a
 comment. Editing anything makes a new version and returns the post to
 `draft`, clearing the approval and any schedule.
 
+The editor's bottom bar does each step on what is on screen, so nothing is
+sent or approved that wasn't just saved (`editorAction`):
+
+- **Save draft**: always.
+- **Save and send for review**: for anyone who can't approve the post.
+- **Publish…**: for whoever may approve it themselves (Patience). She ticks
+  the same four review confirmations, then chooses *now* or a date; the
+  editor saves, records her approval against that version's fingerprint, and
+  publishes or schedules it. It is the review, in one step, not a way round it.
+
+A reviewer approving someone else's post can choose *Approve and publish now*.
+What still stands between a draft and review (a title, 150 words) is shown
+under the buttons as it is typed, and only real limits stop a save; each says
+how far over it is. A line break counts as one character, as in the box.
+
+The summary is optional: left empty, it is the post's first paragraph, cut
+near 220 characters. Sources are one per line, written however references are
+usually written; a web address in a line becomes its link, and a reference
+with none (a book, a journal) is listed as plain text. Text pasted from Word
+or Google Docs is spaced into paragraphs, with its bullet points kept.
+
 What readers see lives in append-only versions (`blog_post_versions`). A post
 points at three of them: the one being worked on, the one approved, and the
 one on the website. Publishing checks that the approved version's fingerprint

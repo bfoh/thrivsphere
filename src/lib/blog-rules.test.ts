@@ -1,7 +1,9 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
+  LIMITS,
   afterEdit,
+  autoExcerpt,
   approvalStands,
   awaitingDecision,
   canArchive,
@@ -23,6 +25,7 @@ import {
   reviewProblems,
   scheduleProblem,
   slugify,
+  tidyPastedText,
   uniqueSlug,
   wordCount,
   type BlogContent,
@@ -213,10 +216,47 @@ describe("sources", () => {
     assert.equal(parseSources(formatSources(r.sources)).ok, true);
   });
 
-  it("refuses a line without a title or a web address", () => {
-    assert.equal(parseSources("https://www.nhs.uk").ok, false);
-    assert.equal(parseSources("NHS | www.nhs.uk").ok, false);
-    assert.equal(parseSources("NHS | javascript:alert(1)").ok, false);
+  it("reads references written the usual ways, not only the suggested layout", () => {
+    const r = parseSources(
+      [
+        "Mind (2023) How to improve your self-esteem. Available at: https://www.mind.org.uk/self-esteem/ (Accessed: 20 November 2026).",
+        "Clance, P. R. and Imes, S. A. (1978) The impostor phenomenon in high achieving women. Psychotherapy, 15(3), pp. 241-247.",
+        "https://www.nhs.uk/mental-health/self-help/",
+        "NHS | www.nhs.uk",
+        "See (https://en.wikipedia.org/wiki/Impostor_syndrome_(psychology)).",
+      ].join("\n")
+    );
+    assert.ok(r.ok);
+    assert.deepEqual(r.sources[0], {
+      title: "Mind (2023) How to improve your self-esteem. (Accessed: 20 November 2026).",
+      publisher: null,
+      url: "https://www.mind.org.uk/self-esteem/",
+      accessed: null,
+    });
+    assert.equal(r.sources[1].url, null);
+    assert.match(r.sources[1].title, /^Clance, P\. R\./);
+    assert.deepEqual(r.sources[2], { title: "nhs.uk", publisher: null, url: "https://www.nhs.uk/mental-health/self-help/", accessed: null });
+    assert.deepEqual(r.sources[3], { title: "NHS", publisher: null, url: "https://www.nhs.uk", accessed: null });
+    assert.equal(r.sources[4].url, "https://en.wikipedia.org/wiki/Impostor_syndrome_(psychology)");
+  });
+
+  it("reads back what it wrote", () => {
+    const text = "Mind (2023) Self-esteem. Available at: https://www.mind.org.uk/x\nA book with no link (2020).\nBreathing | NHS | https://www.nhs.uk/b | 2026-11-20";
+    const first = parseSources(text);
+    assert.ok(first.ok);
+    const again = parseSources(formatSources(first.sources));
+    assert.ok(again.ok);
+    assert.deepEqual(again.sources, first.sources);
+  });
+
+  it("only ever links to a real web address", () => {
+    const r = parseSources("NHS | javascript:alert(1)\nClick javascript:alert(1) here");
+    assert.ok(r.ok);
+    assert.deepEqual(r.sources.map((s) => s.url), [null, null]);
+  });
+
+  it("refuses an implausibly long list", () => {
+    assert.equal(parseSources(Array.from({ length: 51 }, (_, i) => `Source ${i}`).join("\n")).ok, false);
   });
 
   it("knows the trusted sites, subdomains included", () => {
@@ -295,6 +335,30 @@ describe("forms", () => {
     assert.equal(r.content.coverAlt, null);
   });
 
+  it("counts a line break in a box as one character, as the box does", () => {
+    // Browsers send each line break as CR LF. A summary that fills the box exactly must still save.
+    const excerpt = `First line.\r\n${"x".repeat(LIMITS.excerpt - 12)}`;
+    const r = parseContent({ title: "T", category: "Mindfulness", excerpt, body: "b" }, { coverImage: null });
+    assert.ok(r.ok, r.ok ? "" : r.message);
+    assert.equal(r.content.excerpt.length, LIMITS.excerpt);
+  });
+
+  it("says by how much something is too long", () => {
+    const r = parseContent({ title: "T", category: "Mindfulness", excerpt: "x".repeat(LIMITS.excerpt + 41), body: "b" }, { coverImage: null });
+    assert.equal(r.ok, false);
+    assert.match(r.ok ? "" : r.message, new RegExp(`${LIMITS.excerpt + 41} characters`));
+  });
+
+  it("uses the opening of the post when the summary is left empty", () => {
+    const r = parseContent(
+      { title: "T", category: "Mindfulness", excerpt: "", body: "## Start here\n\nA **gentle** look at [stress](https://www.nhs.uk). More follows.\n\nSecond paragraph." },
+      { coverImage: null }
+    );
+    assert.ok(r.ok);
+    assert.equal(r.content.excerpt, "A gentle look at stress. More follows.");
+    assert.deepEqual(reviewProblems({ ...r.content, body: "word ".repeat(200) }), []);
+  });
+
   it("refuses an unknown category and a missing title", () => {
     assert.equal(parseContent({ title: "", category: "Mindfulness" }, { coverImage: null }).ok, false);
     assert.equal(parseContent({ title: "x", category: "Crypto" }, { coverImage: null }).ok, false);
@@ -306,5 +370,31 @@ describe("forms", () => {
     assert.equal(r.brief.length, "short");
     assert.equal(parseBrief({ topic: "" }).ok, false);
     assert.equal(parseBrief({ topic: "x", audience: "everyone" }).ok, false);
+  });
+});
+
+describe("autoExcerpt", () => {
+  it("cuts a long opening at a sentence, or failing that a word", () => {
+    const sentences = `${"This is a sentence about wellbeing. ".repeat(10)}`;
+    const a = autoExcerpt(sentences);
+    assert.ok(a.length <= 220 && a.endsWith("."), a);
+    const b = autoExcerpt("word ".repeat(100));
+    assert.ok(b.length <= 221 && b.endsWith("…"), b);
+    assert.equal(autoExcerpt("- only a list\n- here"), "");
+  });
+});
+
+describe("tidyPastedText", () => {
+  it("spaces paragraphs pasted from Word and keeps its bullet points", () => {
+    const pasted = "Imposter syndrome is common.\r\nMany people feel it.\r\n•\tNoticing the thought\r\n•\tNaming it\r\n1. Breathe\r\nA closing line.";
+    assert.equal(
+      tidyPastedText(pasted),
+      "Imposter syndrome is common.\n\nMany people feel it.\n\n- Noticing the thought\n- Naming it\n1. Breathe\n\nA closing line."
+    );
+  });
+
+  it("leaves alone text that's one line or already has its paragraphs spaced", () => {
+    assert.equal(tidyPastedText("Just a phrase"), null);
+    assert.equal(tidyPastedText("Para one.\n\nPara two.\n- a list"), null);
   });
 });

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { createPost, reviewPost, saveVersion, schedulePost } from "@/app/actions/blog";
+import { createPost, editorAction, reviewPost, schedulePost } from "@/app/actions/blog";
 import { initialBlogState, type BlogFormState } from "@/lib/blog-state";
 import { BlogBody } from "@/components/BlogBody";
 import { BlogAssist } from "@/components/admin/ai/BlogAssist";
@@ -12,12 +12,16 @@ import {
   LENGTHS,
   LIMITS,
   REVIEW_CHECKS,
+  autoExcerpt,
   contentFindings,
   formatSources,
   parseSources,
   readingTime,
+  reviewProblems,
+  tidyPastedText,
   wordCount,
   type BlogContent,
+  type BlogStatus,
 } from "@/lib/blog-rules";
 
 type Action = (prev: BlogFormState, fd: FormData) => Promise<BlogFormState>;
@@ -90,10 +94,11 @@ export function NewPostForm() {
         </select>
       </div>
 
-      <fieldset style={{ border: "1px solid rgba(31,58,95,0.12)", borderRadius: 12, padding: "14px 16px 16px", margin: 0, display: "flex", flexDirection: "column", gap: 14 }}>
-        <legend style={{ fontSize: 13, fontWeight: 800, color: "var(--navy)", padding: "0 6px" }}>Plan the post (optional)</legend>
+      <details style={{ border: "1px solid rgba(31,58,95,0.12)", borderRadius: 12, padding: "12px 16px" }}>
+        <summary style={{ cursor: "pointer", fontSize: 13, fontWeight: 800, color: "var(--navy)" }}>Plan the post (optional)</summary>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 12 }}>
         <p style={{ ...hint, margin: 0 }}>
-          A short brief helps whoever writes it, and the AI writing assistant when it arrives. Never include anything about a real client.
+          A short brief helps whoever writes it, and the AI writing assistant. Never include anything about a real client.
         </p>
         <div>
           <label htmlFor="n-topic" style={lbl}>What is it about?</label>
@@ -125,7 +130,8 @@ export function NewPostForm() {
           <label htmlFor="n-notes" style={lbl}>Notes</label>
           <textarea id="n-notes" name="notes" maxLength={1500} rows={3} style={{ ...input, resize: "vertical" }} />
         </div>
-      </fieldset>
+        </div>
+      </details>
 
       <div>
         <button className="pill pill-teal" disabled={pending} style={{ padding: "10px 22px", fontSize: 14, opacity: pending ? 0.6 : 1 }}>
@@ -155,6 +161,10 @@ export function PostEditor({
   slug,
   slugEditable,
   initial,
+  status,
+  selfApprove,
+  onWebsiteAsIs,
+  minSchedule,
   aiOn = false,
 }: {
   postId: string;
@@ -162,10 +172,17 @@ export function PostEditor({
   slug: string;
   slugEditable: boolean;
   initial: BlogContent;
+  status: BlogStatus;
+  /** This person may approve the post themselves (the founder), so the editor offers Publish. */
+  selfApprove: boolean;
+  /** The saved version is the one on the website, so until something changes there's nothing to publish or review. */
+  onWebsiteAsIs: boolean;
+  /** The earliest date a post can be scheduled for, as YYYY-MM-DDTHH:MM. */
+  minSchedule: string;
   /** AI help is shown once the business's AI key is set. */
   aiOn?: boolean;
 }) {
-  const { state, pending, onSubmit } = useBlogAction(saveVersion);
+  const { state, pending, onSubmit } = useBlogAction(editorAction);
   const start = React.useMemo(
     () => ({
       title: initial.title,
@@ -187,6 +204,10 @@ export function PostEditor({
   const bodyRef = React.useRef<HTMLTextAreaElement>(null);
   // Whether an AI suggestion was used since the last save; the version is marked so.
   const [aiUsed, setAiUsed] = React.useState(false);
+  const [publishing, setPublishing] = React.useState(false);
+  const [checks, setChecks] = React.useState<Record<string, boolean>>({});
+  const [when, setWhen] = React.useState<"now" | "later">("now");
+  const [tidied, setTidied] = React.useState(false);
 
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setF((prev) => ({ ...prev, [k]: e.target.value }));
@@ -195,9 +216,13 @@ export function PostEditor({
   const sent = React.useRef(start);
   const lastState = React.useRef(state);
   React.useEffect(() => {
-    if (state !== lastState.current && state.status === "ok") {
+    if (state !== lastState.current && (state.status === "ok" || state.saved)) {
       setSaved(sent.current);
       setAiUsed(false);
+      if (state.status === "ok") {
+        setPublishing(false);
+        setChecks({});
+      }
     }
     lastState.current = state;
   }, [state]);
@@ -210,17 +235,32 @@ export function PostEditor({
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
+  // Everything below is worked out from what's on screen, not from the last save.
   const parsedSources = parseSources(f.sources);
-  const findings = contentFindings({
+  const summaryFromBody = autoExcerpt(f.body);
+  const content: BlogContent = {
     title: f.title,
     category: f.category,
-    excerpt: f.excerpt,
+    excerpt: f.excerpt.trim() || summaryFromBody,
     metaDescription: f.metaDescription || null,
     body: f.body,
     sources: parsedSources.ok ? parsedSources.sources : [],
     coverImage: f.coverImage || null,
     coverAlt: f.coverAlt || null,
-  });
+  };
+  const findings = contentFindings(content);
+  const problems = reviewProblems(content);
+  const words = wordCount(f.body);
+  const tooLong =
+    f.title.length > LIMITS.title ||
+    f.excerpt.trim().length > LIMITS.excerpt ||
+    f.metaDescription.trim().length > LIMITS.metaDescriptionMax ||
+    f.coverAlt.trim().length > LIMITS.coverAlt ||
+    !parsedSources.ok;
+  const allTicked = REVIEW_CHECKS.every((c) => checks[c.key]);
+  const waiting = status === "in_review" && !dirty;
+  const archived = status === "archived";
+  const nothingNew = onWebsiteAsIs && !dirty;
 
   async function onCover(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -240,6 +280,29 @@ export function PostEditor({
     }
   }
 
+  // Text pasted from Word or Google Docs keeps its paragraphs and bullet points.
+  function onBodyPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+    const tidy = tidyPastedText(e.clipboardData.getData("text/plain"));
+    if (tidy === null) return;
+    e.preventDefault();
+    const el = e.currentTarget;
+    el.focus();
+    // insertText keeps the browser's undo working; the fallback sets the value directly.
+    if (!document.execCommand("insertText", false, tidy)) {
+      const { selectionStart: a, selectionEnd: b } = el;
+      const next = el.value.slice(0, a) + tidy + el.value.slice(b);
+      setF((prev) => ({ ...prev, body: next }));
+      requestAnimationFrame(() => el.setSelectionRange(a + tidy.length, a + tidy.length));
+    }
+    setTidied(true);
+  }
+
+  const over = (len: number, max: number) => len > max && (
+    <p role="alert" style={{ ...hint, color: "#a1421c", fontWeight: 700 }}>
+      {len - max} character{len - max === 1 ? "" : "s"} too long. Shorten it to {max} or fewer.
+    </p>
+  );
+
   return (
     <form
       onSubmit={(e) => {
@@ -248,6 +311,8 @@ export function PostEditor({
       }}
       style={{ display: "flex", flexDirection: "column", gap: 16 }}
     >
+      {/* Pressing Enter in a box saves, and never publishes: the first submit button is the one Enter uses. */}
+      <button type="submit" name="intent" value="save" hidden aria-hidden tabIndex={-1} />
       <input type="hidden" name="postId" value={postId} />
       <input type="hidden" name="expectedVersionId" value={versionId ?? ""} />
       <input type="hidden" name="coverImage" value={f.coverImage} />
@@ -256,9 +321,14 @@ export function PostEditor({
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <label htmlFor="e-title" style={lbl}>Title</label>
-          <Count value={f.title} limit={LIMITS.titleSearch} />
+          <Count value={f.title} limit={LIMITS.title} />
         </div>
-        <input id="e-title" name="title" value={f.title} onChange={set("title")} maxLength={LIMITS.title} style={{ ...input, fontSize: 17, fontWeight: 700 }} />
+        <input id="e-title" name="title" value={f.title} onChange={set("title")} style={{ ...input, fontSize: 17, fontWeight: 700 }} />
+        {f.title.length > LIMITS.title
+          ? over(f.title.length, LIMITS.title)
+          : f.title.length > LIMITS.titleSearch && (
+              <p style={hint}>Fine to save. Search engines show about the first {LIMITS.titleSearch} characters, so put the key words first.</p>
+            )}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }} className="two-col">
@@ -282,15 +352,6 @@ export function PostEditor({
       </div>
 
       <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-          <label htmlFor="e-excerpt" style={lbl}>Summary</label>
-          <Count value={f.excerpt} limit={LIMITS.excerpt} />
-        </div>
-        <textarea id="e-excerpt" name="excerpt" value={f.excerpt} onChange={set("excerpt")} rows={2} maxLength={LIMITS.excerpt} style={{ ...input, resize: "vertical" }} />
-        <p style={hint}>One or two sentences, shown on the blog page under the title.</p>
-      </div>
-
-      <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
           <div style={{ display: "flex", gap: 6 }} role="tablist" aria-label="Body">
             {(["write", "preview"] as const).map((t) => (
@@ -308,7 +369,7 @@ export function PostEditor({
             ))}
           </div>
           <span style={{ fontSize: 12, color: "var(--navy-soft)", fontWeight: 700 }}>
-            {wordCount(f.body)} words · {readingTime(f.body)}
+            {words} words · {readingTime(f.body)}
           </span>
         </div>
         <textarea
@@ -316,9 +377,12 @@ export function PostEditor({
           id="e-body"
           name="body"
           aria-label="Post body"
+          aria-describedby="e-body-hint"
           value={f.body}
           onChange={set("body")}
+          onPaste={onBodyPaste}
           rows={26}
+          placeholder="Write here, or paste the article from Word or Google Docs."
           style={{ ...input, marginTop: 8, resize: "vertical", lineHeight: 1.65, display: tab === "write" ? "block" : "none" }}
         />
         {tab === "preview" && (
@@ -326,6 +390,14 @@ export function PostEditor({
             {f.body.trim() ? <BlogBody markdown={f.body} /> : <p style={{ color: "var(--navy-soft)" }}>Nothing written yet.</p>}
           </div>
         )}
+        <p id="e-body-hint" style={hint}>
+          {tidied
+            ? "Pasted text was spaced into paragraphs and its bullet points kept. Check it under Preview."
+            : "Pasting from Word or Google Docs keeps your paragraphs and bullet points. Check how it looks under Preview."}
+          {f.body.length > LIMITS.body && (
+            <strong style={{ color: "#a1421c" }}> The post is longer than a post can hold ({f.body.length.toLocaleString("en-GB")} of {LIMITS.body.toLocaleString("en-GB")} characters). Split it into two.</strong>
+          )}
+        </p>
         <details style={{ marginTop: 8 }}>
           <summary style={{ cursor: "pointer", fontSize: 12.5, fontWeight: 700, color: "var(--teal-deep)" }}>How to format the text</summary>
           <table style={{ marginTop: 8, fontSize: 12.5, borderCollapse: "collapse" }}>
@@ -345,19 +417,41 @@ export function PostEditor({
       </div>
 
       <div>
-        <label htmlFor="e-sources" style={lbl}>Sources</label>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <label htmlFor="e-excerpt" style={lbl}>Summary (optional)</label>
+          {f.excerpt.trim() && <Count value={f.excerpt.trim()} limit={LIMITS.excerpt} />}
+        </div>
+        <textarea
+          id="e-excerpt"
+          name="excerpt"
+          value={f.excerpt}
+          onChange={set("excerpt")}
+          rows={2}
+          placeholder={summaryFromBody || "Leave empty to use the opening of the post."}
+          style={{ ...input, resize: "vertical" }}
+        />
+        {over(f.excerpt.trim().length, LIMITS.excerpt) || (
+          <p style={hint}>
+            Shown on the blog page under the title, up to {LIMITS.excerpt} characters.
+            {f.excerpt.trim() ? "" : " Left empty, the opening of the post is used, as shown in the box."}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="e-sources" style={lbl}>Sources and references (optional)</label>
         <textarea
           id="e-sources"
           name="sources"
           value={f.sources}
           onChange={set("sources")}
           rows={4}
-          placeholder={"Breathing exercises for stress | NHS | https://www.nhs.uk/… | 2026-11-21"}
+          placeholder={"NHS (2025) Breathing exercises for stress. Available at: https://www.nhs.uk/…\nClance, P. R. and Imes, S. A. (1978) The impostor phenomenon in high achieving women."}
           style={{ ...input, resize: "vertical", fontSize: 13 }}
         />
         <p style={hint}>
-          One per line: title | publisher | web address | date read (optional). Listed under the post. Any figure or fact in the
-          post should come from one of these.
+          One per line, written however you usually write references. A web address in a line becomes a link. Listed under the post;
+          any figure or fact in the post should come from one of these.
         </p>
         {!parsedSources.ok && <p role="alert" style={{ ...hint, color: "#a1421c", fontWeight: 700 }}>{parsedSources.message}</p>}
       </div>
@@ -387,17 +481,22 @@ export function PostEditor({
         </div>
         <div>
           <label htmlFor="e-alt" style={lbl}>Describe the photo</label>
-          <textarea id="e-alt" name="coverAlt" value={f.coverAlt} onChange={set("coverAlt")} rows={3} maxLength={LIMITS.coverAlt} disabled={!f.coverImage} style={{ ...input, resize: "vertical" }} />
-          <p style={hint}>Read aloud to people using screen readers, e.g. &quot;A cup of tea on a windowsill in the rain&quot;.</p>
+          <textarea id="e-alt" name="coverAlt" value={f.coverAlt} onChange={set("coverAlt")} rows={3} disabled={!f.coverImage} style={{ ...input, resize: "vertical" }} />
+          {over(f.coverAlt.trim().length, LIMITS.coverAlt) || (
+            <p style={hint}>Read aloud to people using screen readers, e.g. &quot;A cup of tea on a windowsill in the rain&quot;.</p>
+          )}
         </div>
       </div>
 
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
           <label htmlFor="e-meta" style={lbl}>Search engine description (optional)</label>
-          <Count value={f.metaDescription || f.excerpt} limit={LIMITS.metaDescription} />
+          {f.metaDescription.trim() && <Count value={f.metaDescription.trim()} limit={LIMITS.metaDescriptionMax} />}
         </div>
-        <textarea id="e-meta" name="metaDescription" value={f.metaDescription} onChange={set("metaDescription")} rows={2} maxLength={200} placeholder="Uses the summary if left empty" style={{ ...input, resize: "vertical" }} />
+        <textarea id="e-meta" name="metaDescription" value={f.metaDescription} onChange={set("metaDescription")} rows={2} placeholder="Uses the summary if left empty" style={{ ...input, resize: "vertical" }} />
+        {over(f.metaDescription.trim().length, LIMITS.metaDescriptionMax) || (
+          <p style={hint}>Search engines show about the first {LIMITS.metaDescription} characters.</p>
+        )}
       </div>
 
       {aiOn && (
@@ -417,7 +516,8 @@ export function PostEditor({
 
       {findings.length > 0 && (
         <div style={{ border: "1px solid rgba(138,109,18,0.35)", background: "rgba(212,175,55,0.08)", borderRadius: 12, padding: "12px 16px" }}>
-          <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 800, color: "#8a6d12" }}>Things to check</p>
+          <p style={{ margin: "0 0 2px", fontSize: 13, fontWeight: 800, color: "#8a6d12" }}>Things to check</p>
+          <p style={{ margin: "0 0 6px", fontSize: 12, color: "var(--navy-soft)" }}>Suggestions only. None of these stop you saving.</p>
           <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 1.55, color: "var(--ink)" }}>
             {findings.map((x) => (
               <li key={x.message}>{x.message}</li>
@@ -426,13 +526,75 @@ export function PostEditor({
         </div>
       )}
 
-      <div style={{ position: "sticky", bottom: 0, background: "rgba(255,255,255,0.96)", padding: "12px 0", borderTop: "1px solid rgba(31,58,95,0.08)", display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
-        <button className="pill pill-teal" disabled={pending || !parsedSources.ok} style={{ padding: "10px 22px", fontSize: 14, opacity: pending ? 0.6 : 1 }}>
-          {pending ? "Saving…" : "Save"}
-        </button>
-        <span style={{ fontSize: 12.5, fontWeight: 700, color: dirty ? "#8a6d12" : "var(--navy-soft)" }}>
-          {dirty ? "Unsaved changes" : "All changes saved"}
-        </span>
+      {publishing && selfApprove && (
+        <fieldset style={{ border: "2px solid rgba(212,175,55,0.55)", borderRadius: 14, padding: "16px 18px 18px", margin: 0, display: "flex", flexDirection: "column", gap: 12, background: "#fffdf6" }}>
+          <legend style={{ fontSize: 14, fontWeight: 800, color: "var(--navy)", padding: "0 6px" }}>Publish this post</legend>
+          <p style={{ margin: 0, fontSize: 13.5, color: "var(--ink)", lineHeight: 1.5 }}>
+            This saves what&apos;s on screen and approves it as you. First{" "}
+            <button type="button" style={{ ...linkButton, color: "var(--teal-deep)", fontSize: 13.5 }} onClick={() => { setTab("preview"); bodyRef.current?.closest("form")?.scrollIntoView({ behavior: "smooth" }); }}>
+              read it under Preview
+            </button>
+            , then confirm that:
+          </p>
+          {REVIEW_CHECKS.map((c) => (
+            <label key={c.key} style={{ display: "flex", gap: 9, alignItems: "flex-start", fontSize: 14, lineHeight: 1.45, color: "var(--ink)", cursor: "pointer" }}>
+              <input type="checkbox" name={`check_${c.key}`} checked={!!checks[c.key]} onChange={(e) => setChecks((p) => ({ ...p, [c.key]: e.target.checked }))} style={{ marginTop: 3 }} />
+              {c.label}
+            </label>
+          ))}
+          <div style={{ display: "flex", gap: 18, flexWrap: "wrap", alignItems: "center", fontSize: 14, color: "var(--ink)" }}>
+            <label style={{ display: "flex", gap: 7, alignItems: "center", cursor: "pointer" }}>
+              <input type="radio" name="publishWhen" value="now" checked={when === "now"} onChange={() => setWhen("now")} /> Now
+            </label>
+            <label style={{ display: "flex", gap: 7, alignItems: "center", cursor: "pointer" }}>
+              <input type="radio" name="publishWhen" value="later" checked={when === "later"} onChange={() => setWhen("later")} /> On a date (UK time)
+            </label>
+            {when === "later" && <input type="datetime-local" name="when" min={minSchedule} required aria-label="Publish on" style={{ ...input, width: "auto" }} />}
+          </div>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+            <button
+              name="intent"
+              value="publish"
+              className="pill pill-gold"
+              disabled={pending || !allTicked || problems.length > 0 || tooLong}
+              style={{ padding: "10px 22px", fontSize: 14, opacity: pending || !allTicked || problems.length > 0 || tooLong ? 0.55 : 1 }}
+            >
+              {pending ? "Working…" : when === "now" ? "Save and publish now" : "Save and schedule"}
+            </button>
+            <button type="button" style={{ ...linkButton, fontSize: 13, color: "var(--navy-soft)" }} onClick={() => setPublishing(false)}>
+              Cancel
+            </button>
+            {!allTicked && <span style={{ fontSize: 12.5, color: "var(--navy-soft)" }}>Tick all four to publish.</span>}
+          </div>
+        </fieldset>
+      )}
+
+      <div style={{ position: "sticky", bottom: 0, background: "rgba(255,255,255,0.97)", padding: "12px 0", borderTop: "1px solid rgba(31,58,95,0.08)", display: "flex", flexDirection: "column", gap: 6 }}>
+        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+          <button name="intent" value="save" className={`pill ${archived ? "pill-teal" : "pill-ghost"}`} disabled={pending || tooLong} style={{ padding: "10px 20px", fontSize: 14, opacity: pending || tooLong ? 0.6 : 1 }}>
+            {pending ? "Saving…" : "Save draft"}
+          </button>
+          {!archived && !nothingNew && selfApprove && !publishing && (
+            <button type="button" className="pill pill-gold" disabled={pending || problems.length > 0 || tooLong} onClick={() => setPublishing(true)} style={{ padding: "10px 22px", fontSize: 14, opacity: pending || problems.length > 0 || tooLong ? 0.55 : 1 }}>
+              Publish…
+            </button>
+          )}
+          {!archived && !nothingNew && !selfApprove && !waiting && (
+            <button name="intent" value="review" className="pill pill-teal" disabled={pending || problems.length > 0 || tooLong} style={{ padding: "10px 22px", fontSize: 14, opacity: pending || problems.length > 0 || tooLong ? 0.55 : 1 }}>
+              {pending ? "Sending…" : "Save and send for review"}
+            </button>
+          )}
+          <span style={{ fontSize: 12.5, fontWeight: 700, color: dirty ? "#8a6d12" : "var(--navy-soft)" }}>
+            {dirty ? "Unsaved changes" : waiting ? "Saved · waiting for review" : nothingNew ? "Saved · this is what's on the website" : "All changes saved"}
+          </span>
+        </div>
+        {!archived && !nothingNew && problems.length > 0 && (
+          <p style={{ margin: 0, fontSize: 12.5, color: "var(--navy-soft)" }}>
+            To {selfApprove ? "publish" : "send it for review"}: {problems.join(" ")}
+            {words > 0 && words < LIMITS.minWordsForReview ? ` (${words} so far.)` : ""} You can save a draft at any time.
+          </p>
+        )}
+        {tooLong && <p style={{ margin: 0, fontSize: 12.5, fontWeight: 700, color: "#a1421c" }}>Something above is too long; it&apos;s marked in red.</p>}
         <Result state={state} />
       </div>
     </form>
@@ -441,7 +603,7 @@ export function PostEditor({
 
 /* ------------------------------------------------------------------ review */
 
-export function ReviewForm({ postId, versionId }: { postId: string; versionId: string }) {
+export function ReviewForm({ postId, versionId, offerPublish = false }: { postId: string; versionId: string; offerPublish?: boolean }) {
   const { state, pending, onSubmit } = useBlogAction(reviewPost);
   const [checks, setChecks] = React.useState<Record<string, boolean>>({});
   const all = REVIEW_CHECKS.every((c) => checks[c.key]);
@@ -470,8 +632,13 @@ export function ReviewForm({ postId, versionId }: { postId: string; versionId: s
         <textarea id="r-comment" name="comment" rows={3} maxLength={LIMITS.comment} style={{ ...input, resize: "vertical" }} />
       </div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-        <button name="decision" value="approved" className="pill pill-gold" disabled={pending || !all} style={{ padding: "10px 22px", fontSize: 14, opacity: pending || !all ? 0.55 : 1 }}>
-          Approve this version
+        {offerPublish && (
+          <button name="decision" value="approve_publish" className="pill pill-gold" disabled={pending || !all} style={{ padding: "10px 22px", fontSize: 14, opacity: pending || !all ? 0.55 : 1 }}>
+            Approve and publish now
+          </button>
+        )}
+        <button name="decision" value="approved" className={offerPublish ? "pill pill-ghost" : "pill pill-gold"} disabled={pending || !all} style={{ padding: "10px 22px", fontSize: 14, opacity: pending || !all ? 0.55 : 1 }}>
+          {offerPublish ? "Approve only" : "Approve this version"}
         </button>
         <button name="decision" value="changes_requested" className="pill pill-ghost" disabled={pending} style={{ padding: "10px 22px", fontSize: 14, color: "#a1421c" }}>
           Request changes

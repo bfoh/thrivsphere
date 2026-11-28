@@ -28,7 +28,8 @@ export type BlogLength = "short" | "standard" | "long";
 export type BlogSource = {
   title: string;
   publisher: string | null;
-  url: string;
+  /** The link, when the source is on the web. A book or journal reference may have none. */
+  url: string | null;
   /** When it was read, as YYYY-MM-DD. */
   accessed: string | null;
 };
@@ -128,11 +129,15 @@ export const TRUSTED_DOMAINS = [
 
 export const LIMITS = {
   title: 120,
+  /** About what search engines show of a title. A guide, not a limit. */
   titleSearch: 65,
   excerpt: 300,
+  /** About what search engines show of a description. A guide; the limit is `metaDescriptionMax`. */
   metaDescription: 155,
-  body: 60_000,
-  sources: 30,
+  metaDescriptionMax: 200,
+  /** Characters. About 15,000 words, far beyond the longest read. */
+  body: 100_000,
+  sources: 50,
   coverAlt: 250,
   comment: 2000,
   minWordsForReview: 150,
@@ -284,6 +289,60 @@ export function readingTime(markdown: string): string {
   return `${Math.max(1, Math.round(wordCount(markdown) / 200))} min read`;
 }
 
+/** About how long a summary made from the opening of a post runs. */
+const AUTO_EXCERPT = 220;
+
+/**
+ * A summary for a post whose author left the summary empty: its first
+ * paragraph of ordinary text, without formatting, cut at a sentence (or,
+ * failing that, a word) near `AUTO_EXCERPT` characters.
+ */
+export function autoExcerpt(markdown: string): string {
+  const first = paragraphs(markdown).find((p) => !/^(?:#{1,6}\s|>|[-*+]\s|\d+[.)]\s|```|!\[|\|)/.test(p));
+  if (!first) return "";
+  const text = first
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/(\*\*|__|\*|_|`|~~)/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (text.length <= AUTO_EXCERPT) return text;
+  const head = text.slice(0, AUTO_EXCERPT);
+  const sentence = Math.max(head.lastIndexOf(". "), head.lastIndexOf("? "), head.lastIndexOf("! "));
+  if (sentence >= 80) return head.slice(0, sentence + 1);
+  const space = head.lastIndexOf(" ");
+  return `${head.slice(0, space > 80 ? space : AUTO_EXCERPT).replace(/[\s,;:.-]+$/, "")}…`;
+}
+
+const BULLET = /^(?:[•·▪◦●○■□➢➤►✓✔]\s*|[-*+]\s+|o\t)(.+)$/;
+const NUMBERED = /^(\d{1,3})[.)]\s+(.+)$/;
+
+/**
+ * Text pasted from Word or Google Docs arrives with one line break between
+ * paragraphs, which Markdown reads as a single paragraph, and with "•" for
+ * bullet points. This spaces the paragraphs and turns bullets into list
+ * items. Returns null when there's nothing to change: one line, or text that
+ * already has empty lines between its paragraphs.
+ */
+export function tidyPastedText(text: string): string | null {
+  const t = text.replace(/\r\n?/g, "\n").replace(/ /g, " ");
+  if (!t.trim().includes("\n") || /\n[ \t]*\n/.test(t.trim())) return null;
+  let out = "";
+  let prevList = false;
+  for (const raw of t.split("\n")) {
+    const line = raw.trim();
+    if (!line) continue;
+    const bullet = line.match(BULLET);
+    const numbered = bullet ? null : line.match(NUMBERED);
+    const md = bullet ? `- ${bullet[1].trim()}` : numbered ? `${numbered[1]}. ${numbered[2].trim()}` : line;
+    const isList = !!(bullet || numbered);
+    if (out) out += isList && prevList ? "\n" : "\n\n";
+    out += md;
+    prevList = isList;
+  }
+  return out === text ? null : out;
+}
+
 /** Paragraphs, split on blank lines, for the reviewer's comparison. */
 export function paragraphs(markdown: string): string[] {
   return markdown
@@ -358,31 +417,65 @@ export function isTrustedHost(host: string): boolean {
   return TRUSTED_DOMAINS.some((d) => host === d || host.endsWith(`.${d}`));
 }
 
-/**
- * Sources from the editor, one per line: `Title | Publisher | URL | accessed`.
- * Publisher and the date are optional; `Title | URL` is enough.
- */
-export function parseSources(text: string): { ok: true; sources: BlogSource[] } | { ok: false; message: string } {
-  const sources: BlogSource[] = [];
-  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-  if (lines.length > LIMITS.sources) return { ok: false, message: `List at most ${LIMITS.sources} sources.` };
-  for (const [n, line] of lines.entries()) {
-    const parts = line.split("|").map((p) => p.trim());
-    const urlAt = parts.findIndex((p) => /^https?:\/\//i.test(p));
-    if (urlAt < 1) return { ok: false, message: `Source ${n + 1}: write it as "Title | Publisher | https://…".` };
-    const url = parts[urlAt];
-    if (!hostOf(url)) return { ok: false, message: `Source ${n + 1}: that web address doesn't look right.` };
-    const title = parts[0].slice(0, 300);
-    const publisher = urlAt >= 2 ? parts[1].slice(0, 200) || null : null;
-    const accessed = parts[urlAt + 1] && /^\d{4}-\d{2}-\d{2}$/.test(parts[urlAt + 1]) ? parts[urlAt + 1] : null;
-    sources.push({ title, publisher, url, accessed });
+/** A web address as typed, made into a link: `www.` gains `https://`, trailing punctuation goes. Null if it isn't one. */
+function webAddress(raw: string): string | null {
+  let url = /^www\./i.test(raw) ? `https://${raw}` : raw;
+  url = url.replace(/[.,;:!?'"]+$/, "");
+  // A closing bracket belongs to the address only if it opened one, as Wikipedia's do.
+  while (/[)\]]$/.test(url) && (url.match(/[([]/g)?.length ?? 0) < (url.match(/[)\]]/g)?.length ?? 0)) {
+    url = url.slice(0, -1).replace(/[.,;:!?'"]+$/, "");
   }
-  return { ok: true, sources };
+  return hostOf(url) ? url : null;
 }
 
+const ADDRESS = /(?:https?:\/\/|www\.)[^\s<>"]+/i;
+
+/**
+ * One line of the sources box. Either the layout the editor suggests,
+ * `Title | Publisher | https://… | date read`, or a reference written the way
+ * people write them (Harvard, APA, a bare link, a book with no link at all).
+ * Only a real http(s) address ever becomes a link.
+ */
+function parseSourceLine(line: string): BlogSource {
+  const parts = line.split("|").map((p) => p.trim());
+  const urlAt = parts.findIndex((p) => /^(?:https?:\/\/|www\.)\S+$/i.test(p) && webAddress(p));
+  if (parts.length > 1 && urlAt >= 1 && parts[0]) {
+    const next = parts[urlAt + 1] ?? "";
+    return {
+      title: parts[0].slice(0, 500),
+      publisher: urlAt >= 2 ? parts[1].slice(0, 200) || null : null,
+      url: webAddress(parts[urlAt]),
+      accessed: /^\d{4}-\d{2}-\d{2}$/.test(next) ? next : null,
+    };
+  }
+
+  const found = line.match(ADDRESS);
+  const url = found ? webAddress(found[0]) : null;
+  let title = url && found ? line.replace(found[0], " ") : line;
+  title = title
+    .replace(/\b(?:available (?:at|from|online)|retrieved from|accessed via)\s*:?/gi, " ")
+    .replace(/\[\s*online\s*\]/gi, " ")
+    .replace(/\(\s*\)|\[\s*\]/g, " ")
+    .replace(/\s+([.,;:)])/g, "$1")
+    .replace(/\s{2,}/g, " ")
+    .replace(/[\s,;:]+$/, "")
+    .trim();
+  return { title: (title || hostOf(url ?? "") || line).slice(0, 500), publisher: null, url, accessed: null };
+}
+
+/** The sources box: one source per line, in whatever form it was written. */
+export function parseSources(text: string): { ok: true; sources: BlogSource[] } | { ok: false; message: string } {
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length > LIMITS.sources) {
+    return { ok: false, message: `There are ${lines.length} sources; list at most ${LIMITS.sources}, one per line.` };
+  }
+  return { ok: true, sources: lines.map(parseSourceLine) };
+}
+
+/** Back into the sources box, in a form `parseSources` reads back the same. */
 export function formatSources(sources: BlogSource[]): string {
   return sources
-    .map((s) => [s.title, s.publisher, s.url, s.accessed].filter((p): p is string => !!p).join(" | "))
+    .map((s) => [s.title, s.publisher, s.url, s.url ? s.accessed : null].filter((p): p is string => !!p).join(" | "))
     .join("\n");
 }
 
@@ -440,7 +533,7 @@ export function contentFindings(c: BlogContent): Finding[] {
   }
 
   // Links in the body that aren't listed as sources.
-  const listed = new Set(c.sources.map((s) => s.url.replace(/\/+$/, "")));
+  const listed = new Set(c.sources.flatMap((s) => (s.url ? [s.url.replace(/\/+$/, "")] : [])));
   const links = [...c.body.matchAll(/\]\((https?:\/\/[^)\s]+)/gi)].map((m) => m[1]);
   for (const url of new Set(links)) {
     const host = hostOf(url);
@@ -449,10 +542,13 @@ export function contentFindings(c: BlogContent): Finding[] {
   }
 
   for (const s of c.sources) {
-    const host = hostOf(s.url);
+    const host = s.url ? hostOf(s.url) : null;
     if (host && !isTrustedHost(host))
       out.push({ level: "note", message: `${host} isn't one of the usual trusted sources. Check it's reliable.` });
   }
+  const unlinked = c.sources.filter((s) => !s.url).length;
+  if (unlinked)
+    out.push({ level: "note", message: `${unlinked === 1 ? "One source has" : `${unlinked} sources have`} no web address, so readers can't click through to check ${unlinked === 1 ? "it" : "them"}.` });
 
   if (/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(c.body))
     out.push({ level: "warning", message: "Contains an email address. Check it isn't personal." });
@@ -480,10 +576,17 @@ export function reviewProblems(c: BlogContent): string[] {
 // ---------------------------------------------------------------------------
 // Forms
 
+/**
+ * A form field, trimmed, with line breaks as one character each. Browsers send
+ * a line break in a text box as two (CR LF), so without this a summary that
+ * fits the box is refused for being one character over.
+ */
 const field = (input: Record<string, unknown>, name: string) => {
   const v = input[name];
-  return typeof v === "string" ? v.trim() : "";
+  return typeof v === "string" ? v.replace(/\r\n?/g, "\n").trim() : "";
 };
+
+const n = (x: number) => x.toLocaleString("en-GB");
 
 export function parseContent(
   input: Record<string, unknown>,
@@ -491,20 +594,26 @@ export function parseContent(
 ): { ok: true; content: BlogContent } | { ok: false; message: string } {
   const title = field(input, "title");
   const category = field(input, "category");
-  const excerpt = field(input, "excerpt");
+  const body = field(input, "body");
+  // Left empty, the summary is the opening of the post, so there's one less thing to write.
+  const excerpt = field(input, "excerpt") || autoExcerpt(body);
   const metaDescription = field(input, "metaDescription") || null;
-  const body = typeof input.body === "string" ? input.body.replace(/\r\n/g, "\n").trim() : "";
   const coverAlt = field(input, "coverAlt") || null;
   const cover = "coverImage" in input ? field(input, "coverImage") || null : keep.coverImage;
   if (cover && !isCoverName(cover)) return { ok: false, message: "That cover photo can't be used. Upload it again." };
 
   if (!title) return { ok: false, message: "Add a title." };
-  if (title.length > LIMITS.title) return { ok: false, message: `Keep the title under ${LIMITS.title} characters.` };
+  if (title.length > LIMITS.title)
+    return { ok: false, message: `The title is ${title.length} characters. Shorten it to ${LIMITS.title} or fewer.` };
   if (category && !(BLOG_CATEGORIES as readonly string[]).includes(category)) return { ok: false, message: "Choose a category from the list." };
-  if (excerpt.length > LIMITS.excerpt) return { ok: false, message: `Keep the summary under ${LIMITS.excerpt} characters.` };
-  if (metaDescription && metaDescription.length > 200) return { ok: false, message: "Keep the search description under 200 characters." };
-  if (body.length > LIMITS.body) return { ok: false, message: "The post is too long to save." };
-  if (coverAlt && coverAlt.length > LIMITS.coverAlt) return { ok: false, message: `Keep the photo description under ${LIMITS.coverAlt} characters.` };
+  if (excerpt.length > LIMITS.excerpt)
+    return { ok: false, message: `The summary is ${excerpt.length} characters. Shorten it to ${LIMITS.excerpt} or fewer, or leave it empty to use the opening of the post.` };
+  if (metaDescription && metaDescription.length > LIMITS.metaDescriptionMax)
+    return { ok: false, message: `The search engine description is ${metaDescription.length} characters. Shorten it to ${LIMITS.metaDescriptionMax} or fewer, or leave it empty to use the summary.` };
+  if (body.length > LIMITS.body)
+    return { ok: false, message: `The post is ${n(body.length)} characters, more than the ${n(LIMITS.body)} a post can hold. Split it into two posts.` };
+  if (coverAlt && coverAlt.length > LIMITS.coverAlt)
+    return { ok: false, message: `The photo description is ${coverAlt.length} characters. Shorten it to ${LIMITS.coverAlt} or fewer.` };
 
   const sources = parseSources(field(input, "sources"));
   if (!sources.ok) return sources;

@@ -15,6 +15,7 @@ import {
   REVIEW_CHECKS,
   STATUS_LABEL,
   afterEdit,
+  approvalStands,
   awaitingDecision,
   canArchive,
   canRestore,
@@ -140,50 +141,49 @@ export async function createPost(_prev: State, fd: FormData): Promise<State> {
   redirect(`/admin/blog/${post.id}`);
 }
 
+type Post = typeof blogPosts.$inferSelect;
+type Version = typeof blogPostVersions.$inferSelect;
+type Saved = { ok: true; post: Post; changed: boolean; slugChanged: boolean } | { ok: false; state: State };
+
+const err = (message: string, saved = false): State => ({ status: "error", message, ...(saved ? { saved } : {}) });
+
 /**
- * Save the editor. A change makes a new version, sends the post back to
- * draft and clears any approval or schedule. A live post stays live, as it was
- * approved, until the new version is approved and published.
+ * Save what's in the editor. A change makes a new version, sends the post
+ * back to draft and clears any approval or schedule; a live post stays live,
+ * as it was approved, until the new version is approved and published. The
+ * caller has already passed the guard. Returns the post as it now stands.
  */
-export async function saveVersion(_prev: State, fd: FormData): Promise<State> {
-  const id = str(fd, "postId");
-  const post = await load(id);
-  if (!post) return { status: "error", message: "That post no longer exists." };
-
-  const actor = await guard(id, "update", "saved a blog post");
-  if (refused(actor)) return actor;
-
+async function saveEditor(post: Post, actor: Actor, fd: FormData): Promise<Saved> {
   if (str(fd, "expectedVersionId") !== (post.currentVersionId ?? "")) {
-    return { status: "error", message: "Someone else has saved this post since you opened it. Copy your changes, reload the page and try again." };
+    return { ok: false, state: err("Someone else has saved this post since you opened it. Copy your changes, reload the page and try again.") };
   }
   const current = await loadVersion(post.currentVersionId);
   const parsed = parseContent(Object.fromEntries(fd), { coverImage: current?.coverImage ?? null });
-  if (!parsed.ok) return { status: "error", message: parsed.message };
+  if (!parsed.ok) return { ok: false, state: err(parsed.message) };
 
   // The address can change until the post first goes live; after that, links to it would break.
   let slug = post.slug;
   const wanted = str(fd, "slug");
   if (wanted && wanted !== post.slug) {
-    if (post.firstPublishedAt) return { status: "error", message: "The address can't change once a post has been on the website." };
-    if (!isValidSlug(wanted)) return { status: "error", message: "Use lower-case letters, numbers and hyphens for the address." };
+    if (post.firstPublishedAt) return { ok: false, state: err("The address can't change once a post has been on the website.") };
+    if (!isValidSlug(wanted)) return { ok: false, state: err("Use lower-case letters, numbers and hyphens for the address.") };
     const [taken] = await getDb().select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.slug, wanted)).limit(1);
-    if (taken) return { status: "error", message: "Another post already uses that address." };
+    if (taken) return { ok: false, state: err("Another post already uses that address.") };
     slug = wanted;
   }
+  const slugChanged = slug !== post.slug;
 
   const hash = contentHash(parsed.content);
   const db = getDb();
   if (current && current.contentHash === hash) {
-    if (slug === post.slug) return { status: "ok", message: "No changes to save." };
-    await db.update(blogPosts).set({ slug, updatedAt: new Date() }).where(eq(blogPosts.id, id));
-    refreshAdmin(id);
-    return { status: "ok", message: "Address updated." };
+    if (slugChanged) await db.update(blogPosts).set({ slug, updatedAt: new Date() }).where(eq(blogPosts.id, post.id));
+    return { ok: true, post: (await load(post.id)) ?? post, changed: false, slugChanged };
   }
 
   const [latest] = await db
     .select({ number: blogPostVersions.number })
     .from(blogPostVersions)
-    .where(eq(blogPostVersions.postId, id))
+    .where(eq(blogPostVersions.postId, post.id))
     .orderBy(desc(blogPostVersions.number))
     .limit(1);
 
@@ -191,7 +191,7 @@ export async function saveVersion(_prev: State, fd: FormData): Promise<State> {
     const [version] = await db
       .insert(blogPostVersions)
       .values({
-        postId: id,
+        postId: post.id,
         number: (latest?.number ?? 0) + 1,
         ...parsed.content,
         contentHash: hash,
@@ -203,13 +203,30 @@ export async function saveVersion(_prev: State, fd: FormData): Promise<State> {
     await db
       .update(blogPosts)
       .set({ slug, currentVersionId: version.id, ...afterEdit(), updatedAt: new Date() })
-      .where(eq(blogPosts.id, id));
-  } catch (err) {
-    console.error("[blog] save failed", err);
-    return { status: "error", message: "Someone else saved at the same moment. Reload the page and try again." };
+      .where(eq(blogPosts.id, post.id));
+  } catch (e) {
+    console.error("[blog] save failed", e);
+    return { ok: false, state: err("Someone else saved at the same moment. Reload the page and try again.") };
   }
+  const saved = await load(post.id);
+  if (!saved) return { ok: false, state: err("That post no longer exists.") };
+  return { ok: true, post: saved, changed: true, slugChanged };
+}
 
+/** Save the editor. */
+export async function saveVersion(_prev: State, fd: FormData): Promise<State> {
+  const id = str(fd, "postId");
+  const post = await load(id);
+  if (!post) return err("That post no longer exists.");
+
+  const actor = await guard(id, "update", "saved a blog post");
+  if (refused(actor)) return actor;
+
+  const saved = await saveEditor(post, actor, fd);
+  if (!saved.ok) return saved.state;
   refreshAdmin(id);
+  if (!saved.changed) return { status: "ok", message: saved.slugChanged ? "Address updated." : "No changes to save." };
+
   const wasApproved = post.approvedVersionId !== null && post.approvedVersionId === post.currentVersionId;
   const live = post.publishedVersionId !== null;
   return {
@@ -222,36 +239,22 @@ export async function saveVersion(_prev: State, fd: FormData): Promise<State> {
   };
 }
 
-/** Send the current version to the reviewers. */
-export async function submitForReview(_prev: State, fd: FormData): Promise<State> {
-  const id = str(fd, "postId");
-  const post = await load(id);
-  if (!post) return { status: "error", message: "That post no longer exists." };
-  if (!canSubmit(post)) return { status: "error", message: `It's ${STATUS_LABEL[post.status].toLowerCase()}, so it can't be sent for review now.` };
-
-  const version = await loadVersion(post.currentVersionId);
-  if (!version) return { status: "error", message: "Save the post first." };
-  const problems = reviewProblems(toContent(version));
-  if (problems.length) return { status: "error", message: `Before sending it for review: ${problems.join(" ")}` };
-
-  const actor = await guard(id, "update", "sent a blog post for review");
-  if (refused(actor)) return actor;
-
+/** Mark the post as waiting for review and email everyone who could approve it, other than the sender. */
+async function sendToReviewers(post: Post, version: Version, actor: Actor): Promise<State> {
   const now = new Date();
   await getDb()
     .update(blogPosts)
     .set({ status: "in_review", submittedAt: now, submittedBy: actor.userId, updatedAt: now })
-    .where(eq(blogPosts.id, id));
+    .where(eq(blogPosts.id, post.id));
 
-  // Email everyone who could approve this version, other than the sender.
   const reviewers = (await getBlogReviewers()).filter(
     (r) =>
       r.id !== actor.userId &&
       canReview({ actor: { userId: r.id, role: r.role, status: "active" }, isReviewer: true, authorId: post.authorId, versionCreatedBy: version.createdBy }).allowed
   );
-  await notify(reviewers.map((r) => r.email), blogReviewRequest({ postId: id }));
+  await notify(reviewers.map((r) => r.email), blogReviewRequest({ postId: post.id }));
 
-  refreshAdmin(id);
+  refreshAdmin(post.id);
   if (actor.role === "founder") return { status: "ok", message: "Ready for review. You can approve it below." };
   return {
     status: "ok",
@@ -259,6 +262,189 @@ export async function submitForReview(_prev: State, fd: FormData): Promise<State
       ? `Sent for review. ${reviewers.length === 1 ? "The reviewer has" : "The reviewers have"} been emailed a link.`
       : "Sent for review. There's nobody else who can approve it yet, so ask the founder to look at it.",
   };
+}
+
+/** Send the current version to the reviewers. */
+export async function submitForReview(_prev: State, fd: FormData): Promise<State> {
+  const id = str(fd, "postId");
+  const post = await load(id);
+  if (!post) return err("That post no longer exists.");
+  if (!canSubmit(post)) return err(`It's ${STATUS_LABEL[post.status].toLowerCase()}, so it can't be sent for review now.`);
+
+  const version = await loadVersion(post.currentVersionId);
+  if (!version) return err("Save the post first.");
+  const problems = reviewProblems(toContent(version));
+  if (problems.length) return err(`Before sending it for review: ${problems.join(" ")}`);
+
+  const actor = await guard(id, "update", "sent a blog post for review");
+  if (refused(actor)) return actor;
+  return sendToReviewers(post, version, actor);
+}
+
+/** Why a saved post that didn't change can't go for review or be approved again, if it can't. */
+function nothingNew(post: Post): string | null {
+  if (post.status === "in_review") return "It's already waiting for review.";
+  if (post.status === "published" && post.publishedVersionId === post.currentVersionId) return "It's already on the website, just as it is.";
+  if (post.status === "scheduled") return "It's already approved and scheduled.";
+  if (post.status === "archived") return "It's archived. Restore it first.";
+  return null;
+}
+
+/**
+ * The editor's "Send for review": save what's on screen, then send that
+ * version, so what the reviewer sees is always what was just written.
+ */
+async function saveAndSubmit(fd: FormData): Promise<State> {
+  const id = str(fd, "postId");
+  const post = await load(id);
+  if (!post) return err("That post no longer exists.");
+
+  const actor = await guard(id, "update", "saved a blog post and sent it for review");
+  if (refused(actor)) return actor;
+
+  const saved = await saveEditor(post, actor, fd);
+  if (!saved.ok) return saved.state;
+  refreshAdmin(id);
+  const p = saved.post;
+  if (!canSubmit(p)) {
+    const why = nothingNew(p) ?? `It's ${STATUS_LABEL[p.status].toLowerCase()}, so it can't be sent for review now.`;
+    return err(saved.changed ? `Saved. ${why}` : why, true);
+  }
+  const version = await loadVersion(p.currentVersionId);
+  if (!version) return err("Save the post first.");
+  const problems = reviewProblems(toContent(version));
+  if (problems.length) return err(`Saved. Before it can go for review: ${problems.join(" ")}`, true);
+
+  const sent = await sendToReviewers(p, version, actor);
+  return { ...sent, saved: true };
+}
+
+/**
+ * Record a reviewer's decision on a version, against its fingerprint. The
+ * caller has checked that this person may decide, and that it's awaiting one.
+ */
+async function recordDecision(
+  post: Post,
+  version: Version,
+  actor: Actor,
+  decision: "approved" | "changes_requested",
+  comment: string,
+  checklist: Record<string, boolean>
+): Promise<{ ok: true; live: boolean } | { ok: false; message: string }> {
+  // The stored fingerprint must still match the content, or something has changed underneath.
+  const hash = contentHash(toContent(version));
+  if (hash !== version.contentHash) {
+    console.error("[blog] content hash mismatch", version.id);
+    return { ok: false, message: "This version can't be verified. Save the post again, then review it." };
+  }
+
+  const db = getDb();
+  const live = post.publishedVersionId !== null && post.publishedVersionId === version.id;
+  const now = new Date();
+  await db.insert(blogReviews).values({
+    postId: post.id,
+    versionId: version.id,
+    reviewerId: actor.userId,
+    decision,
+    comment: comment || null,
+    checklist,
+    contentHash: hash,
+  });
+  await db
+    .update(blogPosts)
+    .set(
+      decision === "approved"
+        ? { status: live ? "published" : "approved", approvedVersionId: version.id, updatedAt: now }
+        : { status: "changes_requested", approvedVersionId: null, scheduledFor: null, updatedAt: now }
+    )
+    .where(eq(blogPosts.id, post.id));
+
+  // Tell the author, unless they made the decision themselves.
+  if (post.authorId && post.authorId !== actor.userId) {
+    const [author] = await db.select({ email: users.email, status: users.status }).from(users).where(eq(users.id, post.authorId)).limit(1);
+    if (author?.status === "active") await notify([author.email], blogReviewDecision({ postId: post.id, approved: decision === "approved" }));
+  }
+  return { ok: true, live };
+}
+
+/**
+ * The editor's "Publish" for someone who may approve the post themselves:
+ * save what's on screen, approve that exact version with the same four
+ * confirmations as the review form, then publish it now or schedule it. Each
+ * step checks what it always checks, so this is the review, not a way round it.
+ */
+async function saveAndPublish(fd: FormData): Promise<State> {
+  const id = str(fd, "postId");
+  const checklist = Object.fromEntries(REVIEW_CHECKS.map((c) => [c.key, fd.get(`check_${c.key}`) === "on"]));
+  if (!checklistComplete(checklist)) return err("Tick all four confirmations to publish.");
+
+  const later = str(fd, "publishWhen") === "later";
+  let when: Date | null = null;
+  if (later) {
+    const [date, time] = str(fd, "when").split("T");
+    when = date && time ? zonedTimeToUtc(date, time, "Europe/London") : new Date(NaN);
+    const problem = scheduleProblem(when, new Date());
+    if (problem) return err(problem);
+  }
+
+  const post = await load(id);
+  if (!post) return err("That post no longer exists.");
+  const actor = await guard(id, "update", later ? `approved a blog post and scheduled it for ${when!.toISOString()}` : "approved and published a blog post");
+  if (refused(actor)) return actor;
+
+  const saved = await saveEditor(post, actor, fd);
+  if (!saved.ok) return saved.state;
+  refreshAdmin(id);
+  let p = saved.post;
+  const pre = saved.changed ? "Saved, but not published. " : "";
+
+  const version = await loadVersion(p.currentVersionId);
+  if (!version) return err("Save the post first.");
+  if (p.status === "published" && p.publishedVersionId === version.id && approvalStands(p)) {
+    return { status: "ok", message: "It's already on the website, just as it is.", saved: true };
+  }
+  if (p.status === "archived") return err("It's archived. Restore it first.", true);
+
+  const problems = reviewProblems(toContent(version));
+  if (problems.length) return err(`${pre}Before it can be published: ${problems.join(" ")}`, true);
+
+  const allowed = canReview({
+    actor: { userId: actor.userId, role: actor.role, status: actor.status },
+    isReviewer: await isBlogReviewer(actor.userId),
+    authorId: p.authorId,
+    versionCreatedBy: version.createdBy,
+  });
+  if (!allowed.allowed) return err(`${pre}${allowed.reason}`, true);
+
+  if (!approvalStands(p)) {
+    const r = await recordDecision(p, version, actor, "approved", "", checklist);
+    if (!r.ok) return err(`${pre}${r.message}`, true);
+    p = (await load(id)) ?? p;
+  }
+
+  if (later && when) {
+    if (!canSchedule(p)) return err("Approved, but it couldn't be scheduled. Reload the page and try again.", true);
+    await getDb().update(blogPosts).set({ status: "scheduled", scheduledFor: when, updatedAt: new Date() }).where(eq(blogPosts.id, id));
+    refreshAdmin(id);
+    return { status: "ok", message: "Approved and scheduled. It goes live within the hour after the time you chose.", saved: true };
+  }
+
+  const check = await verifyApproval(p);
+  if (!check.ok) return err(`Approved, but not published: ${check.message}`, true);
+  if (!(await markPublished(p, new Date()))) return err("Approved, but the post changed while publishing. Reload the page and try again.", true);
+  refreshAdmin(id);
+  return { status: "ok", message: "Published. It's on the website now.", saved: true };
+}
+
+/**
+ * Everything the editor's buttons do, chosen by the button pressed: save,
+ * save and send for review, or save, approve and publish.
+ */
+export async function editorAction(prev: State, fd: FormData): Promise<State> {
+  const intent = str(fd, "intent");
+  if (intent === "review") return saveAndSubmit(fd);
+  if (intent === "publish") return saveAndPublish(fd);
+  return saveVersion(prev, fd);
 }
 
 /** Take a post back out of review, to keep working on it. */
@@ -283,7 +469,9 @@ export async function withdrawFromReview(_prev: State, fd: FormData): Promise<St
  */
 export async function reviewPost(_prev: State, fd: FormData): Promise<State> {
   const id = str(fd, "postId");
-  const decision = str(fd, "decision");
+  // "Approve and publish now" is an approval, followed by the same publishing step as the Publish button.
+  const publishAfter = str(fd, "decision") === "approve_publish";
+  const decision = publishAfter ? "approved" : str(fd, "decision");
   const comment = str(fd, "comment");
   if (decision !== "approved" && decision !== "changes_requested") return { status: "error", message: "Choose approve or request changes." };
   if (comment.length > LIMITS.comment) return { status: "error", message: `Keep the comment under ${LIMITS.comment} characters.` };
@@ -322,43 +510,22 @@ export async function reviewPost(_prev: State, fd: FormData): Promise<State> {
     return { status: "error", message: "Tick all four confirmations to approve." };
   }
 
-  // The stored fingerprint must still match the content, or something has changed underneath.
-  const hash = contentHash(toContent(version));
-  if (hash !== version.contentHash) {
-    console.error("[blog] content hash mismatch", version.id);
-    return { status: "error", message: "This version can't be verified. Save the post again, then review it." };
-  }
-
-  const live = post.publishedVersionId !== null && post.publishedVersionId === version.id;
-  const now = new Date();
-  await db.insert(blogReviews).values({
-    postId: id,
-    versionId: version.id,
-    reviewerId: actor.userId,
-    decision,
-    comment: comment || null,
-    checklist,
-    contentHash: hash,
-  });
-  await db
-    .update(blogPosts)
-    .set(
-      decision === "approved"
-        ? { status: live ? "published" : "approved", approvedVersionId: version.id, updatedAt: now }
-        : { status: "changes_requested", approvedVersionId: null, scheduledFor: null, updatedAt: now }
-    )
-    .where(eq(blogPosts.id, id));
-
-  // Tell the author, unless they made the decision themselves.
-  if (post.authorId && post.authorId !== actor.userId) {
-    const [author] = await db.select({ email: users.email, status: users.status }).from(users).where(eq(users.id, post.authorId)).limit(1);
-    if (author?.status === "active") await notify([author.email], blogReviewDecision({ postId: id, approved: decision === "approved" }));
-  }
-
+  const r = await recordDecision(post, version, actor, decision, comment, checklist);
+  if (!r.ok) return err(r.message);
   refreshAdmin(id);
-  if (live) refreshPublicBlog(post.slug);
+  if (r.live) refreshPublicBlog(post.slug);
   if (decision === "changes_requested") return { status: "ok", message: "Sent back with your comments." };
-  return { status: "ok", message: live ? "Approved. It was already on the website and stays there." : "Approved. It can now be published or scheduled." };
+  if (r.live) return { status: "ok", message: "Approved. It was already on the website and stays there." };
+
+  if (publishAfter) {
+    const approved = await load(id);
+    const check = approved ? await verifyApproval(approved) : { ok: false as const, message: "That post no longer exists." };
+    if (!check.ok) return err(`Approved, but not published: ${check.message}`);
+    if (!(await markPublished(approved!, new Date()))) return err("Approved, but the post changed while publishing. Reload the page and publish it.");
+    refreshAdmin(id);
+    return { status: "ok", message: "Approved and published. It's on the website now." };
+  }
+  return { status: "ok", message: "Approved. It can now be published or scheduled." };
 }
 
 /** Put the approved version on the website now. */

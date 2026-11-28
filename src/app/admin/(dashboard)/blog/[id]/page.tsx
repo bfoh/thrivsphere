@@ -7,7 +7,7 @@ import { BackLink } from "@/components/admin/BackLink";
 import { StatusBadge } from "@/components/admin/blog/StatusBadge";
 import { PostActionButton, PostEditor, ReviewForm, ScheduleForm } from "@/components/admin/blog/BlogForms";
 import { aiConfigured } from "@/lib/ai/run";
-import { archivePost, cancelSchedule, publishPost, restorePost, submitForReview, unpublishPost, withdrawFromReview } from "@/app/actions/blog";
+import { archivePost, cancelSchedule, publishPost, restorePost, unpublishPost, withdrawFromReview } from "@/app/actions/blog";
 import { getPostForEditor, isBlogReviewer, postEngagement, toContent } from "@/lib/queries/blog";
 import { commentsLabel, likesLabel } from "@/lib/blog-comment-rules";
 import {
@@ -25,7 +25,6 @@ import {
   changedFields,
   contentFindings,
   diffParagraphs,
-  reviewProblems,
   type BlogContent,
 } from "@/lib/blog-rules";
 import { formatZonedDate } from "@/lib/time";
@@ -70,7 +69,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
   const mayTakeDown = actor.role === "founder" || reviewer;
   const live = post.publishedVersionId !== null;
   const showingOlder = live && post.publishedVersionId !== post.currentVersionId;
-  const problems = reviewProblems(content);
+  // The founder approves her own posts, so her editor publishes; anyone else's sends for review.
+  const selfApprove = canReview({
+    actor: { userId: actor.userId, role: actor.role, status: actor.status },
+    isReviewer: reviewer,
+    authorId: post.authorId,
+    versionCreatedBy: actor.userId,
+  }).allowed;
   const lastRequest = reviews.find((r) => r.decision === "changes_requested" && post.status === "changes_requested");
   const baseContent = baseline ? toContent(baseline.version) : null;
   const diff = baseContent ? diffParagraphs(baseContent.body, content.body) : null;
@@ -133,18 +138,19 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
       <Section title="Next step">
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {canSubmit(post) && (
-            <div>
-              {problems.length > 0 ? (
-                <p style={{ margin: "0 0 10px", fontSize: 14, color: "var(--ink)" }}>
-                  Before it can go for review: {problems.join(" ")}
-                </p>
+            <p style={{ margin: 0, fontSize: 14, color: "var(--ink)", lineHeight: 1.55 }}>
+              {selfApprove ? (
+                <>
+                  Write below. When it&apos;s ready, press <strong>Publish…</strong> at the bottom of the editor: you tick the four review
+                  checks, and it goes on the website now or on the date you choose.
+                </>
               ) : (
-                <p style={{ margin: "0 0 10px", fontSize: 14, color: "var(--ink)" }}>
-                  When it&apos;s ready, send it for review. {actor.role === "founder" ? "You can then approve it yourself." : "The reviewers are emailed a link."}
-                </p>
+                <>
+                  Write below. When it&apos;s ready, press <strong>Save and send for review</strong> at the bottom of the editor. Patience,
+                  or a colleague she has named as a reviewer, is emailed a link.
+                </>
               )}
-              <PostActionButton action={submitForReview} postId={post.id} label="Send for review" />
-            </div>
+            </p>
           )}
           {canWithdraw(post) && (
             <div>
@@ -247,7 +253,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
                   This version was written with AI help. Check every fact against the sources, and that it sounds like us.
                 </p>
               )}
-              <ReviewForm postId={post.id} versionId={current.version.id} />
+              <ReviewForm postId={post.id} versionId={current.version.id} offerPublish={post.publishedVersionId !== post.currentVersionId} />
             </div>
           ) : (
             <p style={{ margin: 0, fontSize: 14, color: "var(--ink)" }}>
@@ -258,7 +264,18 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
       )}
 
       <Section title="Write" subtitle={live ? "Saving makes a new version for review. The website keeps the approved version until then." : "Saving makes a new version. Any change after approval needs approving again."}>
-        <PostEditor postId={post.id} versionId={post.currentVersionId} slug={post.slug} slugEditable={!post.firstPublishedAt} initial={content} aiOn={aiConfigured()} />
+        <PostEditor
+          postId={post.id}
+          versionId={post.currentVersionId}
+          slug={post.slug}
+          slugEditable={!post.firstPublishedAt}
+          initial={content}
+          status={post.status}
+          selfApprove={selfApprove}
+          onWebsiteAsIs={live && post.publishedVersionId === post.currentVersionId}
+          minSchedule={minSchedule}
+          aiOn={aiConfigured()}
+        />
       </Section>
 
       {post.brief && (

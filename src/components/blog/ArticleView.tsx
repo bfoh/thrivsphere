@@ -80,9 +80,13 @@ export function ArticleView(p: ArticleViewProps) {
           <ol style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 6, fontSize: 14, lineHeight: 1.5, color: "var(--ink)" }}>
             {p.sources.map((s, i) => (
               <li key={`${s.url}-${i}`}>
-                <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
-                  {s.title}
-                </a>
+                {s.url ? (
+                  <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--teal-deep)", fontWeight: 700 }}>
+                    {s.title}
+                  </a>
+                ) : (
+                  <span>{s.title}</span>
+                )}
                 {s.publisher && <span>, {s.publisher}</span>}
                 {s.accessed && <span style={{ color: "var(--navy-soft)" }}> (accessed {displayDate(new Date(`${s.accessed}T12:00:00Z`))})</span>}
               </li>
