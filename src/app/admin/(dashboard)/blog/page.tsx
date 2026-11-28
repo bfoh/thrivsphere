@@ -58,8 +58,8 @@ export default async function BlogAdminPage({ searchParams }: { searchParams: Pr
           padding: "12px 16px",
           borderRadius: 12,
           textDecoration: "none",
-          border: `1px solid ${comments.urgent ? "rgba(161,66,28,0.45)" : "rgba(31,58,95,0.1)"}`,
-          background: comments.urgent ? "rgba(161,66,28,0.05)" : "#fff",
+          border: `1px solid ${comments.urgent ? "var(--a-danger-line)" : "var(--a-line)"}`,
+          background: comments.urgent ? "var(--a-danger-soft)" : "#fff",
           color: "var(--ink)",
           fontSize: 14,
         }}
@@ -93,13 +93,13 @@ export default async function BlogAdminPage({ searchParams }: { searchParams: Pr
               <Link
                 key={p.id}
                 href={`/admin/blog/${p.id}`}
-                style={{ display: "block", border: "1px solid rgba(31,58,95,0.1)", borderRadius: 12, padding: "13px 17px", textDecoration: "none", color: "inherit" }}
+                style={{ display: "block", border: "1px solid var(--a-line)", borderRadius: 12, padding: "13px 17px", textDecoration: "none", color: "inherit" }}
               >
                 <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
                   <strong style={{ fontSize: 15, color: "var(--navy)" }}>{p.title ?? "Untitled"}</strong>
                   <span style={{ fontSize: 12.5, color: "var(--navy-soft)" }}>{p.category}</span>
                   {p.publishedVersionId && p.status !== "published" && (
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#3f7a3a" }}>on the website (earlier version)</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "var(--a-ok)" }}>on the website (earlier version)</span>
                   )}
                   <span style={{ marginLeft: "auto", fontSize: 12.5, fontWeight: 800, color: STATUS_COLOUR[p.status] }}>
                     {STATUS_LABEL[p.status]}

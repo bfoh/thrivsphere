@@ -50,7 +50,7 @@ function useBlogAction(fn: Action) {
 export function Result({ state }: { state: BlogFormState }) {
   if (state.status === "idle") return null;
   return (
-    <p role={state.status === "error" ? "alert" : "status"} style={{ margin: "8px 0 0", fontSize: 13, fontWeight: 700, color: state.status === "error" ? "#a1421c" : "var(--teal-deep)" }}>
+    <p role={state.status === "error" ? "alert" : "status"} style={{ margin: "8px 0 0", fontSize: 13, fontWeight: 700, color: state.status === "error" ? "var(--a-danger)" : "var(--teal-deep)" }}>
       {state.message}
     </p>
   );
@@ -58,7 +58,7 @@ export function Result({ state }: { state: BlogFormState }) {
 
 function Count({ value, limit }: { value: string; limit: number }) {
   return (
-    <span style={{ fontSize: 12, fontWeight: 700, color: value.length > limit ? "#a1421c" : "var(--navy-soft)" }}>
+    <span style={{ fontSize: 12, fontWeight: 700, color: value.length > limit ? "var(--a-danger)" : "var(--navy-soft)" }}>
       {value.length}/{limit}
     </span>
   );
@@ -84,7 +84,7 @@ export function NewPostForm() {
         </select>
       </div>
 
-      <details style={{ border: "1px solid rgba(31,58,95,0.12)", borderRadius: 12, padding: "12px 16px" }}>
+      <details style={{ border: "1px solid var(--a-line)", borderRadius: 12, padding: "12px 16px" }}>
         <summary style={{ cursor: "pointer", fontSize: 13, fontWeight: 800, color: "var(--navy)" }}>Plan the post (optional)</summary>
         <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 12 }}>
         <p style={{ ...hint, margin: 0 }}>
@@ -288,7 +288,7 @@ export function PostEditor({
   }
 
   const over = (len: number, max: number) => len > max && (
-    <p role="alert" style={{ ...hint, color: "#a1421c", fontWeight: 700 }}>
+    <p role="alert" style={{ ...hint, color: "var(--a-danger)", fontWeight: 700 }}>
       {len - max} character{len - max === 1 ? "" : "s"} too long. Shorten it to {max} or fewer.
     </p>
   );
@@ -376,7 +376,7 @@ export function PostEditor({
           style={{ ...input, marginTop: 8, resize: "vertical", lineHeight: 1.65, display: tab === "write" ? "block" : "none" }}
         />
         {tab === "preview" && (
-          <div style={{ marginTop: 8, border: "1px solid rgba(31,58,95,0.12)", borderRadius: 12, padding: "20px 24px", background: "#fff", minHeight: 300 }}>
+          <div style={{ marginTop: 8, border: "1px solid var(--a-line)", borderRadius: 12, padding: "20px 24px", background: "#fff", minHeight: 300 }}>
             {f.body.trim() ? <BlogBody markdown={f.body} /> : <p style={{ color: "var(--navy-soft)" }}>Nothing written yet.</p>}
           </div>
         )}
@@ -385,7 +385,7 @@ export function PostEditor({
             ? "Pasted text was spaced into paragraphs and its bullet points kept. Check it under Preview."
             : "Pasting from Word or Google Docs keeps your paragraphs and bullet points. Check how it looks under Preview."}
           {f.body.length > LIMITS.body && (
-            <strong style={{ color: "#a1421c" }}> The post is longer than a post can hold ({f.body.length.toLocaleString("en-GB")} of {LIMITS.body.toLocaleString("en-GB")} characters). Split it into two.</strong>
+            <strong style={{ color: "var(--a-danger)" }}> The post is longer than a post can hold ({f.body.length.toLocaleString("en-GB")} of {LIMITS.body.toLocaleString("en-GB")} characters). Split it into two.</strong>
           )}
         </p>
         <details style={{ marginTop: 8 }}>
@@ -395,7 +395,7 @@ export function PostEditor({
               {MARKDOWN_HELP.map(([code, what]) => (
                 <tr key={code}>
                   <td style={{ padding: "3px 14px 3px 0" }}>
-                    <code style={{ background: "rgba(31,58,95,0.06)", padding: "1px 6px", borderRadius: 5 }}>{code}</code>
+                    <code style={{ background: "var(--a-canvas)", padding: "1px 6px", borderRadius: 5 }}>{code}</code>
                   </td>
                   <td style={{ color: "var(--navy-soft)" }}>{what}</td>
                 </tr>
@@ -443,7 +443,7 @@ export function PostEditor({
           One per line, written however you usually write references. A web address in a line becomes a link. Listed under the post;
           any figure or fact in the post should come from one of these.
         </p>
-        {!parsedSources.ok && <p role="alert" style={{ ...hint, color: "#a1421c", fontWeight: 700 }}>{parsedSources.message}</p>}
+        {!parsedSources.ok && <p role="alert" style={{ ...hint, color: "var(--a-danger)", fontWeight: 700 }}>{parsedSources.message}</p>}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }} className="two-col">
@@ -461,12 +461,12 @@ export function PostEditor({
               <input type="file" accept="image/jpeg,image/png,image/webp" onChange={onCover} disabled={upload.busy} style={{ display: "none" }} />
             </label>
             {f.coverImage && (
-              <button type="button" style={{ ...linkButton, color: "#a1421c", fontSize: 12.5 }} onClick={() => setF((p) => ({ ...p, coverImage: "", coverAlt: "" }))}>
+              <button type="button" style={{ ...linkButton, color: "var(--a-danger)", fontSize: 12.5 }} onClick={() => setF((p) => ({ ...p, coverImage: "", coverAlt: "" }))}>
                 Remove
               </button>
             )}
           </div>
-          {upload.error && <p role="alert" style={{ ...hint, color: "#a1421c", fontWeight: 700 }}>{upload.error}</p>}
+          {upload.error && <p role="alert" style={{ ...hint, color: "var(--a-danger)", fontWeight: 700 }}>{upload.error}</p>}
           <p style={hint}>JPEG, PNG or WebP, under 4 MB. Save the post to keep it.</p>
         </div>
         <div>
@@ -506,7 +506,7 @@ export function PostEditor({
 
       {findings.length > 0 && (
         <div style={{ border: "1px solid rgba(138,109,18,0.35)", background: "rgba(212,175,55,0.08)", borderRadius: 12, padding: "12px 16px" }}>
-          <p style={{ margin: "0 0 2px", fontSize: 13, fontWeight: 800, color: "#8a6d12" }}>Things to check</p>
+          <p style={{ margin: "0 0 2px", fontSize: 13, fontWeight: 800, color: "var(--a-gold)" }}>Things to check</p>
           <p style={{ margin: "0 0 6px", fontSize: 12, color: "var(--navy-soft)" }}>Suggestions only. None of these stop you saving.</p>
           <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 1.55, color: "var(--ink)" }}>
             {findings.map((x) => (
@@ -559,7 +559,7 @@ export function PostEditor({
         </fieldset>
       )}
 
-      <div style={{ position: "sticky", bottom: 0, background: "rgba(255,255,255,0.97)", padding: "12px 0", borderTop: "1px solid rgba(31,58,95,0.08)", display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ position: "sticky", bottom: 0, background: "rgba(255,255,255,0.97)", padding: "12px 0", borderTop: "1px solid var(--a-line)", display: "flex", flexDirection: "column", gap: 6 }}>
         <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
           <button name="intent" value="save" className={`pill ${archived ? "pill-teal" : "pill-ghost"}`} disabled={pending || tooLong} style={{ padding: "10px 20px", fontSize: 14, opacity: pending || tooLong ? 0.6 : 1 }}>
             {pending ? "Saving…" : "Save draft"}
@@ -574,7 +574,7 @@ export function PostEditor({
               {pending ? "Sending…" : "Save and send for review"}
             </button>
           )}
-          <span style={{ fontSize: 12.5, fontWeight: 700, color: dirty ? "#8a6d12" : "var(--navy-soft)" }}>
+          <span style={{ fontSize: 12.5, fontWeight: 700, color: dirty ? "var(--a-gold)" : "var(--navy-soft)" }}>
             {dirty ? "Unsaved changes" : waiting ? "Saved · waiting for review" : nothingNew ? "Saved · this is what's on the website" : "All changes saved"}
           </span>
         </div>
@@ -584,7 +584,7 @@ export function PostEditor({
             {words > 0 && words < LIMITS.minWordsForReview ? ` (${words} so far.)` : ""} You can save a draft at any time.
           </p>
         )}
-        {tooLong && <p style={{ margin: 0, fontSize: 12.5, fontWeight: 700, color: "#a1421c" }}>Something above is too long; it&apos;s marked in red.</p>}
+        {tooLong && <p style={{ margin: 0, fontSize: 12.5, fontWeight: 700, color: "var(--a-danger)" }}>Something above is too long; it&apos;s marked in red.</p>}
         <Result state={state} />
       </div>
     </form>
@@ -630,7 +630,7 @@ export function ReviewForm({ postId, versionId, offerPublish = false }: { postId
         <button name="decision" value="approved" className={offerPublish ? "pill pill-ghost" : "pill pill-gold"} disabled={pending || !all} style={{ padding: "10px 22px", fontSize: 14, opacity: pending || !all ? 0.55 : 1 }}>
           {offerPublish ? "Approve only" : "Approve this version"}
         </button>
-        <button name="decision" value="changes_requested" className="pill pill-ghost" disabled={pending} style={{ padding: "10px 22px", fontSize: 14, color: "#a1421c" }}>
+        <button name="decision" value="changes_requested" className="pill pill-ghost" disabled={pending} style={{ padding: "10px 22px", fontSize: 14, color: "var(--a-danger)" }}>
           Request changes
         </button>
       </div>
@@ -658,7 +658,7 @@ export function PostActionButton({
   const { state, pending, onSubmit } = useBlogAction(action);
   const [armed, setArmed] = React.useState(false);
   const cls = tone === "gold" ? "pill pill-gold" : tone === "teal" ? "pill pill-teal" : "pill pill-ghost";
-  const color = tone === "danger" ? "#a1421c" : undefined;
+  const color = tone === "danger" ? "var(--a-danger)" : undefined;
   return (
     <form onSubmit={onSubmit} style={{ display: "inline-flex", flexDirection: "column", gap: 4 }}>
       <input type="hidden" name="postId" value={postId} />

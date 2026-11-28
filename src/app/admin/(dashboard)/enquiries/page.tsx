@@ -15,9 +15,9 @@ const dt = (v: Date) =>
   v.toLocaleString("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
 const STATUS_COLOUR: Record<string, string> = {
-  new: "#a1421c",
+  new: "var(--a-danger)",
   in_progress: "var(--teal-deep)",
-  awaiting_client: "#8a6d12",
+  awaiting_client: "var(--a-gold)",
 };
 
 /**
@@ -74,7 +74,7 @@ export default async function EnquiriesPage({ searchParams }: { searchParams: Pr
               <Link
                 key={e.id}
                 href={`/admin/enquiries/${e.id}`}
-                style={{ display: "block", border: "1px solid rgba(31,58,95,0.1)", borderRadius: 12, padding: "13px 17px", textDecoration: "none", color: "inherit" }}
+                style={{ display: "block", border: "1px solid var(--a-line)", borderRadius: 12, padding: "13px 17px", textDecoration: "none", color: "inherit" }}
               >
                 <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
                   <strong style={{ fontSize: 13.5, letterSpacing: "0.03em", color: "var(--navy)" }}>{e.reference}</strong>

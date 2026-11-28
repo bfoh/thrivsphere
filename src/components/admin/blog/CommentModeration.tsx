@@ -33,7 +33,7 @@ export function CommentModeration({ commentId, status }: { commentId: string; st
         )}
         {confirmDelete ? (
           <>
-            <button type="button" className="pill" disabled={pending} style={{ ...btn, background: "#a1421c", color: "#fff", border: "none" }} onClick={() => run("delete")}>
+            <button type="button" className="pill" disabled={pending} style={{ ...btn, background: "var(--a-danger)", color: "#fff", border: "none" }} onClick={() => run("delete")}>
               Yes, delete it and the email
             </button>
             <button type="button" onClick={() => setConfirmDelete(false)} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12.5, color: "var(--navy-soft)", textDecoration: "underline" }}>
@@ -41,7 +41,7 @@ export function CommentModeration({ commentId, status }: { commentId: string; st
             </button>
           </>
         ) : (
-          <button type="button" onClick={() => setConfirmDelete(true)} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12.5, fontWeight: 700, color: "#a1421c", textDecoration: "underline" }}>
+          <button type="button" onClick={() => setConfirmDelete(true)} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12.5, fontWeight: 700, color: "var(--a-danger)", textDecoration: "underline" }}>
             Delete
           </button>
         )}

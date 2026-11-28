@@ -52,14 +52,14 @@ function List({ rows }: { rows: Row[] }) {
         <li
           key={c.id}
           style={{
-            border: `1px solid ${c.needsAttention && c.status === "pending" ? "rgba(161,66,28,0.45)" : "rgba(31,58,95,0.1)"}`,
-            background: c.needsAttention && c.status === "pending" ? "rgba(161,66,28,0.04)" : "transparent",
+            border: `1px solid ${c.needsAttention && c.status === "pending" ? "var(--a-danger-line)" : "var(--a-line)"}`,
+            background: c.needsAttention && c.status === "pending" ? "var(--a-danger-soft)" : "transparent",
             borderRadius: 12,
             padding: "14px 17px",
           }}
         >
           {c.needsAttention && (
-            <p style={{ margin: "0 0 8px", fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", color: "#a1421c" }}>
+            <p style={{ margin: "0 0 8px", fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--a-danger)" }}>
               Possible risk: read and follow up
             </p>
           )}
@@ -76,7 +76,7 @@ function List({ rows }: { rows: Row[] }) {
           </div>
           <p style={{ margin: "8px 0 10px", fontSize: 14.5, lineHeight: 1.6, color: "var(--ink)", whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{c.body}</p>
           {c.flags.length > 0 && (
-            <p style={{ margin: "0 0 10px", fontSize: 12.5, color: "#8a6d12", fontWeight: 700 }}>Noticed: {c.flags.join(" · ")}</p>
+            <p style={{ margin: "0 0 10px", fontSize: 12.5, color: "var(--a-gold)", fontWeight: 700 }}>Noticed: {c.flags.join(" · ")}</p>
           )}
           {c.status !== "pending" && (
             <p style={{ margin: "0 0 10px", fontSize: 12.5, color: "var(--navy-soft)" }}>

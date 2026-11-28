@@ -193,7 +193,7 @@ export function TaskDoneButton({ taskId, done }: { taskId: string; done: boolean
           fontWeight: 800,
           borderRadius: 999,
           cursor: "pointer",
-          border: `1px solid ${done ? "var(--teal-deep)" : "rgba(31,58,95,0.25)"}`,
+          border: `1px solid ${done ? "var(--teal-deep)" : "var(--a-line-strong)"}`,
           background: done ? "var(--teal-deep)" : "#fff",
           color: done ? "#fff" : "var(--navy)",
           opacity: pending ? 0.6 : 1,
@@ -216,7 +216,7 @@ export function DeleteDraftButton({ recordId }: { recordId: string }) {
         <button
           type="button"
           onClick={() => setAsking(true)}
-          style={{ background: "none", border: 0, padding: 0, fontSize: 13, fontWeight: 700, color: "#a1421c", cursor: "pointer" }}
+          style={{ background: "none", border: 0, padding: 0, fontSize: 13, fontWeight: 700, color: "var(--a-danger)", cursor: "pointer" }}
         >
           Delete this draft
         </button>
@@ -228,7 +228,7 @@ export function DeleteDraftButton({ recordId }: { recordId: string }) {
     <form action={action} className="no-print" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
       <input type="hidden" name="recordId" value={recordId} />
       <span style={{ fontSize: 13.5, color: "var(--ink)" }}>Delete this draft for good?</span>
-      <button className="pill pill-ghost" disabled={pending} style={{ padding: "8px 16px", fontSize: 13, borderColor: "#c86b52", color: "#a1421c" }}>
+      <button className="pill pill-ghost" disabled={pending} style={{ padding: "8px 16px", fontSize: 13, borderColor: "#c86b52", color: "var(--a-danger)" }}>
         {pending ? "Deleting…" : "Yes, delete it"}
       </button>
       <button type="button" className="pill pill-ghost" onClick={() => setAsking(false)} style={{ padding: "8px 16px", fontSize: 13 }}>
@@ -261,7 +261,7 @@ export function WorksheetStaffActions({ assignmentId, status }: { assignmentId: 
             <form action={withdraw} style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
               <input type="hidden" name="assignmentId" value={assignmentId} />
               <span style={{ fontSize: 13.5 }}>Withdraw it? The client will no longer see it.</span>
-              <button className="pill pill-ghost" disabled={withdrawing} style={{ padding: "8px 16px", fontSize: 13, borderColor: "#c86b52", color: "#a1421c" }}>
+              <button className="pill pill-ghost" disabled={withdrawing} style={{ padding: "8px 16px", fontSize: 13, borderColor: "#c86b52", color: "var(--a-danger)" }}>
                 Yes, withdraw
               </button>
               <button type="button" className="pill pill-ghost" onClick={() => setAsking(false)} style={{ padding: "8px 16px", fontSize: 13 }}>

@@ -115,7 +115,7 @@ export default async function HrPage() {
       <Section title="People" subtitle={`${staff.length} staff ${staff.length === 1 ? "account" : "accounts"}`}>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {rows.map((r) => (
-            <div key={r.staff.id} style={{ border: "1px solid rgba(31,58,95,0.1)", borderRadius: 12, padding: "14px 18px" }}>
+            <div key={r.staff.id} style={{ border: "1px solid var(--a-line)", borderRadius: 12, padding: "14px 18px" }}>
               <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
                 <StateDot state={r.overall} />
                 <strong style={{ fontSize: 14.5, color: "var(--navy)" }}>{nameFor.get(r.staff.id)}</strong>
@@ -125,7 +125,7 @@ export default async function HrPage() {
                   {r.profile ? ` · ${contractLabel(r.profile.contract)}` : ""}
                 </span>
                 {r.staff.status !== "active" && (
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#b4553f" }}>blocked</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--a-danger)" }}>blocked</span>
                 )}
                 {r.absentToday && (
                   <span style={{ fontSize: 12, fontWeight: 700, color: "var(--teal-deep)" }}>away today</span>
@@ -180,7 +180,7 @@ export default async function HrPage() {
               {r.training.length > 0 && (
                 <ul style={{ margin: "12px 0 0", padding: 0, listStyle: "none", display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {r.training.map((t) => (
-                    <li key={t.id} style={{ fontSize: 12, padding: "5px 11px", borderRadius: 999, background: "rgba(31,58,95,0.05)", color: "var(--navy)" }}>
+                    <li key={t.id} style={{ fontSize: 12, padding: "5px 11px", borderRadius: 999, background: "var(--a-subtle)", color: "var(--navy)" }}>
                       {t.course} · {d(t.completedOn)}
                       {t.expiresOn ? ` → ${d(t.expiresOn)}` : ""}
                     </li>
@@ -229,7 +229,7 @@ export default async function HrPage() {
 const STATE_COLOUR: Record<ComplianceState, string> = {
   ok: "var(--teal-deep)",
   due_soon: "#a97c1e",
-  overdue: "#b4553f",
+  overdue: "var(--a-danger)",
   missing: "#7a879b",
 };
 

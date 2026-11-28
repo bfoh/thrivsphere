@@ -8,7 +8,7 @@ import { SUITABILITY_OUTCOMES } from "@/lib/suitability-rules";
 
 const input: React.CSSProperties = { fontFamily: "inherit", width: "100%", boxSizing: "border-box" };
 const lbl: React.CSSProperties = { fontSize: 12.5, fontWeight: 800, color: "var(--navy)", display: "block", marginBottom: 6 };
-const errStyle: React.CSSProperties = { margin: "4px 0 0", fontSize: 12, fontWeight: 600, color: "#b4553f" };
+const errStyle: React.CSSProperties = { margin: "4px 0 0", fontSize: 12, fontWeight: 600, color: "var(--a-danger)" };
 
 /**
  * The practitioner's decision after the Initial Wellbeing Consultation
@@ -96,7 +96,7 @@ export function SuitabilityForm({ clientId, hasDecision }: { clientId: string; h
       </div>
 
       {state.status !== "idle" && (
-        <p role={state.status === "error" ? "alert" : "status"} style={{ margin: 0, fontSize: 13, fontWeight: 700, color: state.status === "error" ? "#a1421c" : "var(--teal-deep)" }}>
+        <p role={state.status === "error" ? "alert" : "status"} style={{ margin: 0, fontSize: 13, fontWeight: 700, color: state.status === "error" ? "var(--a-danger)" : "var(--teal-deep)" }}>
           {state.message}
         </p>
       )}

@@ -13,15 +13,15 @@ export function FlagBadge({ compact = false }: { compact?: boolean }) {
         gap: 6,
         padding: compact ? "3px 9px" : "5px 12px",
         borderRadius: 50,
-        background: "#c8532420",
-        color: "#a1421c",
+        background: "var(--a-danger-soft)",
+        color: "var(--a-danger)",
         fontSize: compact ? 11.5 : 12.5,
         fontWeight: 800,
         letterSpacing: "0.02em",
         whiteSpace: "nowrap",
       }}
     >
-      <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#a1421c" }} />
+      <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--a-danger)" }} />
       Safeguarding flag
     </span>
   );

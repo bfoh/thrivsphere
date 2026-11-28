@@ -2,11 +2,11 @@ import { STATUS_LABEL, type BlogStatus } from "@/lib/blog-rules";
 
 export const STATUS_COLOUR: Record<BlogStatus, string> = {
   draft: "var(--navy-soft)",
-  in_review: "#8a6d12",
-  changes_requested: "#a1421c",
+  in_review: "var(--a-gold)",
+  changes_requested: "var(--a-danger)",
   approved: "var(--teal-deep)",
   scheduled: "var(--teal-deep)",
-  published: "#3f7a3a",
+  published: "var(--a-ok)",
   archived: "var(--navy-soft)",
 };
 

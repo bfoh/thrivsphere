@@ -107,7 +107,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
             {engagement.pending > 0 && (
               <>
                 {" ("}
-                <Link href="/admin/blog/comments" style={{ color: "#8a6d12", fontWeight: 700 }}>
+                <Link href="/admin/blog/comments" style={{ color: "var(--a-gold)", fontWeight: 700 }}>
                   {engagement.pending} waiting for approval
                 </Link>
                 {")"}
@@ -129,8 +129,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
         </p>
       )}
       {lastRequest && (
-        <div style={{ ...note, background: "rgba(161,66,28,0.07)", color: "var(--ink)" }}>
-          <strong style={{ color: "#a1421c" }}>{lastRequest.reviewerName || lastRequest.reviewerEmail} asked for changes</strong> ({dt(lastRequest.createdAt)}):
+        <div style={{ ...note, background: "var(--a-danger-soft)", color: "var(--ink)" }}>
+          <strong style={{ color: "var(--a-danger)" }}>{lastRequest.reviewerName || lastRequest.reviewerEmail} asked for changes</strong> ({dt(lastRequest.createdAt)}):
           <div style={{ whiteSpace: "pre-wrap", marginTop: 4 }}>{lastRequest.comment}</div>
         </div>
       )}
@@ -185,7 +185,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
               <PostActionButton action={restorePost} postId={post.id} label="Restore as a draft" tone="ghost" />
             </div>
           )}
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", paddingTop: 10, borderTop: "1px solid rgba(31,58,95,0.08)" }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", paddingTop: 10, borderTop: "1px solid var(--a-line)" }}>
             {canUnpublish(post) && mayTakeDown && (
               <PostActionButton action={unpublishPost} postId={post.id} label="Take off the website" tone="danger" confirm="Remove it from the website? It will need reviewing again to come back." />
             )}
@@ -235,7 +235,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
                             fontSize: 13.5,
                             lineHeight: 1.55,
                             whiteSpace: "pre-wrap",
-                            background: d.kind === "added" ? "rgba(63,122,58,0.1)" : d.kind === "removed" ? "rgba(161,66,28,0.08)" : "transparent",
+                            background: d.kind === "added" ? "var(--a-ok-soft)" : d.kind === "removed" ? "var(--a-danger-soft)" : "transparent",
                             color: d.kind === "same" ? "var(--navy-soft)" : "var(--ink)",
                             textDecoration: d.kind === "removed" ? "line-through" : "none",
                           }}
@@ -249,7 +249,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
                 </details>
               )}
               {(current.version.origin === "ai_assist" || current.version.origin === "ai_draft") && (
-                <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "#8a6d12" }}>
+                <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "var(--a-gold)" }}>
                   This version was written with AI help. Check every fact against the sources, and that it sounds like us.
                 </p>
               )}
@@ -320,7 +320,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
                       Version {item.v.version.number}
                     </span>{" "}
                     {ORIGIN[item.v.version.origin] ?? item.v.version.origin}
-                    {item.v.version.id === post.publishedVersionId && <strong style={{ color: "#3f7a3a" }}> · on the website</strong>}
+                    {item.v.version.id === post.publishedVersionId && <strong style={{ color: "var(--a-ok)" }}> · on the website</strong>}
                     {item.v.version.id === post.approvedVersionId && item.v.version.id !== post.publishedVersionId && (
                       <strong style={{ color: "var(--teal-deep)" }}> · approved</strong>
                     )}
@@ -334,7 +334,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ id: s
                   </li>
                 ) : (
                   <li key={item.key} style={{ fontSize: 14, lineHeight: 1.5, color: "var(--ink)" }}>
-                    <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", color: item.r.decision === "approved" ? "var(--teal-deep)" : "#a1421c" }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", color: item.r.decision === "approved" ? "var(--teal-deep)" : "var(--a-danger)" }}>
                       {item.r.decision === "approved" ? "Approved" : "Changes requested"}
                     </span>{" "}
                     version {versions.find((v) => v.version.id === item.r.versionId)?.version.number ?? "?"}

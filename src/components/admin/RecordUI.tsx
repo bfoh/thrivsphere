@@ -61,7 +61,7 @@ export function Field({
         style={{
           fontSize: small ? "var(--fs-sm)" : "var(--fs-base)",
           lineHeight: 1.5,
-          color: emphasis ? "#a1421c" : value ? "var(--ink)" : "var(--navy-soft)",
+          color: emphasis ? "var(--a-danger)" : value ? "var(--ink)" : "var(--navy-soft)",
           fontWeight: emphasis ? 700 : 400,
           whiteSpace: "pre-wrap",
         }}

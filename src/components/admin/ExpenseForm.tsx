@@ -62,7 +62,7 @@ export function ExpenseForm() {
         </button>
       </div>
       {state.status !== "idle" && state.message && (
-        <p role="status" style={{ gridColumn: "1 / -1", margin: 0, fontSize: 13, fontWeight: 600, color: state.status === "error" ? "#b4553f" : "var(--teal-deep)" }}>
+        <p role="status" style={{ gridColumn: "1 / -1", margin: 0, fontSize: 13, fontWeight: 600, color: state.status === "error" ? "var(--a-danger)" : "var(--teal-deep)" }}>
           {state.message}
         </p>
       )}

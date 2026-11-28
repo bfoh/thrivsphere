@@ -12,7 +12,7 @@ const day = (v: Date) => v.toLocaleDateString("en-GB", { timeZone: "Europe/Londo
 /** The last day a discount works: it ends at the start of the next UK day. */
 const lastDay = (endsAt: Date) => day(new Date(endsAt.getTime() - 1));
 
-const card: React.CSSProperties = { border: "1px solid rgba(31,58,95,0.1)", borderRadius: 12, padding: "13px 17px" };
+const card: React.CSSProperties = { border: "1px solid var(--a-line)", borderRadius: 12, padding: "13px 17px" };
 const meta: React.CSSProperties = { marginTop: 4, display: "flex", gap: 14, flexWrap: "wrap", fontSize: 12.5, color: "var(--navy-soft)" };
 
 /**

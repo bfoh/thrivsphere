@@ -12,7 +12,7 @@ const label: React.CSSProperties = { display: "block", marginBottom: 6, fontSize
 function Result({ state }: { state: { status: string; message: string } }) {
   if (state.status === "idle" || !state.message) return null;
   return (
-    <p role="status" style={{ margin: 0, fontSize: 13, fontWeight: 600, color: state.status === "error" ? "#b4553f" : "var(--teal-deep)" }}>
+    <p role="status" style={{ margin: 0, fontSize: 13, fontWeight: 600, color: state.status === "error" ? "var(--a-danger)" : "var(--teal-deep)" }}>
       {state.message}
     </p>
   );
@@ -68,7 +68,7 @@ export function StaffProfileForm({
   }
 
   return (
-    <form action={action} style={{ display: "flex", flexDirection: "column", gap: 12, padding: "16px 18px", borderRadius: 12, background: "rgba(31,58,95,0.03)", border: "1px solid rgba(31,58,95,0.12)", marginTop: 10 }}>
+    <form action={action} style={{ display: "flex", flexDirection: "column", gap: 12, padding: "16px 18px", borderRadius: 12, background: "var(--a-subtle)", border: "1px solid var(--a-line)", marginTop: 10 }}>
       <input type="hidden" name="userId" value={userId} />
       <strong style={{ fontSize: 13.5, color: "var(--navy)" }}>{name}</strong>
 
@@ -86,7 +86,7 @@ export function StaffProfileForm({
         </Labelled>
       </div>
 
-      <fieldset style={{ border: "1px solid rgba(31,58,95,0.12)", borderRadius: 10, padding: "12px 14px", margin: 0 }}>
+      <fieldset style={{ border: "1px solid var(--a-line)", borderRadius: 10, padding: "12px 14px", margin: 0 }}>
         <legend style={{ fontSize: 12, fontWeight: 800, color: "var(--navy)", padding: "0 6px" }}>
           DBS and supervision
         </legend>

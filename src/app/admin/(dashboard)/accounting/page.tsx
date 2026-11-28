@@ -128,7 +128,7 @@ export default async function AccountingPage({
                       )}
                     </td>
                     <td style={{ ...td, color: "var(--navy-soft)" }}>{r.counterparty ?? "—"}</td>
-                    <td style={{ ...num, color: r.kind === "income" ? "var(--teal-deep)" : "#b4553f", fontWeight: 700 }}>
+                    <td style={{ ...num, color: r.kind === "income" ? "var(--teal-deep)" : "var(--a-danger)", fontWeight: 700 }}>
                       {r.kind === "income" ? "" : "−"}
                       {formatPence(r.amountPence).replace("−", "")}
                     </td>

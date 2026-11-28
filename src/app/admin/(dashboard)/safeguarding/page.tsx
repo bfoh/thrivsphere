@@ -67,7 +67,7 @@ export default async function SafeguardingPage() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {open.map((c) => (
-              <div key={c.id} style={{ border: "1px solid rgba(31,58,95,0.1)", borderRadius: 12, padding: "14px 18px" }}>
+              <div key={c.id} style={{ border: "1px solid var(--a-line)", borderRadius: 12, padding: "14px 18px" }}>
                 <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 7 }}>
                   <strong style={{ fontSize: 13.5, color: "var(--navy)" }}>{labelsFor(CONCERN_TYPES, c.concernTypes, c.concernTypeOther).join("; ")}</strong>
                   {c.clientId && (
@@ -82,7 +82,7 @@ export default async function SafeguardingPage() {
                 </div>
                 <p style={{ margin: "0 0 6px", fontSize: 13, color: "var(--navy-soft)" }}>
                   Immediate threat to life or serious harm: <strong style={{ color: "var(--ink)" }}>{labelFor(IMMEDIATE_THREAT, c.immediateThreat)}</strong>
-                  {c.nextSteps.includes("review") && <> · <strong style={{ color: "#a1421c" }}>Review with Safeguarding Lead/Deputy before next session</strong></>}
+                  {c.nextSteps.includes("review") && <> · <strong style={{ color: "var(--a-danger)" }}>Review with Safeguarding Lead/Deputy before next session</strong></>}
                   {c.followUpDate && <> · follow-up {new Date(`${c.followUpDate}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</>}
                 </p>
                 <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--ink)", whiteSpace: "pre-wrap" }}>{c.detail}</p>

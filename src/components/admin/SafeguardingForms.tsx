@@ -25,12 +25,12 @@ import {
 import { Icon } from "@/components/icons";
 
 const input: React.CSSProperties = { fontFamily: "inherit", width: "100%", boxSizing: "border-box" };
-const errStyle: React.CSSProperties = { margin: "4px 0 0", fontSize: 12, fontWeight: 600, color: "#b4553f" };
+const errStyle: React.CSSProperties = { margin: "4px 0 0", fontSize: 12, fontWeight: 600, color: "var(--a-danger)" };
 
 function Status({ state }: { state: { status: string; message: string } }) {
   if (state.status === "idle") return null;
   return (
-    <p role="status" style={{ margin: "8px 0 0", fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>
+    <p role="status" style={{ margin: "8px 0 0", fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "var(--a-danger)" }}>
       {state.message}
     </p>
   );
@@ -67,7 +67,7 @@ function CrisisGuidance() {
   );
 }
 
-const fieldset: React.CSSProperties = { border: "1px solid rgba(31,58,95,0.12)", borderRadius: 12, padding: "14px 16px 16px", margin: 0, background: "#fff", display: "flex", flexDirection: "column", gap: 12 };
+const fieldset: React.CSSProperties = { border: "1px solid var(--a-line)", borderRadius: 12, padding: "14px 16px 16px", margin: 0, background: "#fff", display: "flex", flexDirection: "column", gap: 12 };
 const legend: React.CSSProperties = { fontSize: 14, fontWeight: 800, color: "var(--navy)", padding: "0 6px" };
 const question: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: "var(--navy)", margin: "0 0 6px" };
 const choice: React.CSSProperties = { display: "flex", gap: 8, alignItems: "flex-start", fontSize: 13.5, color: "var(--ink)", lineHeight: 1.45 };
@@ -226,7 +226,7 @@ export function RaiseConcernForm({
         <button
           onClick={() => { setNow(londonNow()); setOpen(true); }}
           className="pill pill-ghost"
-          style={{ padding: "10px 20px", fontSize: 13.5, borderColor: "#c86b52", color: "#a1421c" }}
+          style={{ padding: "10px 20px", fontSize: 13.5, borderColor: "#c86b52", color: "var(--a-danger)" }}
         >
           Complete a Safeguarding Incident / Concern Record
         </button>
@@ -248,7 +248,7 @@ export function RaiseConcernForm({
       noValidate
       style={{
         display: "flex", flexDirection: "column", gap: 16, padding: "18px 20px",
-        borderRadius: 12, background: "#c853240a", border: "1px solid #c8532444",
+        borderRadius: 12, background: "var(--a-danger-soft)", border: "1px solid var(--a-danger-line)",
       }}
     >
       <input type="hidden" name="clientId" value={clientId} />
@@ -302,7 +302,7 @@ export function RaiseConcernForm({
 
       <fieldset style={fieldset}>
         <legend style={legend}>5. Trusted Person / Emergency Contact</legend>
-        <div style={{ fontSize: 13, lineHeight: 1.6, color: "var(--ink)", background: "rgba(31,58,95,0.05)", borderRadius: 10, padding: "10px 14px" }}>
+        <div style={{ fontSize: 13, lineHeight: 1.6, color: "var(--ink)", background: "var(--a-subtle)", borderRadius: 10, padding: "10px 14px" }}>
           <strong style={{ color: "var(--navy)" }}>On the client&apos;s record: </strong>
           {emergencyContact
             ? emergencyContact.join(" · ")
@@ -378,14 +378,14 @@ export function RaiseConcernForm({
       </fieldset>
 
       <div style={{ border: "1px solid rgba(138,109,18,0.35)", background: "rgba(212,175,55,0.08)", borderRadius: 12, padding: "12px 16px" }}>
-        <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 800, color: "#8a6d12" }}>Recording Reminder</p>
+        <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 800, color: "var(--a-gold)" }}>Recording Reminder</p>
         {RECORDING_REMINDER.map((line) => (
           <p key={line} style={{ margin: "0 0 4px", fontSize: 13, lineHeight: 1.5, color: "var(--ink)" }}>{line}</p>
         ))}
       </div>
 
       {willFlag && (
-        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#a1421c" }}>
+        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "var(--a-danger)" }}>
           Saving this record puts a safeguarding flag on the client&apos;s record ({willFlag.toLowerCase()}). It stays until the Safeguarding Lead or Deputy stands it down.
         </p>
       )}
@@ -430,7 +430,7 @@ export function ClearFlagButton({ flagId, clientId }: { flagId: string; clientId
       >
         {pending ? "Clearing…" : "Stand down"}
       </button>
-      {state.status === "error" && <span style={{ fontSize: 12, color: "#a1421c" }}>{state.message}</span>}
+      {state.status === "error" && <span style={{ fontSize: 12, color: "var(--a-danger)" }}>{state.message}</span>}
     </form>
   );
 }

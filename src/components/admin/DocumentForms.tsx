@@ -48,7 +48,7 @@ export function UploadDocumentForm({ clientId }: { clientId: string }) {
       </p>
 
       {state.status !== "idle" && (
-        <p role="status" style={{ margin: 0, fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>
+        <p role="status" style={{ margin: 0, fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "var(--a-danger)" }}>
           {state.message}
         </p>
       )}
@@ -64,11 +64,11 @@ export function DeleteDocumentButton({ documentId, clientId }: { documentId: str
       <input type="hidden" name="clientId" value={clientId} />
       <button
         disabled={pending}
-        style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12.5, fontWeight: 700, color: "#a1421c", padding: 0 }}
+        style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12.5, fontWeight: 700, color: "var(--a-danger)", padding: 0 }}
       >
         {pending ? "Deleting…" : "Delete"}
       </button>
-      {state.status === "error" && <span style={{ fontSize: 12, color: "#a1421c" }}>{state.message}</span>}
+      {state.status === "error" && <span style={{ fontSize: 12, color: "var(--a-danger)" }}>{state.message}</span>}
     </form>
   );
 }

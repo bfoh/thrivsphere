@@ -6,7 +6,7 @@ import { reportIncident } from "@/app/actions/safeguarding";
 import { initialSafeguardingState } from "@/lib/safeguarding-state";
 
 const input: React.CSSProperties = { fontFamily: "inherit", width: "100%", boxSizing: "border-box" };
-const errStyle: React.CSSProperties = { margin: "4px 0 0", fontSize: 12, fontWeight: 600, color: "#b4553f" };
+const errStyle: React.CSSProperties = { margin: "4px 0 0", fontSize: 12, fontWeight: 600, color: "var(--a-danger)" };
 
 const TYPES = [
   ["safeguarding", "Safeguarding"],
@@ -32,7 +32,7 @@ export function IncidentForm() {
   }
 
   return (
-    <form action={action} style={{ display: "flex", flexDirection: "column", gap: 12, padding: "18px 20px", borderRadius: 12, background: "rgba(31,58,95,0.03)", border: "1px solid rgba(31,58,95,0.12)" }}>
+    <form action={action} style={{ display: "flex", flexDirection: "column", gap: 12, padding: "18px 20px", borderRadius: 12, background: "var(--a-subtle)", border: "1px solid var(--a-line)" }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }} className="two-col">
         <div>
           <label htmlFor="type" style={{ fontSize: 12, fontWeight: 800, color: "var(--navy)", display: "block", marginBottom: 5 }}>Type</label>
@@ -69,7 +69,7 @@ export function IncidentForm() {
           Cancel
         </button>
         {state.status !== "idle" && (
-          <span style={{ fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>{state.message}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "var(--a-danger)" }}>{state.message}</span>
         )}
       </div>
     </form>

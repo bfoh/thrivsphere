@@ -39,8 +39,8 @@ export default async function AiUsagePage() {
         <p style={{ margin: "0 0 10px", fontSize: 28, fontWeight: 800, color: "var(--navy)" }}>
           {usd(spent)} <span style={{ fontSize: 14, fontWeight: 600, color: "var(--navy-soft)" }}>spent, {share}% of the limit</span>
         </p>
-        <div role="meter" aria-label="Share of this month's AI limit used" aria-valuemin={0} aria-valuemax={100} aria-valuenow={share} style={{ height: 10, borderRadius: 999, background: "rgba(31,58,95,0.08)", overflow: "hidden", maxWidth: 480 }}>
-          <div style={{ height: "100%", width: `${share}%`, background: share >= 90 ? "#a1421c" : share >= 70 ? "var(--gold)" : "var(--teal)" }} />
+        <div role="meter" aria-label="Share of this month's AI limit used" aria-valuemin={0} aria-valuemax={100} aria-valuenow={share} style={{ height: 10, borderRadius: 999, background: "var(--a-canvas)", overflow: "hidden", maxWidth: 480 }}>
+          <div style={{ height: "100%", width: `${share}%`, background: share >= 90 ? "var(--a-danger)" : share >= 70 ? "var(--gold)" : "var(--teal)" }} />
         </div>
       </Section>
 

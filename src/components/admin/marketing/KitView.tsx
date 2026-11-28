@@ -48,7 +48,7 @@ export function KitView({ kit }: { kit: BrandKit }) {
             <tbody>
               {kit.words.map((w) => (
                 <tr key={w.avoid}>
-                  <td style={{ fontWeight: 700, color: "#a1421c" }}>{w.avoid}</td>
+                  <td style={{ fontWeight: 700, color: "var(--a-danger)" }}>{w.avoid}</td>
                   <td style={{ fontWeight: 700, color: "var(--teal-deep)" }}>{w.instead}</td>
                   <td style={{ color: "var(--navy-soft)" }}>{w.why}</td>
                 </tr>
@@ -81,7 +81,7 @@ export function KitView({ kit }: { kit: BrandKit }) {
           {kit.pillars.map((p) => (
             <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13.5 }}>
               <span style={{ flex: "0 0 44px", fontWeight: 800, color: "var(--navy)", textAlign: "right" }}>{p.share}%</span>
-              <span style={{ flex: "0 0 120px", height: 8, borderRadius: 999, background: "rgba(31,58,95,0.08)", overflow: "hidden" }}>
+              <span style={{ flex: "0 0 120px", height: 8, borderRadius: 999, background: "var(--a-canvas)", overflow: "hidden" }}>
                 <span style={{ display: "block", height: "100%", width: `${p.share}%`, background: "var(--teal)" }} />
               </span>
               <span>
@@ -122,7 +122,7 @@ export function KitView({ kit }: { kit: BrandKit }) {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
           {(Object.keys(CSS_VARIABLE) as BrandColour[]).map((k) => (
             <div key={k} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5 }}>
-              <span style={{ width: 26, height: 26, borderRadius: 8, background: BRAND_COLOURS[k], border: "1px solid rgba(31,58,95,0.15)" }} />
+              <span style={{ width: 26, height: 26, borderRadius: 8, background: BRAND_COLOURS[k], border: "1px solid var(--a-line-strong)" }} />
               <span>
                 {k}
                 <br />

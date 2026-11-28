@@ -7,7 +7,7 @@ import { initialBookingState } from "@/lib/booking-state";
 
 const btn: React.CSSProperties = {
   fontFamily: "inherit", fontSize: 12.5, fontWeight: 700, cursor: "pointer",
-  padding: "7px 13px", borderRadius: 50, border: "1px solid rgba(31,58,95,0.2)",
+  padding: "7px 13px", borderRadius: 50, border: "1px solid var(--a-line-strong)",
   background: "#fff", color: "var(--navy)",
 };
 
@@ -19,14 +19,14 @@ export function StatusButtons({ appointmentId }: { appointmentId: string }) {
       <button name="status" value="completed" disabled={pending} style={{ ...btn, borderColor: "var(--teal)", color: "var(--teal-deep)" }}>
         Attended
       </button>
-      <button name="status" value="no_show" disabled={pending} style={{ ...btn, borderColor: "#c8a24a", color: "#856a12" }}>
+      <button name="status" value="no_show" disabled={pending} style={{ ...btn, borderColor: "#c8a24a", color: "var(--a-gold)" }}>
         No-show
       </button>
-      <button name="status" value="cancelled_by_service" disabled={pending} style={{ ...btn, borderColor: "#c86b52", color: "#a1421c" }}>
+      <button name="status" value="cancelled_by_service" disabled={pending} style={{ ...btn, borderColor: "#c86b52", color: "var(--a-danger)" }}>
         Cancel
       </button>
       {state.status !== "idle" && (
-        <span style={{ fontSize: 12, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "var(--a-danger)" }}>
           {state.message}
         </span>
       )}
@@ -47,7 +47,7 @@ export function ReturnSessionButton({ appointmentId }: { appointmentId: string }
         {pending ? "Returning…" : "Don't count it"}
       </button>
       {state.status === "error" && (
-        <span style={{ fontSize: 12, fontWeight: 700, color: "#a1421c" }}>{state.message}</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: "var(--a-danger)" }}>{state.message}</span>
       )}
     </form>
   );
@@ -70,7 +70,7 @@ export function MeetingLinkForm({ appointmentId, hasLink }: { appointmentId: str
         placeholder={hasLink ? "Link saved — paste a new one to replace" : "https://… joining link"}
         style={{
           fontFamily: "inherit", fontSize: 13, padding: "8px 12px", borderRadius: 8,
-          border: "1px solid rgba(31,58,95,0.18)", minWidth: 280, flex: "1 1 280px",
+          border: "1px solid var(--a-line-strong)", minWidth: 280, flex: "1 1 280px",
         }}
       />
       <button className="pill pill-teal" disabled={pending} style={{ padding: "8px 16px", fontSize: 12.5, opacity: pending ? 0.6 : 1 }}>
@@ -80,7 +80,7 @@ export function MeetingLinkForm({ appointmentId, hasLink }: { appointmentId: str
         Encrypted, and shown only in the client&apos;s account — never emailed.
       </span>
       {state.status !== "idle" && (
-        <span style={{ fontSize: 12, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "var(--a-danger)" }}>
           {state.message}
         </span>
       )}
@@ -109,7 +109,7 @@ export function ReassignForm({
         id={`reassign-${appointmentId}`}
         name="practitionerId"
         defaultValue={currentPractitionerId}
-        style={{ fontFamily: "inherit", fontSize: 13, padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(31,58,95,0.18)", background: "#fff" }}
+        style={{ fontFamily: "inherit", fontSize: 13, padding: "7px 10px", borderRadius: 8, border: "1px solid var(--a-line-strong)", background: "#fff" }}
       >
         {staff.map((p) => (
           <option key={p.id} value={p.id}>{p.name}</option>
@@ -119,7 +119,7 @@ export function ReassignForm({
         {pending ? "Reassigning…" : "Reassign"}
       </button>
       {state.status !== "idle" && (
-        <span style={{ fontSize: 12, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "var(--a-danger)" }}>
           {state.message}
         </span>
       )}

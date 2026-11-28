@@ -193,7 +193,7 @@ export default async function ActivityPage({
                         <em style={{ color: "var(--navy-soft)" }}>not signed in</em>
                       )}
                     </td>
-                    <td style={{ ...td, fontWeight: 700, color: r.action === "permission_denied" ? "#b4553f" : "var(--navy)" }}>
+                    <td style={{ ...td, fontWeight: 700, color: r.action === "permission_denied" ? "var(--a-danger)" : "var(--navy)" }}>
                       {actionLabel(r.action)}
                     </td>
                     <td style={td}>
@@ -263,7 +263,7 @@ function Chip({ href, active, children }: { href: string; active: boolean; child
         borderRadius: 999,
         textDecoration: "none",
         border: "1px solid",
-        borderColor: active ? "var(--teal-deep)" : "rgba(31,58,95,0.16)",
+        borderColor: active ? "var(--teal-deep)" : "var(--a-line-strong)",
         background: active ? "var(--teal-deep)" : "#fff",
         color: active ? "#fff" : "var(--navy)",
       }}

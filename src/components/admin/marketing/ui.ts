@@ -6,4 +6,4 @@ export const hint: React.CSSProperties = { margin: "5px 0 0", fontSize: 12, colo
 /** Spacing only; the title style is the shared `adm-title` class. */
 export const h1: React.CSSProperties = { margin: "0 0 6px" };
 export const lead: React.CSSProperties = { margin: "0 0 22px", fontSize: 14, lineHeight: 1.6, color: "var(--navy-soft)", maxWidth: 680 };
-export const errorText = "#a1421c";
+export const errorText = "var(--a-danger)";

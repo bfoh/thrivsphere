@@ -164,7 +164,7 @@ export function KitEditor({ values, basedOn }: { values: Record<string, string>;
 
       <Group title="Saved replies" intro="Ready answers for comments and messages, copied and pasted by staff. AI never replies to the public.">
         {replySlots.map((i) => (
-          <div key={i} style={{ display: "flex", flexDirection: "column", gap: 6, paddingTop: i ? 10 : 0, borderTop: i ? "1px solid rgba(31,58,95,0.08)" : "none" }}>
+          <div key={i} style={{ display: "flex", flexDirection: "column", gap: 6, paddingTop: i ? 10 : 0, borderTop: i ? "1px solid var(--a-line)" : "none" }}>
             <input aria-label={`Reply ${i + 1} title`} name={`replyTitle${i}`} defaultValue={values[`replyTitle${i}`] ?? ""} placeholder={`Reply ${i + 1}: when to use it`} style={input} />
             <textarea aria-label={`Reply ${i + 1} text`} name={`replyText${i}`} defaultValue={values[`replyText${i}`] ?? ""} rows={3} style={{ ...input, resize: "vertical" }} />
           </div>

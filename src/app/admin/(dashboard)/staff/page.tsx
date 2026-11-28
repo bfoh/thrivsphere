@@ -115,7 +115,7 @@ export default async function StaffPage() {
                           <span style={{ fontSize: 13, color: "var(--navy-soft)" }}>{s.safeguardingDeputy ? "Yes" : "No"}</span>
                         )}
                       </td>
-                      <td style={{ ...td, fontWeight: 700, color: s.status === "active" ? "var(--teal-deep)" : "#b4553f" }}>
+                      <td style={{ ...td, fontWeight: 700, color: s.status === "active" ? "var(--teal-deep)" : "var(--a-danger)" }}>
                         {s.status === "active" ? "Active" : s.status === "suspended" ? "Blocked" : s.status}
                       </td>
                       <td style={{ ...td, color: "var(--navy-soft)" }}>{d(s.lastSeenAt)}</td>

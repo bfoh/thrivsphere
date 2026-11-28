@@ -62,7 +62,7 @@ export function PlanForm({ plan }: { plan: EditablePlan }) {
         </button>
       </div>
       {state.status !== "idle" && (
-        <p role="status" style={{ margin: 0, fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>
+        <p role="status" style={{ margin: 0, fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "var(--a-danger)" }}>
           {state.message}
         </p>
       )}
@@ -125,7 +125,7 @@ export function ServiceForm({ service }: { service: EditableService }) {
         </button>
       </div>
       {state.status !== "idle" && (
-        <p role="status" style={{ margin: 0, fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>
+        <p role="status" style={{ margin: 0, fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "var(--a-danger)" }}>
           {state.message}
         </p>
       )}

@@ -26,7 +26,7 @@ function Result({ state }: { state: { status: string; message: string } }) {
       role="status"
       style={{
         margin: 0, fontSize: 13, fontWeight: 600, lineHeight: 1.5,
-        color: bad ? "#b4553f" : "var(--teal-deep)",
+        color: bad ? "var(--a-danger)" : "var(--teal-deep)",
       }}
     >
       {state.message}
@@ -113,7 +113,7 @@ export function BlockControl({
       <button
         className="pill pill-ghost"
         disabled={pending}
-        style={{ padding: "8px 16px", fontSize: 12.5, opacity: pending ? 0.6 : 1, color: blocked ? "var(--teal-deep)" : "#b4553f" }}
+        style={{ padding: "8px 16px", fontSize: 12.5, opacity: pending ? 0.6 : 1, color: blocked ? "var(--teal-deep)" : "var(--a-danger)" }}
       >
         {pending ? "Working…" : blocked ? "Unblock" : "Block"}
       </button>
@@ -141,7 +141,7 @@ export function RemoveStaffControl({ userId, email }: { userId: string; email: s
       <button
         className="pill pill-ghost"
         disabled={pending}
-        style={{ padding: "8px 16px", fontSize: 12.5, opacity: pending ? 0.6 : 1, color: "#b4553f" }}
+        style={{ padding: "8px 16px", fontSize: 12.5, opacity: pending ? 0.6 : 1, color: "var(--a-danger)" }}
       >
         {pending ? "Removing…" : "Remove"}
       </button>
@@ -168,7 +168,7 @@ export function CancelInvitationControl({ invitationId, email }: { invitationId:
       <button
         className="pill pill-ghost"
         disabled={pending}
-        style={{ padding: "5px 13px", fontSize: 12, opacity: pending ? 0.6 : 1, color: "#b4553f" }}
+        style={{ padding: "5px 13px", fontSize: 12, opacity: pending ? 0.6 : 1, color: "var(--a-danger)" }}
       >
         {pending ? "Cancelling…" : "Cancel invitation"}
       </button>

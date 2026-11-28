@@ -47,7 +47,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14 }}>
           {rows.map(({ asset }) => (
             <li key={asset.id} className="card" style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-              <Link href={`/admin/marketing/library/${asset.id}`} style={{ display: "block", background: "rgba(31,58,95,0.05)", aspectRatio: "1 / 1" }}>
+              <Link href={`/admin/marketing/library/${asset.id}`} style={{ display: "block", background: "var(--a-subtle)", aspectRatio: "1 / 1" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={`/api/admin/marketing/assets/${asset.id}`} alt={asset.altText ?? ""} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
               </Link>
@@ -57,7 +57,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
                   {SOURCE[asset.source]} · {rightsLabel(asset.rights)}
                   {asset.width && asset.height ? ` · ${asset.width}×${asset.height}` : ""}
                 </span>
-                {!asset.altText && <span style={{ fontSize: 12, fontWeight: 700, color: "#a1421c" }}>Needs a description</span>}
+                {!asset.altText && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--a-danger)" }}>Needs a description</span>}
               </div>
             </li>
           ))}

@@ -81,7 +81,7 @@ export default async function ResourcesPage() {
                       {t.clientName}
                     </Link>
                     {t.dueBy && (
-                      <span style={{ fontSize: 12.5, fontWeight: 700, color: t.dueBy < today ? "#a1421c" : "var(--navy-soft)" }}>
+                      <span style={{ fontSize: 12.5, fontWeight: 700, color: t.dueBy < today ? "var(--a-danger)" : "var(--navy-soft)" }}>
                         {" "}
                         · by {fmtDate(t.dueBy)}
                         {t.dueBy < today ? " (overdue)" : ""}
@@ -136,7 +136,7 @@ export default async function ResourcesPage() {
       <Section title="Worksheet library" subtitle="Set one from a client's record">
         <div className="two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           {library.map((w) => (
-            <div key={w.key} style={{ border: "1px solid rgba(31,58,95,0.12)", borderRadius: 12, padding: "16px 18px" }}>
+            <div key={w.key} style={{ border: "1px solid var(--a-line)", borderRadius: 12, padding: "16px 18px" }}>
               <h3 style={{ margin: "0 0 6px", fontSize: 15.5, fontWeight: 800, color: "var(--navy)" }}>{worksheetLabel(w)}</h3>
               <p style={{ margin: "0 0 10px", fontSize: 13.5, color: "var(--ink)", lineHeight: 1.5 }}>{w.template.summary}</p>
               <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
@@ -169,7 +169,7 @@ function StatusChip({ status }: { status: string }) {
         padding: "3px 8px",
         borderRadius: 999,
         background: draft ? "rgba(212,175,55,0.18)" : "rgba(61,138,138,0.14)",
-        color: draft ? "#7a5c0c" : "var(--teal-deep)",
+        color: draft ? "var(--a-gold)" : "var(--teal-deep)",
       }}
     >
       {draft ? "Draft" : "Final"}
@@ -184,6 +184,6 @@ const flagChip: React.CSSProperties = {
   fontWeight: 800,
   padding: "3px 8px",
   borderRadius: 999,
-  background: "#c853241a",
-  color: "#8c2a1c",
+  background: "var(--a-danger-soft)",
+  color: "var(--a-danger)",
 };

@@ -62,7 +62,7 @@ export function NoteForm({ clientId }: { clientId: string }) {
             margin: 0,
             fontSize: 13,
             fontWeight: 700,
-            color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c",
+            color: state.status === "ok" ? "var(--teal-deep)" : "var(--a-danger)",
           }}
         >
           {state.message}

@@ -73,7 +73,7 @@ export default async function MarketingOverview() {
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
           {setup.map((s) => (
             <li key={s.label} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-              <span aria-hidden style={{ flex: "0 0 22px", height: 22, borderRadius: 999, display: "grid", placeItems: "center", fontSize: 12.5, fontWeight: 800, background: s.done ? "var(--teal-deep)" : "rgba(31,58,95,0.1)", color: s.done ? "#fff" : "var(--navy-soft)" }}>
+              <span aria-hidden style={{ flex: "0 0 22px", height: 22, borderRadius: 999, display: "grid", placeItems: "center", fontSize: 12.5, fontWeight: 800, background: s.done ? "var(--teal-deep)" : "var(--a-line)", color: s.done ? "#fff" : "var(--navy-soft)" }}>
                 {s.done ? "✓" : ""}
               </span>
               <span style={{ fontSize: 14, lineHeight: 1.5 }}>

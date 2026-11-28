@@ -110,7 +110,7 @@ export default async function SupervisionSheetPage({
           <Field label="Sheet reference" value={shortRef(record.id)} />
         </div>
         {record.needsFollowUp && (
-          <p role="note" style={{ margin: "14px 0 0", fontSize: 14, fontWeight: 700, color: "#8c2a1c" }}>
+          <p role="note" style={{ margin: "14px 0 0", fontSize: 14, fontWeight: 700, color: "var(--a-danger)" }}>
             Section 3 flags a risk, signposting or scope question.
           </p>
         )}
@@ -177,5 +177,5 @@ const draftChip: React.CSSProperties = {
   padding: "4px 10px",
   borderRadius: 999,
   background: "rgba(212,175,55,0.18)",
-  color: "#7a5c0c",
+  color: "var(--a-gold)",
 };

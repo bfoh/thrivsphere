@@ -21,7 +21,7 @@ const row: React.CSSProperties = { display: "flex", gap: 10, alignItems: "flex-e
 function Result({ state }: { state: EnquiryAdminState }) {
   if (state.status === "idle") return null;
   return (
-    <p role={state.status === "error" ? "alert" : "status"} style={{ margin: "8px 0 0", fontSize: 12.5, fontWeight: 700, color: state.status === "error" ? "#a1421c" : "var(--teal-deep)" }}>
+    <p role={state.status === "error" ? "alert" : "status"} style={{ margin: "8px 0 0", fontSize: 12.5, fontWeight: 700, color: state.status === "error" ? "var(--a-danger)" : "var(--teal-deep)" }}>
       {state.message}
     </p>
   );

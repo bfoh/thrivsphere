@@ -173,7 +173,7 @@ export function GraphicMaker({ services, posts, photos }: { services: Option[]; 
         )}
       </div>
 
-      <div className="card" style={{ padding: 14, minHeight: 240, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(31,58,95,0.04)" }}>
+      <div className="card" style={{ padding: 14, minHeight: 240, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--a-subtle)" }}>
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={preview} alt="Preview of the graphic" style={{ maxWidth: "100%", maxHeight: 640, height: "auto", display: "block", borderRadius: 6, boxShadow: "0 6px 24px rgba(31,58,95,0.15)" }} />

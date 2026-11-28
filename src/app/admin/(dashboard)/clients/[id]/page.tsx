@@ -63,13 +63,13 @@ const chip = (draft: boolean): React.CSSProperties => ({
   padding: "3px 8px",
   borderRadius: 999,
   background: draft ? "rgba(212,175,55,0.18)" : "rgba(61,138,138,0.14)",
-  color: draft ? "#7a5c0c" : "var(--teal-deep)",
+  color: draft ? "var(--a-gold)" : "var(--teal-deep)",
 });
 
 const OUTCOME_COLOUR: Record<string, string> = {
   suitable: "var(--teal-deep)",
-  clarification: "#8a6d12",
-  not_suitable: "#8c2a1c",
+  clarification: "var(--a-gold)",
+  not_suitable: "var(--a-danger)",
 };
 
 const d = (v: Date | string | null) =>
@@ -199,13 +199,13 @@ export default async function ClientRecordPage({
           role="alert"
           style={{
             marginTop: 16,
-            border: "2px solid #c8532466",
-            background: "#c853240d",
+            border: "2px solid var(--a-danger-line)",
+            background: "var(--a-danger-soft)",
             borderRadius: 14,
             padding: "16px 20px",
           }}
         >
-          <h2 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 800, color: "#8c2a1c", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          <h2 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 800, color: "var(--a-danger)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
             Safeguarding flag
           </h2>
           <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
@@ -369,7 +369,7 @@ export default async function ClientRecordPage({
             <Field label="Contact notes" value={client.contactNotes} />
           </div>
         )}
-        <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid rgba(31,58,95,0.08)" }}>
+        <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid var(--a-line)" }}>
           <h3 style={{ margin: "0 0 10px", fontSize: 14.5, color: "var(--navy)" }}>Emergency Contact / Next of Kin</h3>
           {!seeContact ? (
             <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.6, color: "var(--navy-soft)" }}>
@@ -434,10 +434,10 @@ export default async function ClientRecordPage({
               <article
                 key={n.id}
                 style={{
-                  border: "1px solid rgba(31,58,95,0.1)",
+                  border: "1px solid var(--a-line)",
                   borderRadius: 12,
                   padding: "14px 18px",
-                  background: n.supersededAt ? "rgba(31,58,95,0.03)" : "#fff",
+                  background: n.supersededAt ? "var(--a-subtle)" : "var(--a-surface)",
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
@@ -456,7 +456,7 @@ export default async function ClientRecordPage({
                   </p>
                 )}
                 {n.supersededAt && (
-                  <p style={{ margin: "10px 0 0", fontSize: 12, fontWeight: 700, color: "#856a12" }}>
+                  <p style={{ margin: "10px 0 0", fontSize: 12, fontWeight: 700, color: "var(--a-gold)" }}>
                     Amended {dt(n.supersededAt)} — the original text above is retained.
                   </p>
                 )}
@@ -504,7 +504,7 @@ export default async function ClientRecordPage({
                 </Link>
                 <span style={{ color: "var(--navy-soft)" }}>{r.practitionerName ?? r.practitionerEmail ?? ""}</span>
                 {r.needsFollowUp && (
-                  <span style={{ fontSize: 12, fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: "#c853241a", color: "#8c2a1c" }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: "var(--a-danger-soft)", color: "var(--a-danger)" }}>
                     Section 3 flag
                   </span>
                 )}
@@ -532,7 +532,7 @@ export default async function ClientRecordPage({
                 <Link href={`/admin/clients/${client.id}/worksheets/${w.id}`} style={{ fontWeight: 700, color: "var(--teal-deep)", textDecoration: "none" }}>
                   {getTemplate(w.templateKey, w.templateVersion)?.title ?? w.templateKey}
                 </Link>
-                <span style={{ fontWeight: 700, color: w.status === "submitted" ? "#a1421c" : "var(--navy-soft)" }}>
+                <span style={{ fontWeight: 700, color: w.status === "submitted" ? "var(--a-danger)" : "var(--navy-soft)" }}>
                   {WORKSHEET_STATUS_LABEL[w.status as WorksheetStatus]}
                 </span>
                 <span style={{ color: "var(--navy-soft)" }}>set {d(w.assignedAt)}</span>
@@ -558,10 +558,10 @@ export default async function ClientRecordPage({
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {concerns.map((c) => (
-              <div key={c.id} id={`concern-${c.id}`} style={{ border: "1px solid rgba(31,58,95,0.1)", borderRadius: 12, padding: "14px 18px" }}>
+              <div key={c.id} id={`concern-${c.id}`} style={{ border: "1px solid var(--a-line)", borderRadius: 12, padding: "14px 18px" }}>
                 <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 8 }}>
                   <strong style={{ fontSize: 13.5, color: "var(--navy)" }}>{labelsFor(CONCERN_TYPES, c.concernTypes, c.concernTypeOther).join("; ")}</strong>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: c.status === "closed" ? "var(--navy-soft)" : "#a1421c" }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: c.status === "closed" ? "var(--navy-soft)" : "var(--a-danger)" }}>
                     {c.status}
                   </span>
                   <span style={{ fontSize: 12, color: "var(--navy-soft)", marginLeft: "auto" }}>{dt(c.occurredAt)}</span>
@@ -619,7 +619,7 @@ export default async function ClientRecordPage({
       {canDiscount && (
         <Section id="discounts" title="Discounts & free sessions" subtitle="Only the founder and admins see this">
           {concession ? (
-            <div style={{ border: "1px solid rgba(31,58,95,0.1)", borderRadius: 12, padding: "13px 17px" }}>
+            <div style={{ border: "1px solid var(--a-line)", borderRadius: 12, padding: "13px 17px" }}>
               <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
                 <strong style={{ fontSize: 14, color: "var(--navy)" }}>{concession.label}</strong>
                 <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink)" }}>{describeDiscount(concession)}</span>
@@ -674,7 +674,7 @@ export default async function ClientRecordPage({
                 <strong style={{ color: "var(--navy)" }}>{c.type.replace(/_/g, " ")}</strong>
                 {c.policySlug && ` · ${c.policySlug} v${c.policyVersion ?? "?"}`} · {dt(c.grantedAt)}
                 {c.withdrawnAt && (
-                  <span style={{ color: "#a1421c", fontWeight: 700 }}> · withdrawn {d(c.withdrawnAt)}</span>
+                  <span style={{ color: "var(--a-danger)", fontWeight: 700 }}> · withdrawn {d(c.withdrawnAt)}</span>
                 )}
               </li>
             ))}

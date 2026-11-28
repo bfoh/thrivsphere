@@ -17,7 +17,7 @@ import { CODE_MAX_PERCENT, DEFAULT_CONCESSION_LABEL, DISCOUNT_REASONS, type Plan
 const input: React.CSSProperties = { fontFamily: "inherit", width: "100%", boxSizing: "border-box" };
 const lbl: React.CSSProperties = { fontSize: 12, fontWeight: 800, color: "var(--navy)", display: "block", marginBottom: 5 };
 const hint: React.CSSProperties = { margin: "4px 0 0", fontSize: 12, color: "var(--muted)" };
-const errStyle: React.CSSProperties = { margin: "4px 0 0", fontSize: 12, fontWeight: 600, color: "#b4553f" };
+const errStyle: React.CSSProperties = { margin: "4px 0 0", fontSize: 12, fontWeight: 600, color: "var(--a-danger)" };
 const grid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 };
 const linkButton: React.CSSProperties = {
   background: "none",
@@ -53,7 +53,7 @@ function Err({ fe, name }: { fe: Record<string, string>; name: string }) {
 function Result({ state }: { state: DiscountAdminState }) {
   if (state.status === "idle") return null;
   return (
-    <p role={state.status === "error" ? "alert" : "status"} style={{ margin: "8px 0 0", fontSize: 12.5, fontWeight: 700, color: state.status === "error" ? "#a1421c" : "var(--teal-deep)" }}>
+    <p role={state.status === "error" ? "alert" : "status"} style={{ margin: "8px 0 0", fontSize: 12.5, fontWeight: 700, color: state.status === "error" ? "var(--a-danger)" : "var(--teal-deep)" }}>
       {state.message}
     </p>
   );
@@ -108,7 +108,7 @@ function Panel({
   }
 
   return (
-    <form onSubmit={onSubmit} style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 14, padding: 16, borderRadius: 12, background: "rgba(31,58,95,0.035)" }}>
+    <form onSubmit={onSubmit} style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 14, padding: 16, borderRadius: 12, background: "var(--a-subtle)" }}>
       {children(state.fieldErrors ?? {})}
       <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
         <Submit pending={pending}>{submitLabel}</Submit>
@@ -241,7 +241,7 @@ export function EndDiscountButton({ discountId, kind }: { discountId: string; ki
       <input type="hidden" name="discountId" value={discountId} />
       {armed ? (
         <>
-          <button className="pill" disabled={pending} style={{ padding: "6px 14px", fontSize: 12.5, background: "#a1421c", color: "#fff", border: "none", opacity: pending ? 0.6 : 1 }}>
+          <button className="pill" disabled={pending} style={{ padding: "6px 14px", fontSize: 12.5, background: "var(--a-danger)", color: "#fff", border: "none", opacity: pending ? 0.6 : 1 }}>
             {pending ? "Ending…" : kind === "client" ? "Yes, end it now" : "Yes, turn it off"}
           </button>
           <button type="button" style={{ ...linkButton, color: "var(--muted)", fontSize: 12.5 }} onClick={() => setArmed(false)}>
@@ -249,7 +249,7 @@ export function EndDiscountButton({ discountId, kind }: { discountId: string; ki
           </button>
         </>
       ) : (
-        <button type="button" style={{ ...linkButton, color: "#a1421c", fontSize: 12.5 }} onClick={() => setArmed(true)}>
+        <button type="button" style={{ ...linkButton, color: "var(--a-danger)", fontSize: 12.5 }} onClick={() => setArmed(true)}>
           {kind === "client" ? "End concession" : "Turn off"}
         </button>
       )}

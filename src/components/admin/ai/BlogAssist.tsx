@@ -73,7 +73,7 @@ export function BlogAssist({
         <button type="button" className="pill pill-ghost" style={small} disabled={!!busy} onClick={() => run("blog-summary")}>{busy === "blog-summary" ? "Thinking…" : "Write the summary"}</button>
         <button type="button" className="pill pill-ghost" style={small} disabled={!!busy} onClick={() => run("blog-review")}>{busy === "blog-review" ? "Checking…" : "Check against our rules"}</button>
         <span style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
-          <select aria-label="How to rewrite" value={style} onChange={(e) => setStyle(e.target.value as RewriteStyle)} style={{ fontFamily: "inherit", fontSize: 12.5, padding: "6px 8px", borderRadius: 8, border: "1px solid rgba(31,58,95,0.18)" }}>
+          <select aria-label="How to rewrite" value={style} onChange={(e) => setStyle(e.target.value as RewriteStyle)} style={{ fontFamily: "inherit", fontSize: 12.5, padding: "6px 8px", borderRadius: 8, border: "1px solid var(--a-line-strong)" }}>
             {(Object.keys(REWRITE_STYLES) as RewriteStyle[]).map((k) => (
               <option key={k} value={k}>{REWRITE_STYLES[k].label}</option>
             ))}
@@ -85,7 +85,7 @@ export function BlogAssist({
         </span>
       </div>
 
-      {error && <p role="alert" style={{ margin: "10px 0 0", fontSize: 13, fontWeight: 700, color: "#a1421c" }}>{error}</p>}
+      {error && <p role="alert" style={{ margin: "10px 0 0", fontSize: 13, fontWeight: 700, color: "var(--a-danger)" }}>{error}</p>}
 
       {result && (
         <div role="status" style={{ marginTop: 12, background: "#fff", borderRadius: 10, padding: "12px 14px", fontSize: 13.5, lineHeight: 1.55 }}>
@@ -115,7 +115,7 @@ export function BlogAssist({
                 <ul style={{ margin: 0, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 10 }}>
                   {result.output.issues.map((x, n) => (
                     <li key={n}>
-                      <strong style={{ color: x.severity === "must_fix" ? "#a1421c" : "#8a6d12" }}>{x.severity === "must_fix" ? "Must fix" : "Consider"}:</strong> {x.problem}
+                      <strong style={{ color: x.severity === "must_fix" ? "var(--a-danger)" : "var(--a-gold)" }}>{x.severity === "must_fix" ? "Must fix" : "Consider"}:</strong> {x.problem}
                       {x.quote && <span style={{ display: "block", color: "var(--navy-soft)", fontStyle: "italic" }}>&ldquo;{x.quote}&rdquo;</span>}
                       <span style={{ display: "block" }}>Suggestion: {x.suggestion}</span>
                     </li>

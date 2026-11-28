@@ -19,7 +19,7 @@ export const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Fr
 function Status({ state }: { state: { status: string; message: string } }) {
   if (state.status === "idle") return null;
   return (
-    <p role="status" style={{ margin: 0, fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "#a1421c" }}>
+    <p role="status" style={{ margin: 0, fontSize: 13, fontWeight: 700, color: state.status === "ok" ? "var(--teal-deep)" : "var(--a-danger)" }}>
       {state.message}
     </p>
   );
@@ -64,7 +64,7 @@ export function RemoveRuleButton({ ruleId }: { ruleId: string }) {
       <input type="hidden" name="ruleId" value={ruleId} />
       <button
         disabled={pending}
-        style={{ background: "none", border: "none", cursor: "pointer", color: "#a1421c", fontWeight: 700, fontSize: 13, fontFamily: "inherit", padding: 0 }}
+        style={{ background: "none", border: "none", cursor: "pointer", color: "var(--a-danger)", fontWeight: 700, fontSize: 13, fontFamily: "inherit", padding: 0 }}
       >
         {pending ? "Removing…" : "Remove"}
       </button>
@@ -135,7 +135,7 @@ export function RemoveExceptionButton({ exceptionId }: { exceptionId: string }) 
       <input type="hidden" name="exceptionId" value={exceptionId} />
       <button
         disabled={pending}
-        style={{ background: "none", border: "none", cursor: "pointer", color: "#a1421c", fontWeight: 700, fontSize: 13, fontFamily: "inherit", padding: 0 }}
+        style={{ background: "none", border: "none", cursor: "pointer", color: "var(--a-danger)", fontWeight: 700, fontSize: 13, fontFamily: "inherit", padding: 0 }}
       >
         {pending ? "Removing…" : "Remove"}
       </button>

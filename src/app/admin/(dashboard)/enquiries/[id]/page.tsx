@@ -107,7 +107,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
           <AssignForm enquiryId={enquiry.id} assignedTo={enquiry.assignedTo} staff={staff.map((s) => ({ id: s.id, name: s.name }))} />
         </div>
         {(callback || enquiry.category === "individual") && (
-          <div style={{ marginTop: 20, paddingTop: 18, borderTop: "1px solid rgba(31,58,95,0.1)" }}>
+          <div style={{ marginTop: 20, paddingTop: 18, borderTop: "1px solid var(--a-line)" }}>
             <p style={{ margin: "0 0 10px", fontSize: 13.5, lineHeight: 1.55, color: "var(--ink)" }}>
               Once you have spoken, send them the link to book and pay for their Initial Wellbeing
               Consultation. It opens the same booking page as the website&apos;s, with the practitioner you
