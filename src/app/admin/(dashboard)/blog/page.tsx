@@ -5,6 +5,7 @@ import { Section, Empty } from "@/components/admin/RecordUI";
 import { listPostsForAdmin, isBlogReviewer, pendingCommentCount } from "@/lib/queries/blog";
 import { STATUS_LABEL, type BlogStatus } from "@/lib/blog-rules";
 import { STATUS_COLOUR } from "@/components/admin/blog/StatusBadge";
+import { Tabs } from "@/components/admin/ui";
 
 export const metadata: Metadata = { title: "Blog", robots: { index: false, follow: false } };
 
@@ -72,17 +73,15 @@ export default async function BlogAdminPage({ searchParams }: { searchParams: Pr
         <span style={{ marginLeft: "auto", color: "var(--teal-deep)", fontWeight: 700 }}>Open</span>
       </Link>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        {VIEWS.map((v) => (
-          <Link
-            key={v.key}
-            href={v.key === "active" ? "/admin/blog" : `/admin/blog?show=${v.key}`}
-            className={`pill ${v.key === view.key ? "pill-teal" : "pill-ghost"}`}
-            style={{ padding: "8px 16px", fontSize: 13 }}
-          >
-            {v.label}
-          </Link>
-        ))}
+      <div style={{ marginBottom: 16 }}>
+        <Tabs
+          label="Which posts"
+          items={VIEWS.map((v) => ({
+            label: v.label,
+            href: v.key === "active" ? "/admin/blog" : `/admin/blog?show=${v.key}`,
+            active: v.key === view.key,
+          }))}
+        />
       </div>
 
       <Section title={view.label} subtitle={`${rows.length} ${rows.length === 1 ? "post" : "posts"}, most recently changed first`}>
