@@ -1,26 +1,25 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "./icons";
+import { SitePhoto } from "./SitePhoto";
 import type { TeamMember } from "@/data/site";
+import { teamPhotos } from "@/data/photos";
 
 /**
- * A practitioner's photograph, or their initials until one is supplied.
+ * A practitioner's seated portrait, or their initials if they have none.
  *
- * Both fill the same circle, so adding `photo` to a team member in
- * src/data/site.ts changes nothing else about the page.
+ * Portraits come from src/data/photos.ts and are shown whole, at their own
+ * 4:5 proportions, in one frame size per layout so every practitioner
+ * appears the same size and lined up with the others.
  */
-export function TeamAvatar({ member }: { member: TeamMember }) {
-  if (!member.photo) return <div className="founder-avatar">{member.initials}</div>;
+export function TeamAvatar({ member, layout = "card" }: { member: TeamMember; layout?: "card" | "profile" }) {
+  const photo = teamPhotos[member.slug];
+  if (!photo) return <div className="founder-avatar">{member.initials}</div>;
   return (
-    <div className="founder-avatar" style={{ overflow: "hidden", padding: 0 }}>
-      <Image
-        src={member.photo}
-        alt={`${member.name}, ${member.role}`}
-        width={128}
-        height={128}
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-      />
-    </div>
+    <SitePhoto
+      photo={photo}
+      className={`team-photo team-photo--${layout}`}
+      sizes={layout === "profile" ? "300px" : "280px"}
+    />
   );
 }
 
@@ -53,7 +52,7 @@ export function TeamProfile({ member }: { member: TeamMember }) {
       style={{ display: "grid", gridTemplateColumns: "0.8fr 1.2fr", gap: 36, alignItems: "start", scrollMarginTop: 130 }}
     >
       <div className="founder-card">
-        <TeamAvatar member={member} />
+        <TeamAvatar member={member} layout="profile" />
         <h2 style={{ margin: 0, fontSize: 21, color: "var(--navy)" }}>{member.name}</h2>
         <p style={{ margin: "6px 0 0", fontSize: 13.5, color: "var(--teal-deep)", fontWeight: 700 }}>{member.role}</p>
         <ul style={{ listStyle: "none", margin: "18px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: 8, textAlign: "left" }}>

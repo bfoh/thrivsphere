@@ -291,13 +291,11 @@ export type TeamMember = {
   slug: string;
   name: string;
   role: string;
-  /** Shown in the avatar until a photograph is supplied. */
-  initials: string;
   /**
-   * Path under /public, e.g. "/images/team/patience.jpg". Optional so a
-   * photograph can be added later without touching the design.
+   * Shown in place of a portrait for anyone without one. Portraits live in
+   * src/data/photos.ts (teamPhotos), keyed by slug.
    */
-  photo?: string;
+  initials: string;
   credentials: string[];
   bio: string[];
 };

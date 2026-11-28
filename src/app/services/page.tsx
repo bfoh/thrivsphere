@@ -5,6 +5,7 @@ import { ScopeOfPractice } from "@/components/ScopeOfPractice";
 import { ServiceDetail } from "@/components/ServiceDetail";
 import { Icon } from "@/components/icons";
 import { bookCta, brand } from "@/data/site";
+import { servicePhotos } from "@/data/photos";
 import { getPublishedServices } from "@/lib/queries/catalogue";
 
 export const metadata: Metadata = {
@@ -18,6 +19,8 @@ export const revalidate = 300;
 
 export default async function ServicesPage() {
   const services = await getPublishedServices();
+  // Services with a photo alternate it right, left, right… down the page.
+  const withPhoto = services.filter((s) => servicePhotos[s.slug]).map((s) => s.slug);
   return (
     <PageShell
       eyebrow="Our Services"
@@ -27,7 +30,13 @@ export default async function ServicesPage() {
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {services.map((s, i) => (
-          <ServiceDetail key={s.slug} service={s} letter={String.fromCharCode(65 + i)} />
+          <ServiceDetail
+            key={s.slug}
+            service={s}
+            letter={String.fromCharCode(65 + i)}
+            photo={servicePhotos[s.slug]}
+            photoFirst={withPhoto.indexOf(s.slug) % 2 === 1}
+          />
         ))}
       </div>
 

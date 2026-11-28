@@ -3,7 +3,9 @@
 import { Section } from "../Section";
 import { Icon } from "../icons";
 import { FancyHeadline } from "../FancyHeadline";
+import { SitePhoto } from "../SitePhoto";
 import { homeIntro, mission, values } from "@/data/site";
+import { homeIntroPhoto } from "@/data/photos";
 
 const GOLD = "#bd951f";
 const TEAL = "#3d8a8a";
@@ -12,21 +14,27 @@ const NAVY = "#1f3a5f";
 export function About() {
   return (
     <Section id="about" aura="sage" background="linear-gradient(160deg,#f2f6ee 0%,#e6efe1 100%)" watermark="About">
-      <FancyHeadline
-        lines={[
-          [{ t: "who we are —", size: 17, italic: true, color: GOLD }],
-          [{ t: "PROFESSIONAL,", size: 46, weight: 800, color: NAVY }],
-          [
-            { t: "compassionate", size: 23, italic: true, color: TEAL },
-            { t: "SUPPORT", size: 42, weight: 800, color: NAVY },
-          ],
-        ]}
-      />
-      {homeIntro.paragraphs.slice(1).map((p, i) => (
-        <p key={i} style={{ margin: i === 0 ? "16px 0 0" : "12px 0 0", fontSize: 16.5, lineHeight: 1.6, maxWidth: 780, color: "var(--ink)" }}>
-          {p}
-        </p>
-      ))}
+      <div className="intro-grid">
+        <div>
+          <FancyHeadline
+            lines={[
+              [{ t: "who we are —", size: 17, italic: true, color: GOLD }],
+              [{ t: "PROFESSIONAL,", size: 46, weight: 800, color: NAVY }],
+              [
+                { t: "compassionate", size: 23, italic: true, color: TEAL },
+                { t: "SUPPORT", size: 42, weight: 800, color: NAVY },
+              ],
+            ]}
+          />
+          {homeIntro.paragraphs.slice(1).map((p, i) => (
+            <p key={i} style={{ margin: i === 0 ? "16px 0 0" : "12px 0 0", fontSize: 16.5, lineHeight: 1.6, maxWidth: 780, color: "var(--ink)" }}>
+              {p}
+            </p>
+          ))}
+        </div>
+        {/* Beside the introduction to personalised online support. */}
+        <SitePhoto photo={homeIntroPhoto} sizes="(max-width: 900px) calc(100vw - 48px), 490px" />
+      </div>
 
       <div className="two-col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22, marginTop: 30 }}>
         <div className="mv-card">

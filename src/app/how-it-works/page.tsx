@@ -4,7 +4,9 @@ import { PageShell } from "@/components/PageShell";
 import { PillButton } from "@/components/PillButton";
 import { HowItWorksSteps } from "@/components/HowItWorksSteps";
 import { NotCrisisNotice } from "@/components/NotCrisisNotice";
+import { SitePhoto } from "@/components/SitePhoto";
 import { bookCta, brand } from "@/data/site";
+import { howItWorksPhoto } from "@/data/photos";
 
 export const metadata: Metadata = {
   title: "How It Works",
@@ -21,7 +23,14 @@ export default function HowItWorksPage() {
       intro={brand.availabilityLine}
       aura="sage"
     >
-      <HowItWorksSteps />
+      {/* The photo stays beside the steps as they scroll; it shows step 3,
+          a Personalised Wellbeing Action Plan, being worked through. */}
+      <div className="hiw-grid">
+        <div>
+          <HowItWorksSteps />
+        </div>
+        <SitePhoto photo={howItWorksPhoto} className="hiw-photo" sizes="(max-width: 900px) calc(100vw - 48px), 380px" />
+      </div>
 
       <p style={{ margin: "28px 0 0", fontSize: 15, lineHeight: 1.6, color: "var(--ink)" }}>
         See{" "}

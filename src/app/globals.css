@@ -442,6 +442,57 @@ body {
   box-shadow: 0 14px 30px rgba(79, 168, 168, 0.45);
 }
 
+/* ---- photographs (src/data/photos.ts, SitePhoto) ----
+   Always shown whole at their own proportions: no cropping, no filters. */
+.site-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 2px 6px rgba(31, 58, 95, 0.06), 0 18px 40px -14px rgba(31, 58, 95, 0.32);
+}
+/* practitioner portraits: one frame size per layout, so both line up */
+.team-photo {
+  margin: 0 auto 20px;
+}
+.team-photo--card {
+  max-width: 280px;
+}
+.team-photo--profile {
+  max-width: 300px;
+}
+/* homepage introduction: text beside a photo */
+.intro-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: 44px;
+  align-items: center;
+}
+/* a service with a photo: points beside it, alternating sides down the page */
+.svc-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+  gap: 30px;
+  align-items: center;
+}
+.svc-detail-grid.photo-first {
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr);
+}
+.svc-detail-grid.photo-first .svc-detail-photo {
+  order: -1;
+}
+/* How It Works: the photo stays beside the steps while they scroll */
+.hiw-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 32px;
+  align-items: start;
+}
+.hiw-photo {
+  position: sticky;
+  top: 130px;
+}
+
 /* ---- shared clickable tile (resource + blog cards) ---- */
 .tile {
   position: relative;
@@ -929,8 +980,27 @@ body {
   .two-col,
   .founder-grid,
   .support-grid,
-  .footer-grid {
+  .footer-grid,
+  .intro-grid,
+  .svc-detail-grid,
+  .svc-detail-grid.photo-first,
+  .hiw-grid {
     grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .intro-grid {
+    gap: 26px;
+  }
+  .svc-detail-grid,
+  .hiw-grid {
+    gap: 22px;
+  }
+  /* photos lead their card or page body once stacked */
+  .svc-detail-grid .svc-detail-photo,
+  .hiw-photo {
+    order: -1;
+  }
+  .hiw-photo {
+    position: static;
   }
   .footer-hint {
     display: none !important;
