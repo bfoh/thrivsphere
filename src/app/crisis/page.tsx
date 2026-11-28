@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { PolicyPage } from "@/components/PolicyPage";
+import { policyMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Suicide, Self-Harm & Crisis Escalation",
-};
+export const metadata: Metadata = policyMetadata("crisis");
 
 export default function Page() {
   return <PolicyPage slug="crisis" />;

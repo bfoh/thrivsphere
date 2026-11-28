@@ -43,8 +43,12 @@ const clerkLocalization = {
   },
 };
 
+/*
+ * The homepage's search description, and the default for social cards. Kept
+ * near 155 characters, about what Google shows before cutting it short.
+ */
 const description =
-  "ThriveSphere Wellbeing provides professional, compassionate and personalised online wellbeing support for adults aged 18 and above — helping individuals understand their emotional wellbeing, develop practical coping strategies and strengthen resilience. A non-clinical service; not an emergency mental health service.";
+  "Professional, compassionate online wellbeing support for adults 18+ from experienced Registered Mental Health Nurses. Non-clinical; not an emergency service.";
 
 const fullTitle = `${brand.name} — ${brand.tagline}`;
 
@@ -56,12 +60,14 @@ export const metadata: Metadata = {
   },
   description,
   applicationName: brand.name,
-  alternates: { canonical: "/" },
+  /*
+   * No canonical or og:url here: whatever the layout sets, every page without
+   * its own inherits. Each page names itself instead (see src/lib/seo.ts).
+   */
   openGraph: {
     type: "website",
     siteName: brand.name,
     locale: "en_GB",
-    url: SITE_URL,
     title: fullTitle,
     description,
   },

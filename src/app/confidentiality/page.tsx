@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { PolicyPage } from "@/components/PolicyPage";
+import { policyMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Confidentiality Statement",
-};
+export const metadata: Metadata = policyMetadata("confidentiality");
 
 export default function Page() {
   return <PolicyPage slug="confidentiality" />;

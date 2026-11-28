@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   title: "Contact Us",
   description:
     "Get in touch with ThriveSphere Wellbeing in confidence, or find emergency and specialist support if you need help right now.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

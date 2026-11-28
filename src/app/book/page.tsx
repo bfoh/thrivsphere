@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   title: "Book Initial Wellbeing Consultation",
   description:
     "Book your Initial Wellbeing Consultation with ThriveSphere Wellbeing online, or request a callback. A 50-minute online consultation; flexible appointments, including evenings and weekends, subject to availability.",
+  alternates: { canonical: "/book" },
 };
 
 /**

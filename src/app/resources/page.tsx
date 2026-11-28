@@ -8,6 +8,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Resource Centre",
   description: "A digital wellbeing library of guides, exercises, articles and self-help resources to support your journey.",
+  alternates: { canonical: "/resources" },
 };
 
 export default function ResourcesPage() {

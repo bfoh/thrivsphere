@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Meet Our Team",
   description:
     "Meet the ThriveSphere Wellbeing practitioners: experienced Registered Mental Health Nurses providing online wellbeing support.",
+  alternates: { canonical: "/team" },
 };
 
 export default function TeamPage() {

@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Frequently Asked Questions",
   description:
     "Answers to common questions about ThriveSphere Wellbeing: who can use the service, our practitioners, sessions, confidentiality and urgent support.",
+  alternates: { canonical: "/faq" },
 };
 
 export default function FaqPage() {

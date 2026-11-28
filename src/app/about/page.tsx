@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "About Us",
   description:
     "ThriveSphere Wellbeing provides professional, compassionate and personalised online wellbeing support, delivered by experienced Registered Mental Health Nurses.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

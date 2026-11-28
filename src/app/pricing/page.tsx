@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   title: "Pricing and Packages",
   description:
     "ThriveSphere Wellbeing prices: Initial Wellbeing Needs Review, individual 50-minute wellbeing support sessions, and optional four- and six-session packages.",
+  alternates: { canonical: "/pricing" },
 };
 
 // Prices live in the database. The page is rebuilt at most every five minutes,
