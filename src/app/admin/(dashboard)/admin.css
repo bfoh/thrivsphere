@@ -1740,6 +1740,7 @@ a.adm-stat:hover {
 }
 
 @media (max-width: 640px) {
+  .adm-weekgrid-scale,
   .adm-weekgrid-row {
     grid-template-columns: 48px minmax(0, 1fr);
     row-gap: 6px;
