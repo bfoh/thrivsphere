@@ -11,6 +11,7 @@ import { assignableRoles, canCancelInvitation, canManageStaff, roleLabel } from 
 import {
   blockUser,
   deleteUser,
+  findInvitation,
   inviteStaff,
   listInvitations,
   revokeInvitation,
@@ -339,7 +340,7 @@ export async function cancelStaffInvitation(
   const invitation = pending.value.find((i) => i.id === invitationId);
   if (!invitation) return { status: "error", message: "That invitation has already been accepted or cancelled." };
 
-  if (!canCancelInvitation({ userId: actor.userId, role: actor.role }, invitation.role as Role)) {
+  if (!canCancelInvitation({ userId: actor.userId, role: actor.role }, invitation.role)) {
     return { status: "error", message: "Only a founder can cancel an invitation for an administrator or founder." };
   }
 
@@ -355,6 +356,124 @@ export async function cancelStaffInvitation(
 
   revalidatePath("/admin/staff");
   return { status: "ok", message: `Invitation for ${invitation.email} cancelled.` };
+}
+
+export type InvitationLinkResult = { status: "ok"; url: string } | { status: "error"; message: string };
+
+/**
+ * The link from an invitation that has not been accepted, so it can be sent
+ * to the person directly when the email has not reached them.
+ *
+ * Anyone holding the link can create that colleague's account, so the same
+ * people who could cancel the invitation may copy it, and each copy is logged.
+ * An admin cannot copy an administrator's or founder's invitation and use it
+ * to give themselves that role.
+ */
+export async function copyInvitationLink(invitationId: string): Promise<InvitationLinkResult> {
+  let actor;
+  try {
+    actor = await requireCapability("staff:remove", {
+      entity: "users",
+      action: "export",
+      detail: "invitation link requested",
+    });
+  } catch (err) {
+    const mapped = mapGuardError(err, "You do not have permission to share invitations.");
+    if (mapped) return { status: "error", message: mapped.message };
+    throw err;
+  }
+
+  const found = await findInvitation(String(invitationId));
+  if (!found.ok) return { status: "error", message: `The invitation could not be loaded: ${found.reason}` };
+  if (!found.value) return { status: "error", message: "That invitation has already been accepted, cancelled or has expired." };
+
+  const { invitation, url } = found.value;
+  if (!canCancelInvitation({ userId: actor.userId, role: actor.role }, invitation.role)) {
+    return { status: "error", message: "Only a founder can share an invitation for an administrator or founder." };
+  }
+  if (!url) return { status: "error", message: "No link came back for this invitation. Use Resend email instead." };
+
+  await recordAudit({
+    actorId: actor.userId,
+    action: "export",
+    entity: "users",
+    detail: `copied the invitation link for ${invitation.email} (${roleLabel(invitation.role)})`,
+  });
+
+  return { status: "ok", url };
+}
+
+/**
+ * Email an invitation again.
+ *
+ * Clerk cannot resend one, so this sends a new invitation with the same role
+ * and inviter, then cancels the old one. The new one goes first: if it fails,
+ * the old link still works.
+ */
+export async function resendStaffInvitation(
+  _prev: StaffFormState,
+  formData: FormData
+): Promise<StaffFormState> {
+  const invitationId = str(formData, "invitationId");
+
+  let actor;
+  try {
+    actor = await requireCapability("staff:remove", {
+      entity: "users",
+      action: "create",
+      detail: "invitation re-send requested",
+    });
+  } catch (err) {
+    const mapped = mapGuardError(err, "You do not have permission to send invitations.");
+    if (mapped) return mapped;
+    throw err;
+  }
+
+  const found = await findInvitation(invitationId);
+  if (!found.ok) return { status: "error", message: `The invitation could not be loaded: ${found.reason}` };
+  if (!found.value) return { status: "error", message: "That invitation has already been accepted, cancelled or has expired." };
+
+  const { invitation } = found.value;
+  if (!canCancelInvitation({ userId: actor.userId, role: actor.role }, invitation.role)) {
+    return { status: "error", message: "Only a founder can resend an invitation for an administrator or founder." };
+  }
+
+  const existing = await getDb()
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.email, invitation.email), ne(users.status, "deleted")))
+    .limit(1);
+  if (existing.length > 0) {
+    return { status: "error", message: "That email now has an account. Cancel this invitation and change their role instead." };
+  }
+
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thrivsphere.org";
+  const sent = await inviteStaff({
+    email: invitation.email,
+    role: invitation.role,
+    invitedBy: invitation.invitedBy ?? actor.userId,
+    redirectUrl: `${site}/admin/join`,
+    ignoreExisting: true,
+  });
+  if (!sent.ok) return { status: "error", message: `Invitation not sent again: ${sent.reason}` };
+
+  const revoked = await revokeInvitation(invitation.id);
+
+  await recordAudit({
+    actorId: actor.userId,
+    action: "create",
+    entity: "users",
+    detail: `sent the invitation to ${invitation.email} again (${roleLabel(invitation.role)})`,
+  });
+
+  revalidatePath("/admin/staff");
+  if (!revoked.ok) {
+    return {
+      status: "ok",
+      message: `New invitation sent to ${invitation.email}. The earlier link could not be cancelled (${revoked.reason}), so both work until one is used.`,
+    };
+  }
+  return { status: "ok", message: `New invitation sent to ${invitation.email}. The link in the earlier email no longer works.` };
 }
 
 /**

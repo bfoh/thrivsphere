@@ -1,4 +1,5 @@
 import "server-only";
+import { parseInvitations, type PendingInvitation } from "./invitation";
 
 /**
  * Clerk Backend API calls needed to manage staff.
@@ -69,6 +70,8 @@ export function inviteStaff(params: {
   role: string;
   invitedBy: string;
   redirectUrl: string;
+  /** Send even though an invitation to this address is still open: used to send one again. */
+  ignoreExisting?: boolean;
 }): Promise<Result<{ id: string }>> {
   return call("/invitations", {
     method: "POST",
@@ -77,7 +80,7 @@ export function inviteStaff(params: {
       redirect_url: params.redirectUrl,
       public_metadata: { thrivsphereRole: params.role, invitedBy: params.invitedBy },
       notify: true,
-      ignore_existing: false,
+      ignore_existing: params.ignoreExisting ?? false,
     },
   });
 }
@@ -86,51 +89,31 @@ export function revokeInvitation(invitationId: string): Promise<Result> {
   return call(`/invitations/${invitationId}/revoke`, { method: "POST" });
 }
 
-/** An invitation sent but not yet accepted. */
-export type PendingInvitation = {
-  id: string;
-  email: string;
-  role: string;
-  createdAt: Date | null;
-};
+export type { PendingInvitation };
 
-type ClerkInvitation = {
-  id?: unknown;
-  email_address?: unknown;
-  created_at?: unknown;
-  public_metadata?: { thrivsphereRole?: unknown } | null;
-};
-
-/**
- * Invitations still outstanding.
- *
- * Clerk has returned this endpoint both as a bare array and, with pagination
- * enabled, as `{ data: [...] }`. Both shapes are accepted rather than assuming
- * one — a staff list that throws because the provider changed its envelope is a
- * poor trade for a few lines.
- */
-export async function listInvitations(): Promise<Result<PendingInvitation[]>> {
+async function pendingInvitations(): Promise<Result<{ invitation: PendingInvitation; url: string | null }[]>> {
   const res = await call<unknown>("/invitations?status=pending&limit=50", { method: "GET" });
   if (!res.ok) return res;
+  return { ok: true, value: parseInvitations(res.value) };
+}
 
-  const raw = Array.isArray(res.value)
-    ? res.value
-    : Array.isArray((res.value as { data?: unknown })?.data)
-      ? ((res.value as { data: unknown[] }).data)
-      : [];
+/** Invitations still outstanding, without their links. */
+export async function listInvitations(): Promise<Result<PendingInvitation[]>> {
+  const res = await pendingInvitations();
+  if (!res.ok) return res;
+  return { ok: true, value: res.value.map((r) => r.invitation) };
+}
 
-  const invitations = raw.map((item) => {
-    const inv = (item ?? {}) as ClerkInvitation;
-    const created = typeof inv.created_at === "number" ? new Date(inv.created_at) : null;
-    return {
-      id: String(inv.id ?? ""),
-      email: String(inv.email_address ?? ""),
-      role: String(inv.public_metadata?.thrivsphereRole ?? "practitioner"),
-      createdAt: created && !Number.isNaN(created.getTime()) ? created : null,
-    };
-  });
-
-  return { ok: true, value: invitations };
+/**
+ * One pending invitation with its link, or null once it has been accepted,
+ * cancelled or has expired.
+ */
+export async function findInvitation(
+  invitationId: string
+): Promise<Result<{ invitation: PendingInvitation; url: string | null } | null>> {
+  const res = await pendingInvitations();
+  if (!res.ok) return res;
+  return { ok: true, value: res.value.find((r) => r.invitation.id === invitationId) ?? null };
 }
 
 /**

@@ -3,12 +3,13 @@ import { Section, Empty } from "@/components/admin/RecordUI";
 import { getCurrentActor } from "@/lib/session";
 import { listStaff } from "@/app/actions/staff";
 import { listInvitations } from "@/lib/clerk-admin";
+import { invitationRows } from "@/lib/invitation";
 import { assignableRoles, canCancelInvitation, canManageStaff, roleLabel } from "@/lib/staff-rules";
 import {
   BlockControl,
   BlogReviewerControl,
   SafeguardingDeputyControl,
-  CancelInvitationControl,
+  PendingInvitationActions,
   InviteStaffForm,
   RemoveStaffControl,
   RoleControl,
@@ -137,19 +138,24 @@ export default async function StaffPage() {
       </Section>
 
       {pending.ok && pending.value.length > 0 && (
-        <Section title="Invitations not yet accepted" subtitle="These people have been emailed but have not created an account.">
-          <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
-            {pending.value.map((i) => (
-              <li key={i.id} style={{ fontSize: 14, color: "var(--ink)", display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <Section
+          title="Invitations not yet accepted"
+          subtitle="These people have been emailed but have not created an account. If the email hasn't reached them, copy the link and send it yourself."
+        >
+          <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column" }}>
+            {invitationRows(pending.value).map(({ key, invitation: i }, n) => (
+              <li
+                key={key}
+                style={{ fontSize: 14, color: "var(--ink)", display: "flex", flexDirection: "column", gap: 8, padding: n ? "12px 0 0" : 0, marginTop: n ? 12 : 0, borderTop: n ? "1px solid var(--a-line)" : "none" }}
+              >
                 <span>
                   <strong style={{ color: "var(--navy)" }}>{i.email}</strong>{" "}
                   <span style={{ color: "var(--navy-soft)" }}>
-                    — {roleLabel(i.role as Role)}, invited {d(i.createdAt)}
+                    — {roleLabel(i.role)}, invited {d(i.createdAt)}
+                    {i.expiresAt && <>, link works until {d(i.expiresAt)}</>}
                   </span>
                 </span>
-                {acting && canCancelInvitation(acting, i.role as Role) && (
-                  <CancelInvitationControl invitationId={i.id} email={i.email} />
-                )}
+                {acting && canCancelInvitation(acting, i.role) && <PendingInvitationActions invitationId={i.id} email={i.email} />}
               </li>
             ))}
           </ul>
