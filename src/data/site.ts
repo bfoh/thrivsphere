@@ -119,12 +119,67 @@ export const footerPolicyLinks = [
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Cookie Policy", href: "/cookies" },
   { label: "Terms and Conditions", href: "/terms" },
+  // Launch checklist (25 November 2026) §3 lists consent among the links to check.
+  { label: "Consent Policy", href: "/consent" },
   { label: "Cancellation and Refunds", href: "/payments" },
   { label: "Confidentiality", href: "/confidentiality" },
   { label: "Service Boundaries", href: "/scope-of-practice" },
   { label: "Complaints Procedure", href: "/complaints" },
   { label: "Safeguarding Information", href: "/safeguarding" },
 ];
+
+/*
+ * Launch checklist, 25 November 2026. The owner's wording, except that her
+ * document spells the brand "ThrivSphere"; it also says to keep the approved
+ * spelling, which is "ThriveSphere".
+ */
+
+/** §1: clear homepage topics. */
+export const homeTopics = [
+  "Stress",
+  "Confidence",
+  "Self-esteem",
+  "Imposter syndrome",
+  "Relationships",
+  "Workplace wellbeing",
+];
+
+/** Website content §1: homepage, below the service overview and above a booking button. */
+export const whyChooseUs = {
+  heading: "Why choose ThriveSphere Wellbeing?",
+  points: [
+    { icon: "shield", text: "Support from experienced Registered Mental Health Nurses." },
+    { icon: "book", text: "Personalised, evidence-informed wellbeing education." },
+    { icon: "spark", text: "Practical tools to build confidence, emotional awareness and resilience." },
+    { icon: "users", text: "A respectful, inclusive and culturally responsive approach." },
+    { icon: "webinar", text: "Flexible online appointments with clear, affordable pricing." },
+  ],
+};
+
+/** Website content §2: Our Services, below the services, linked from the homepage. */
+export const whatToExpect = {
+  /** Anchor for the homepage link: /services#what-to-expect */
+  id: "what-to-expect",
+  eyebrow: "What to expect in your sessions",
+  heading: "Learn, practise and apply",
+  intro:
+    "Our one-to-one wellbeing sessions combine guided learning, interactive activities and practical worksheets tailored to your agreed wellbeing goals. Your practitioner will help you explore everyday challenges, develop useful skills and identify ways to apply them in daily life.",
+  points: [
+    { icon: "book", title: "Guided learning", text: "explore wellbeing topics through clear explanations and discussion." },
+    {
+      icon: "library",
+      title: "Personalised worksheets",
+      text: "reflect on your experiences and practise new strategies during and between sessions.",
+    },
+    {
+      icon: "spark",
+      title: "Practical skills",
+      text: "develop tools for managing everyday stress, building confidence, setting boundaries and strengthening emotional resilience.",
+    },
+  ],
+  note: "Our service provides non-clinical wellbeing education and support, not diagnosis, treatment or psychotherapy.",
+  cta: { label: "Book your initial wellbeing review", href: "/book" },
+};
 
 /** Checklist §2. */
 export const mission =

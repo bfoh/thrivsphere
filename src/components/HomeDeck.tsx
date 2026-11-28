@@ -8,6 +8,7 @@ import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
 import { Team } from "@/components/sections/Team";
 import { Services } from "@/components/sections/Services";
+import { WhyChooseUs } from "@/components/sections/WhyChooseUs";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { Support } from "@/components/sections/Support";
 import type { Service } from "@/data/site";
@@ -16,7 +17,8 @@ const hints: Record<string, string> = {
   home: "Discover who we are and how we can help",
   about: "Meet our Registered Mental Health Nurses",
   team: "Explore our wellbeing services",
-  services: "See how our service works",
+  services: "Why choose ThriveSphere Wellbeing?",
+  "why-choose-us": "See how our service works",
   "how-it-works": "Ready when you are — book an appointment",
   support: "Get in touch, in confidence",
 };
@@ -52,6 +54,7 @@ export function HomeDeck({ services }: { services: Service[] }) {
         <About />
         <Team />
         <Services services={services} />
+        <WhyChooseUs />
         <HowItWorks />
         <Support />
         <SiteFooter />

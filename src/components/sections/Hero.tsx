@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Section } from "../Section";
 import { PillButton } from "../PillButton";
 import { Icon } from "../icons";
-import { bookCta, brand, callbackCta, homeIntro } from "@/data/site";
+import { bookCta, brand, callbackCta, homeIntro, homeTopics } from "@/data/site";
 
 export function Hero() {
   return (
@@ -66,7 +66,20 @@ export function Hero() {
           <p style={{ margin: "22px 0 0", fontSize: 17.5, lineHeight: 1.6, maxWidth: 540, color: "var(--ink)" }}>
             {homeIntro.paragraphs[0]}
           </p>
-          <div className="cta-stack" style={{ display: "flex", gap: 14, marginTop: 30, flexWrap: "wrap" }}>
+          {/* Clear homepage topics (launch checklist §1). */}
+          <div style={{ marginTop: 18, maxWidth: 560 }}>
+            <p id="hero-topics" style={{ margin: "0 0 9px", fontSize: 13, fontWeight: 700, color: "var(--navy-soft)" }}>
+              Support with:
+            </p>
+            <ul aria-labelledby="hero-topics" style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {homeTopics.map((t) => (
+                <li key={t} className="chip chip-dot" style={{ padding: "7px 14px", fontSize: 13 }}>
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="cta-stack" style={{ display: "flex", gap: 14, marginTop: 26, flexWrap: "wrap" }}>
             <PillButton variant="gold" size="lg" href={bookCta.href} icon="arrow">
               {bookCta.label}
             </PillButton>

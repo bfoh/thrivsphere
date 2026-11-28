@@ -59,8 +59,11 @@ export const servicePhotos: Partial<Record<string, Photo>> = {
   },
 };
 
-/** How It Works, beside the steps (the Personalised Wellbeing Action Plan). */
-export const howItWorksPhoto: Photo = {
+/**
+ * Our Services, beside "What to expect in your sessions": guided learning,
+ * worksheets and practical skills, as the owner's photo brief (point 5) asked.
+ */
+export const whatToExpectPhoto: Photo = {
   src: lucyActionPlan,
   alt: "Lucy Johns going through a My Wellbeing Action Plan worksheet with a man on a video call",
 };

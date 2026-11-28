@@ -49,7 +49,7 @@ export const clients = pgTable(
      * Explicit 18+ confirmation.
      *
      * ThriveSphere is an adults-only service and under-18s must stay blocked
-     * until the CIC deliberately enables that provision (brief §8). Storing
+     * until the business deliberately enables that provision (brief §8). Storing
      * the confirmation and its timestamp means we can evidence the gate was
      * applied, not merely that it exists in code.
      */

@@ -18,7 +18,7 @@ import { isStaff } from "./authz";
  *    written for people seeking support is nonsense, and worse, it invites
  *    them to create a client record for themselves just to get past it.
  *
- * Staff who genuinely are also clients — plausible in a small CIC — keep a
+ * Staff who genuinely are also clients — plausible in a small practice — keep a
  * working portal, because the check is "do they have a client record", not
  * "are they staff".
  *

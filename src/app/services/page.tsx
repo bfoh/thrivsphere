@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
 import { ScopeOfPractice } from "@/components/ScopeOfPractice";
 import { ServiceDetail } from "@/components/ServiceDetail";
+import { WhatToExpect } from "@/components/WhatToExpect";
 import { Icon } from "@/components/icons";
 import { bookCta, brand } from "@/data/site";
 import { servicePhotos } from "@/data/photos";
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
   title: "Our Services",
   description:
     "Wellbeing Needs Reviews, emotional wellbeing support, psychoeducation and coping skills, resilience and personal development, and workplace wellbeing — online, for adults aged 18 and above.",
+  alternates: { canonical: "/services" },
 };
 
 // See src/app/page.tsx.
@@ -38,6 +40,10 @@ export default async function ServicesPage() {
             photoFirst={withPhoto.indexOf(s.slug) % 2 === 1}
           />
         ))}
+      </div>
+
+      <div style={{ marginTop: 40 }}>
+        <WhatToExpect />
       </div>
 
       <div style={{ marginTop: 48 }}>

@@ -21,7 +21,7 @@ appointment, no joining link. See `src/lib/reminders.ts`.
 | -------------------- | --------------------------------------------------------- |
 | `BREVO_API_KEY`      | Brevo API key (Brevo dashboard → SMTP & API → API keys)    |
 | `EMAIL_FROM_ADDRESS` | Verified sender address, e.g. `no-reply@thrivsphere.org`   |
-| `EMAIL_FROM_NAME`    | Sender display name. Defaults to the CIC's name            |
+| `EMAIL_FROM_NAME`    | Sender display name. Defaults to the trading name            |
 | `ENQUIRY_TO_EMAIL`   | Where contact-form enquiries land. Defaults to `brand.email` |
 
 Set them on all three environments:

@@ -226,7 +226,7 @@ export const referralOutcome = pgEnum("referral_outcome", [
 /**
  * A referral or signpost made for a client.
  *
- * Recording these is what lets the CIC show that people whose needs fell
+ * Recording these is what lets the business show that people whose needs fell
  * outside scope were directed somewhere appropriate rather than simply turned
  * away — and it is the basis of the signposting figures in reporting.
  */

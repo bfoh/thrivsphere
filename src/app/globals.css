@@ -481,17 +481,6 @@ body {
 .svc-detail-grid.photo-first .svc-detail-photo {
   order: -1;
 }
-/* How It Works: the photo stays beside the steps while they scroll */
-.hiw-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  gap: 32px;
-  align-items: start;
-}
-.hiw-photo {
-  position: sticky;
-  top: 130px;
-}
 
 /* ---- shared clickable tile (resource + blog cards) ---- */
 .tile {
@@ -983,24 +972,18 @@ body {
   .footer-grid,
   .intro-grid,
   .svc-detail-grid,
-  .svc-detail-grid.photo-first,
-  .hiw-grid {
+  .svc-detail-grid.photo-first {
     grid-template-columns: minmax(0, 1fr) !important;
   }
   .intro-grid {
     gap: 26px;
   }
-  .svc-detail-grid,
-  .hiw-grid {
+  .svc-detail-grid {
     gap: 22px;
   }
   /* photos lead their card or page body once stacked */
-  .svc-detail-grid .svc-detail-photo,
-  .hiw-photo {
+  .svc-detail-grid .svc-detail-photo {
     order: -1;
-  }
-  .hiw-photo {
-    position: static;
   }
   .footer-hint {
     display: none !important;

@@ -30,7 +30,7 @@ export function monthRange(monthsAgo = 0): ReportRange {
 /**
  * Service activity for a period.
  *
- * Deliberately counts rather than lists. A CIC reporting to funders or a board
+ * Deliberately counts rather than lists. A business reporting to funders or a board
  * needs totals — how many people were supported, how many sessions delivered,
  * how many safeguarding concerns raised — and pulling those from aggregates
  * means no one has to open a client record to produce a report.
