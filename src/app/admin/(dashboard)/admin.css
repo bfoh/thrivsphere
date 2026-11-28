@@ -1755,6 +1755,10 @@ a.adm-stat:hover {
   .adm-weekgrid-marks span:nth-child(even) {
     display: none;
   }
+  /* The times are listed under the bar; a clipped copy inside it adds nothing. */
+  .adm-weekgrid-block {
+    font-size: 0;
+  }
   .adm-slotdays > div {
     grid-template-columns: minmax(0, 1fr);
     gap: 6px;
