@@ -483,6 +483,181 @@ a.adm-stat:hover {
 .adm-stat[data-tone="danger"] .adm-stat-value {
   color: var(--a-danger);
 }
+.adm-stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.adm-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--a-accent-soft);
+  color: var(--a-accent);
+  flex: 0 0 auto;
+}
+.adm-stat[data-tone="danger"] .adm-stat-icon {
+  background: var(--a-danger-soft);
+  color: var(--a-danger);
+}
+.adm-stat-trend {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--a-muted);
+}
+.adm-stat-trend[data-direction="up"] {
+  color: var(--a-ok);
+}
+
+/* ── Today (dashboard) ───────────────────────────────────────────────────── */
+
+.adm-today {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 24px;
+}
+.adm-today > .adm-card {
+  margin: 0;
+}
+.adm-sessions,
+.adm-attn {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.adm-session {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 0;
+  border-top: 1px solid var(--a-line);
+}
+.adm-session:first-child {
+  border-top: 0;
+  padding-top: 2px;
+}
+.adm-session-time {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+.adm-session-time strong {
+  font-size: var(--fs-md);
+  color: var(--a-brand);
+}
+.adm-session-time span {
+  font-size: var(--fs-xs);
+  color: var(--a-muted);
+}
+.adm-session-who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.adm-session-who a {
+  font-weight: 700;
+  color: var(--a-brand);
+  text-decoration: none;
+}
+.adm-session-who a:hover {
+  text-decoration: underline;
+}
+.adm-session-meta {
+  margin-top: 2px;
+  font-size: var(--fs-sm);
+  color: var(--a-muted);
+}
+.adm-session-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.adm-session-actions .pill {
+  min-height: 34px;
+  padding: 0 14px;
+  font-size: var(--fs-sm);
+}
+.adm-session[data-phase="now"] .adm-session-time strong {
+  color: var(--a-accent);
+}
+.adm-attn {
+  gap: 8px;
+}
+.adm-attn-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 12px;
+  border: 1px solid var(--a-line);
+  border-radius: var(--a-radius-sm);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.adm-attn-item:hover {
+  border-color: var(--a-line-strong);
+  background: var(--a-subtle);
+}
+.adm-attn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--a-accent-soft);
+  color: var(--a-accent);
+}
+.adm-attn-item[data-tone="danger"] .adm-attn-icon {
+  background: var(--a-danger-soft);
+  color: var(--a-danger);
+}
+.adm-attn-item[data-tone="warn"] .adm-attn-icon {
+  background: var(--a-warn-soft);
+  color: var(--a-warn);
+}
+.adm-attn-title {
+  display: block;
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--a-brand);
+}
+.adm-attn-text {
+  display: block;
+  margin-top: 1px;
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+  color: var(--a-muted);
+}
+.adm-attn-go {
+  color: #9aa3b0;
+  font-size: 18px;
+  line-height: 1;
+}
+.adm-allclear {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--a-radius-sm);
+  background: var(--a-ok-soft);
+  color: #17573a;
+  font-size: var(--fs-base);
+  font-weight: 600;
+}
 
 /* ── Tables ──────────────────────────────────────────────────────────────── */
 
@@ -873,6 +1048,12 @@ a.adm-stat:hover {
 
 /* ── Small screens ───────────────────────────────────────────────────────── */
 
+@media (max-width: 1180px) {
+  .adm-today {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 1023px) {
   .adm {
     grid-template-columns: minmax(0, 1fr);
@@ -952,6 +1133,16 @@ a.adm-stat:hover {
   }
   .adm-stat {
     padding: 14px 16px;
+  }
+  .adm-stat-icon {
+    display: none;
+  }
+  .adm-session {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+  .adm-session-actions {
+    grid-column: 2;
+    justify-content: flex-start;
   }
   .adm-top-search {
     max-width: none;

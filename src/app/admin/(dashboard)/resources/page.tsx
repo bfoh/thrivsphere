@@ -67,7 +67,7 @@ export default async function ResourcesPage() {
           </p>
         </Section>
 
-        <Section title="My preparation tasks" subtitle={`${tasks.length} open`}>
+        <Section id="tasks" title="My preparation tasks" subtitle={`${tasks.length} open`}>
           {tasks.length === 0 ? (
             <Empty>Nothing waiting on you.</Empty>
           ) : (
@@ -96,7 +96,7 @@ export default async function ResourcesPage() {
         </Section>
       </div>
 
-      <Section title="Worksheets awaiting review" subtitle={`${toReview.length} sent back by clients`}>
+      <Section id="worksheets-to-review" title="Worksheets awaiting review" subtitle={`${toReview.length} sent back by clients`}>
         {toReview.length === 0 ? (
           <Empty>No worksheets waiting.</Empty>
         ) : (

@@ -73,6 +73,9 @@ export default async function AppointmentsPage({
       .orderBy(desc(appointments.startsAt))
       .limit(100),
   ]);
+  // Ended but never marked: these get the buttons, the rest are history.
+  const toClose = past.filter((a) => a.status === "scheduled").reverse();
+  const closed = past.filter((a) => a.status !== "scheduled");
 
   return (
     <div className="adm-page">
@@ -93,6 +96,49 @@ export default async function AppointmentsPage({
           </>
         }
       />
+
+      {/*
+        A session that has ended stays "scheduled" until someone says what
+        happened, and until then it counts neither as attended nor missed —
+        in sessions used, attendance or the reports. It used to drop into
+        "Past & closed" with no way to close it.
+      */}
+      {toClose.length > 0 && (
+        <Section id="to-close" title="To mark" subtitle={`${toClose.length} past ${toClose.length === 1 ? "session" : "sessions"} still marked as booked — say what happened`}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {toClose.map((a) => (
+              <div key={a.id} style={{ border: "1px solid var(--a-line)", borderRadius: 10, padding: "12px 16px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
+                  <strong style={{ color: "var(--navy)" }}>
+                    {a.startsAt.toLocaleString("en-GB", { timeZone: LDN, weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                  </strong>
+                  {a.clientId ? (
+                    <Link href={`/admin/clients/${a.clientId}`} style={{ fontWeight: 700, color: "var(--teal-deep)", textDecoration: "none" }}>
+                      {a.clientName}
+                    </Link>
+                  ) : (
+                    <span style={{ color: "var(--navy-soft)" }}>Unknown client</span>
+                  )}
+                </div>
+                <div style={{ margin: "-2px 0 10px", fontSize: 13, color: "var(--navy-soft)" }}>
+                  {kindLabel(a.kind)} · with {a.practitionerId === actor.userId ? "you" : nameOf.get(a.practitionerId) ?? "a former colleague"}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+                  <StatusButtons appointmentId={a.id} />
+                  {a.clientId && (
+                    <Link
+                      href={`/admin/clients/${a.clientId}/supervision/new?appointment=${a.id}`}
+                      style={{ fontSize: 13, fontWeight: 700, color: "var(--teal-deep)", textDecoration: "none" }}
+                    >
+                      Supervision sheet
+                    </Link>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
 
       <Section title="Upcoming" subtitle={`${upcoming.length} scheduled`}>
         {upcoming.length === 0 ? (
@@ -127,12 +173,12 @@ export default async function AppointmentsPage({
         )}
       </Section>
 
-      <Section title="Past & closed" subtitle={`${past.length} shown`}>
-        {past.length === 0 ? (
+      <Section title="Past & closed" subtitle={`${closed.length} shown`}>
+        {closed.length === 0 ? (
           <Empty>Nothing yet.</Empty>
         ) : (
           <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 9 }}>
-            {past.map((a) => (
+            {closed.map((a) => (
               <li key={a.id} style={{ fontSize: 14, color: "var(--ink)", display: "flex", gap: 12, flexWrap: "wrap" }}>
                 <span style={{ minWidth: 190, color: "var(--navy)", fontWeight: 600 }}>
                   {a.startsAt.toLocaleString("en-GB", { timeZone: LDN, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}

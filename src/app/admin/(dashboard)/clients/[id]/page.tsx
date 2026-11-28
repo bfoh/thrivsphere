@@ -217,6 +217,7 @@ export default async function ClientRecordPage({
 
       {/* consultation outcome (IT handover §13.1) */}
       <Section
+        id="outcome"
         title="Consultation outcome"
         subtitle={sessionGate(decision?.outcome ?? null).open ? "Ongoing sessions are open" : "Ongoing sessions are closed until the outcome is Suitable"}
       >
@@ -339,7 +340,7 @@ export default async function ClientRecordPage({
       </Section>
 
       {/* session notes */}
-      <Section title="Session notes" subtitle={`${notes.length} ${notes.length === 1 ? "note" : "notes"} · append-only`}>
+      <Section id="notes" title="Session notes" subtitle={`${notes.length} ${notes.length === 1 ? "note" : "notes"} · append-only`}>
         <NoteForm clientId={client.id} />
         {notes.length === 0 ? (
           <Empty>No notes recorded yet.</Empty>

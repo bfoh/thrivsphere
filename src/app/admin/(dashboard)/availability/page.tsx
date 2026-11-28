@@ -115,7 +115,7 @@ export default async function AvailabilityPage({
         <ExceptionList entries={extraHours} empty="No extra hours." />
       </Section>
 
-      <Section title="Blocked time" subtitle="Leave, training, or anything else that overrides the weekly pattern">
+      <Section id="blocked-time" title="Blocked time" subtitle="Leave, training, or anything else that overrides the weekly pattern">
         <BlockDateForm practitionerId={forOther} />
         <ExceptionList entries={blocked} empty="Nothing blocked." />
       </Section>

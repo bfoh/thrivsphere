@@ -79,17 +79,31 @@ export function Stat({
   hint,
   href,
   tone,
+  icon,
+  trend,
 }: {
   label: string;
   value: React.ReactNode;
   hint?: React.ReactNode;
   href?: string;
   tone?: "danger";
+  /** A small icon in the corner. */
+  icon?: React.ReactNode;
+  /** How it compares, e.g. with this time last month. */
+  trend?: { text: string; direction: "up" | "down" | "flat" } | null;
 }) {
   const body = (
     <>
-      <span className="adm-stat-label">{label}</span>
+      <span className="adm-stat-top">
+        <span className="adm-stat-label">{label}</span>
+        {icon && <span className="adm-stat-icon">{icon}</span>}
+      </span>
       <span className="adm-stat-value">{value}</span>
+      {trend && (
+        <span className="adm-stat-trend" data-direction={trend.direction}>
+          <span aria-hidden="true">{trend.direction === "up" ? "↑" : trend.direction === "down" ? "↓" : "→"}</span> {trend.text}
+        </span>
+      )}
       {hint && <span className="adm-stat-hint">{hint}</span>}
     </>
   );

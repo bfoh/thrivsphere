@@ -17,7 +17,7 @@ export function StatusButtons({ appointmentId }: { appointmentId: string }) {
     <form action={action} style={{ display: "flex", gap: 7, flexWrap: "wrap", alignItems: "center" }}>
       <input type="hidden" name="appointmentId" value={appointmentId} />
       <button name="status" value="completed" disabled={pending} style={{ ...btn, borderColor: "var(--teal)", color: "var(--teal-deep)" }}>
-        Completed
+        Attended
       </button>
       <button name="status" value="no_show" disabled={pending} style={{ ...btn, borderColor: "#c8a24a", color: "#856a12" }}>
         No-show

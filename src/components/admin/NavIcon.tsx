@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { NavIconName } from "@/lib/admin-nav";
 
-type Name = NavIconName | "lock" | "search" | "menu" | "close";
+type Name = NavIconName | "lock" | "search" | "menu" | "close" | "plus" | "check" | "alert" | "video" | "note";
 
 /**
  * Line icons for the back office, drawn on one 24px grid with one stroke
@@ -131,6 +131,31 @@ const PATHS: Record<Name, React.ReactNode> = {
     </>
   ),
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  check: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M8.5 12.2l2.3 2.3 4.7-4.9" />
+    </>
+  ),
+  alert: (
+    <>
+      <path d="M12 4.2 21 19.5H3z" />
+      <path d="M12 10v4.2M12 16.9v.1" />
+    </>
+  ),
+  video: (
+    <>
+      <rect x="3" y="6.5" width="12.5" height="11" rx="2" />
+      <path d="M15.5 10.5 21 7.5v9l-5.5-3" />
+    </>
+  ),
+  note: (
+    <>
+      <path d="M5 4.5h14v15H5z" />
+      <path d="M8.5 9h7M8.5 12.5h7M8.5 16h4" />
+    </>
+  ),
   close: <path d="M6 6l12 12M18 6 6 18" />,
 };
 

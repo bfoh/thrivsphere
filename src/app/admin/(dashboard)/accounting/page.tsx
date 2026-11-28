@@ -70,7 +70,7 @@ export default async function AccountingPage({
         <Stat label="VAT on expenses" value={formatPence(ledger.totals.vatPence)} />
       </div>
 
-      <Section title="Record an expense" subtitle="Attach the receipt where there is one — it is stored privately.">
+      <Section id="record-expense" title="Record an expense" subtitle="Attach the receipt where there is one — it is stored privately.">
         <ExpenseForm />
       </Section>
 
