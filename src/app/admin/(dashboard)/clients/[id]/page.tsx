@@ -35,6 +35,9 @@ import { describeDiscount, penceLabel, reasonLabel } from "@/lib/discounts";
 import { maySeeEmergencyContact } from "@/lib/queries/emergency-contact";
 import { answerLabel, contactLines, methodLabel } from "@/lib/emergency-contact";
 import { recordAudit } from "@/lib/audit";
+import { Badge, CLIENT_STATUS_TONE, statusText, type Tone } from "@/components/admin/ui";
+import { RecordNav } from "@/components/admin/RecordNav";
+import { clock, LDN } from "@/lib/dashboard";
 
 export const metadata: Metadata = {
   title: "Client record",
@@ -150,12 +153,32 @@ export default async function ClientRecordPage({
   const pastSessions = sessionsForWorksheet.slice(0, 20).map((a) => ({ id: a.id, label: dt(a.startsAt) }));
 
   const answers = (intake?.answers ?? {}) as Record<string, unknown>;
+
+  // The summary at the top. One clock reading, taken before rendering.
+  const now = new Date();
+  const nextAppt = appointments
+    .filter((a) => a.status === "scheduled" && new Date(a.startsAt) >= now)
+    .sort((x, y) => new Date(x.startsAt).getTime() - new Date(y.startsAt).getTime())[0];
+  const openConcerns = concerns.filter((c) => c.status !== "closed").length;
+  const OUTCOME_TONE: Record<string, Tone> = { suitable: "ok", clarification: "warn", not_suitable: "danger" };
+
+  const sections = [
+    { id: "outcome", label: "Overview" },
+    { id: "notes", label: "Notes" },
+    { id: "supervision", label: "Supervision" },
+    { id: "worksheets", label: "Worksheets" },
+    { id: "safeguarding", label: "Safeguarding" },
+    { id: "sessions", label: "Sessions" },
+    ...(canDiscount ? [{ id: "discounts", label: "Discounts" }] : []),
+    { id: "consent", label: "Documents & consent" },
+    { id: "messages", label: "Messages" },
+  ];
   const remaining = packages
     .filter((p) => p.status === "active")
     .reduce((n, p) => n + (p.sessionsTotal - p.sessionsUsed), 0);
 
   return (
-    <div className="adm-page">
+    <div className="adm-page adm-record">
       <Link
         href="/admin/clients"
         style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13.5, color: "var(--teal-deep)", fontWeight: 700, textDecoration: "none" }}
@@ -206,14 +229,75 @@ export default async function ClientRecordPage({
         </div>
       )}
 
-      <header style={{ marginTop: 20, marginBottom: 26 }}>
-        <h1 className="adm-title" style={{ margin: "0 0 6px" }}>
-          {client.preferredName}
-        </h1>
-        <p style={{ margin: 0, fontSize: 14, color: "var(--navy-soft)" }}>
-          {client.email} · {client.status} · registered {d(client.createdAt)}
-        </p>
+      <header className="adm-record-head">
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <h1 className="adm-title">{client.preferredName}</h1>
+            <Badge tone={CLIENT_STATUS_TONE[client.status] ?? "neutral"}>{statusText(client.status)}</Badge>
+          </div>
+          <p style={{ margin: "6px 0 0", color: "var(--navy-soft)" }}>
+            {client.email} · registered {d(client.createdAt)}
+          </p>
+        </div>
+        <div className="adm-head-actions">
+          <a href="#notes" className="pill pill-teal" style={{ minHeight: 38, padding: "0 16px", fontSize: 13.5 }}>
+            Add a note
+          </a>
+          <a href="#messages" className="pill pill-ghost" style={{ minHeight: 38, padding: "0 16px", fontSize: 13.5 }}>
+            Message
+          </a>
+        </div>
       </header>
+
+      <dl className="adm-summary">
+        <div>
+          <dt>Consultation outcome</dt>
+          <dd>
+            {decision ? (
+              <Badge tone={OUTCOME_TONE[decision.outcome] ?? "neutral"}>{outcomeLabel(decision.outcome)}</Badge>
+            ) : (
+              <a href="#outcome" style={{ color: "var(--a-warn)", fontWeight: 700 }}>Not recorded yet</a>
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt>Next appointment</dt>
+          <dd>
+            {nextAppt ? (
+              <>
+                {new Date(nextAppt.startsAt).toLocaleDateString("en-GB", { timeZone: LDN, weekday: "short", day: "numeric", month: "short" })},{" "}
+                {clock(new Date(nextAppt.startsAt))}
+                <span className="adm-summary-sub">{kindLabel(nextAppt.kind)}</span>
+              </>
+            ) : (
+              <span style={{ color: "var(--navy-soft)" }}>None booked</span>
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt>Sessions left</dt>
+          <dd>
+            {remaining}
+            <span className="adm-summary-sub">in active packages</span>
+          </dd>
+        </div>
+        <div>
+          <dt>Safeguarding</dt>
+          <dd>
+            {riskFlags.length > 0 ? (
+              <Badge tone="danger">Flag raised</Badge>
+            ) : openConcerns > 0 ? (
+              <a href="#safeguarding" style={{ color: "var(--a-warn)", fontWeight: 700 }}>
+                {openConcerns} open {openConcerns === 1 ? "concern" : "concerns"}
+              </a>
+            ) : (
+              <span style={{ color: "var(--navy-soft)" }}>No flag</span>
+            )}
+          </dd>
+        </div>
+      </dl>
+
+      <RecordNav items={sections} />
 
       {/* consultation outcome (IT handover §13.1) */}
       <Section
@@ -515,7 +599,7 @@ export default async function ClientRecordPage({
       </Section>
 
       {/* appointments + packages */}
-      <Section title="Appointments & sessions" subtitle={`${remaining} session${remaining === 1 ? "" : "s"} remaining`}>
+      <Section id="sessions" title="Appointments & sessions" subtitle={`${remaining} session${remaining === 1 ? "" : "s"} remaining`}>
         {appointments.length === 0 ? (
           <Empty>No appointments booked.</Empty>
         ) : (
@@ -580,7 +664,7 @@ export default async function ClientRecordPage({
       )}
 
       {/* consent */}
-      <Section title="Consent" subtitle="Each pinned to the policy version accepted">
+      <Section id="consent" title="Consent" subtitle="Each pinned to the policy version accepted">
         {consents.length === 0 ? (
           <Empty>No consents recorded.</Empty>
         ) : (
@@ -599,7 +683,7 @@ export default async function ClientRecordPage({
       </Section>
 
       {/* documents */}
-      <Section title="Documents" subtitle={`${documents.length} stored · private, access logged`}>
+      <Section id="documents" title="Documents" subtitle={`${documents.length} stored · private, access logged`}>
         <UploadDocumentForm clientId={client.id} />
         {documents.length === 0 ? (
           <Empty>No documents uploaded.</Empty>
@@ -629,7 +713,7 @@ export default async function ClientRecordPage({
         )}
       </Section>
 
-      <Section title="Secure messages" subtitle="Inside the portal — nothing personal is sent by email">
+      <Section id="messages" title="Secure messages" subtitle="Inside the portal — nothing personal is sent by email">
         <MessageThread clientId={client.id} messages={conversation ?? []} placeholder="Write to this client…" />
       </Section>
 

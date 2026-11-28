@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { canJoin, firstName, greeting, longDate, monthToDate, sessionPhase, trend, ukDay } from "./dashboard";
+import { canJoin, dayHeading, firstName, greeting, longDate, monthToDate, sessionPhase, trend, ukDay, ukWeek } from "./dashboard";
 
 describe("ukDay", () => {
   it("runs midnight to midnight in winter (UK time is UTC)", () => {
@@ -105,5 +105,36 @@ describe("sessionPhase and canJoin", () => {
     assert.equal(canJoin(s, at("2026-11-28T18:49:00Z")), true);
     assert.equal(canJoin(s, at("2026-11-28T18:50:00Z")), false);
     assert.equal(canJoin({ ...s, status: "cancelled_by_client" }, at("2026-11-28T18:10:00Z")), false);
+  });
+});
+
+describe("ukWeek", () => {
+  it("runs Monday to Sunday around today", () => {
+    // Saturday 28 November 2026.
+    const w = ukWeek(new Date("2026-11-28T15:00:00Z"));
+    assert.deepEqual(w.days, ["2026-11-23", "2026-11-24", "2026-11-25", "2026-11-26", "2026-11-27", "2026-11-28", "2026-11-29"]);
+    assert.equal(w.from.toISOString(), "2026-11-23T00:00:00.000Z");
+    assert.equal(w.to.toISOString(), "2026-11-30T00:00:00.000Z");
+  });
+
+  it("treats Sunday as the end of the week, not the start", () => {
+    assert.equal(ukWeek(new Date("2026-11-29T20:00:00Z")).days[0], "2026-11-23");
+  });
+
+  it("moves whole weeks, across the clocks changing", () => {
+    // The week of Monday 26 October 2026, after the clocks go back on the 25th.
+    const w = ukWeek(new Date("2026-11-28T15:00:00Z"), -5);
+    assert.equal(w.days[0], "2026-10-19");
+    assert.equal(w.from.toISOString(), "2026-10-18T23:00:00.000Z");
+    assert.equal(w.to.toISOString(), "2026-10-26T00:00:00.000Z");
+  });
+});
+
+describe("dayHeading", () => {
+  const now = new Date("2026-11-28T15:00:00Z");
+  it("names today and tomorrow, and spells out the rest", () => {
+    assert.equal(dayHeading("2026-11-28", now), "Today");
+    assert.equal(dayHeading("2026-11-29", now), "Tomorrow");
+    assert.equal(dayHeading("2026-12-02", now), "Wednesday 2 December");
   });
 });

@@ -3,20 +3,11 @@ import Link from "next/link";
 import { listClients } from "@/lib/queries/clients";
 import { FlagBadge } from "@/components/admin/FlagBadge";
 import { Icon } from "@/components/icons";
-import { Badge, Page, PageHeader, TableWrap, type Tone } from "@/components/admin/ui";
+import { Badge, CLIENT_STATUS_TONE, Page, PageHeader, TableWrap, statusText } from "@/components/admin/ui";
 
 export const metadata: Metadata = {
   title: "Clients",
   robots: { index: false, follow: false },
-};
-
-const STATUS_TONE: Record<string, Tone> = {
-  enquiry: "gold",
-  registered: "info",
-  active: "ok",
-  paused: "warn",
-  discharged: "neutral",
-  declined: "danger",
 };
 
 export default async function ClientsPage({
@@ -79,7 +70,7 @@ export default async function ClientsPage({
                   <td style={{ fontWeight: 700, color: "var(--navy)" }}>{r.preferredName}</td>
                   <td>{r.email}</td>
                   <td>
-                    <Badge tone={STATUS_TONE[r.status] ?? "neutral"}>{r.status[0].toUpperCase() + r.status.slice(1)}</Badge>
+                    <Badge tone={CLIENT_STATUS_TONE[r.status] ?? "neutral"}>{statusText(r.status)}</Badge>
                   </td>
                   <td>
                     {r.flagged ? <FlagBadge compact /> : <span style={{ color: "var(--navy-soft)" }}>—</span>}

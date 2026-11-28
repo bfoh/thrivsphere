@@ -1,4 +1,4 @@
-import { addDays, formatZonedDate, zonedTimeToUtc } from "./time";
+import { addDays, formatZonedDate, zonedDayOfWeek, zonedTimeToUtc } from "./time";
 
 /**
  * The "Today" dashboard's arithmetic, kept pure so it can be tested without a
@@ -12,6 +12,29 @@ export function ukDay(now: Date): { from: Date; to: Date } {
   const today = formatZonedDate(now, LDN);
   return { from: zonedTimeToUtc(today, "00:00", LDN), to: zonedTimeToUtc(addDays(today, 1), "00:00", LDN) };
 }
+
+/**
+ * A Monday-to-Sunday week in UK time, `offset` weeks from this one, with its
+ * seven calendar dates for the columns of the week view.
+ */
+export function ukWeek(now: Date, offset = 0): { from: Date; to: Date; days: string[] } {
+  const today = formatZonedDate(now, LDN);
+  const monday = addDays(today, -((zonedDayOfWeek(now, LDN) + 6) % 7) + offset * 7);
+  const days = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+  return { from: zonedTimeToUtc(monday, "00:00", LDN), to: zonedTimeToUtc(addDays(monday, 7), "00:00", LDN), days };
+}
+
+/** "Today", "Tomorrow" or "Wednesday 3 December", for an agenda heading. */
+export function dayHeading(date: string, now: Date): string {
+  const today = formatZonedDate(now, LDN);
+  if (date === today) return "Today";
+  if (date === addDays(today, 1)) return "Tomorrow";
+  const d = zonedTimeToUtc(date, "12:00", LDN);
+  return `${d.toLocaleDateString("en-GB", { timeZone: LDN, weekday: "long" })} ${d.toLocaleDateString("en-GB", { timeZone: LDN, day: "numeric", month: "long" })}`;
+}
+
+/** The UK calendar date an instant falls on, "YYYY-MM-DD". */
+export const ukDate = (d: Date) => formatZonedDate(d, LDN);
 
 /**
  * This month so far, and the same stretch of last month.

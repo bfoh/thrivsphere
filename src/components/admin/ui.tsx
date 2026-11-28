@@ -124,6 +124,17 @@ export function Stats({ children }: { children: React.ReactNode }) {
 
 export type Tone = "neutral" | "ok" | "info" | "warn" | "danger" | "gold";
 
+/** A client's status as a label, the same everywhere it appears. */
+export const CLIENT_STATUS_TONE: Record<string, Tone> = {
+  enquiry: "gold",
+  registered: "info",
+  active: "ok",
+  paused: "warn",
+  discharged: "neutral",
+  declined: "danger",
+};
+export const statusText = (s: string) => (s ? s[0].toUpperCase() + s.slice(1).replace(/_/g, " ") : s);
+
 /** A coloured status label. The words carry the meaning; colour only helps scanning. */
 export function Badge({ tone = "neutral", children }: { tone?: Tone; children: React.ReactNode }) {
   return (
